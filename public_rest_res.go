@@ -1,7 +1,7 @@
 package myokxapi
 
-type RestInstrumentsRes []RestInstrumentsResRow
-type RestInstrumentsResRow struct {
+type PublicRestInstrumentsRes []PublicRestInstrumentsResRow
+type PublicRestInstrumentsResRow struct {
 	InstType     string `json:"instType"`     //产品类型  SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
 	InstId       string `json:"instId"`       //产品id， 如 BTC-USD-SWAP
 	Uly          string `json:"uly"`          //标的指数，如 BTC-USD，仅适用于交割/永续/期权
@@ -32,21 +32,21 @@ type RestInstrumentsResRow struct {
 	MaxStopSz    string `json:"maxStopSz"`    //合约或现货止盈止损市价委托的单笔最大委托数量, 合约的数量单位是“张”，现货的数量单位是“USDT”
 }
 
-type RestTimeRes []RestTimeResRow
-type RestTimeResRow struct {
+type PublicRestTimeRes []PublicRestTimeResRow
+type PublicRestTimeResRow struct {
 	Ts string `json:"ts"` //系统时间，Unix时间戳的毫秒数格式，如 1597026383085
 }
 
-type RestMarkPriceRes []RestMarkPriceResRow
-type RestMarkPriceResRow struct {
+type PublicRestMarkPriceRes []PublicRestMarkPriceResRow
+type PublicRestMarkPriceResRow struct {
 	InstType string `json:"instType"` //产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
 	InstId   string `json:"instId"`   //产品ID，如 BTC-USD-200214
 	MarkPx   string `json:"markPx"`   //标记价格
 	Ts       string `json:"ts"`       //接口数据返回时间，Unix时间戳的毫秒数格式，如1597026383085
 }
 
-type RestMarketTickersRes []RestMarketTickersResRow
-type RestMarketTickersResRow struct {
+type PublicRestMarketTickersRes []PublicRestMarketTickersResRow
+type PublicRestMarketTickersResRow struct {
 	InstId  string `json:"instId"`  //指数
 	IdxPx   string `json:"idxPx"`   //最新指数价格
 	High24h string `json:"high24h"` //24小时指数最高价格

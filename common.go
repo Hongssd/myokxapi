@@ -118,6 +118,8 @@ type RestClient struct {
 	c *Client
 }
 
+type PublicRestClient RestClient
+
 func (*MyOkx) NewRestClient(apiKey string, apiSecret string) *RestClient {
 	client := &RestClient{
 		&Client{
@@ -126,6 +128,12 @@ func (*MyOkx) NewRestClient(apiKey string, apiSecret string) *RestClient {
 		},
 	}
 	return client
+}
+
+func (c *RestClient) PublicRestClient() *PublicRestClient {
+	return &PublicRestClient{
+		c: c.c,
+	}
 }
 
 // 通用鉴权接口调用
