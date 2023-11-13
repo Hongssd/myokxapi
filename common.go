@@ -5,8 +5,9 @@ import (
 	"compress/gzip"
 	"crypto/hmac"
 	"crypto/sha256"
-	"encoding/hex"
+	"encoding/base64"
 	"io"
+	"time"
 
 	"net/http"
 	"net/url"
@@ -34,6 +35,8 @@ const (
 	PUT    = "PUT"
 )
 
+var NIL_REQBODY = []byte{}
+
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var log = logrus.New()
@@ -46,19 +49,18 @@ func GetPointer[T any](v T) *T {
 	return &v
 }
 
-func HmacSha256(secret, data string) string {
+func HmacSha256(secret, data string) []byte {
 	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(data))
-	sha := hex.EncodeToString(h.Sum(nil))
-	return sha
+	return h.Sum(nil)
 }
 
 // Request 发送请求
-func Request(url string, method string, isGzip bool) ([]byte, error) {
-	return RequestWithHeader(url, method, map[string]string{}, isGzip)
+func Request(url string, reqBody []byte, method string, isGzip bool) ([]byte, error) {
+	return RequestWithHeader(url, reqBody, method, map[string]string{}, isGzip)
 }
 
-func RequestWithHeader(url string, method string, headerMap map[string]string, isGzip bool) ([]byte, error) {
+func RequestWithHeader(url string, reqBody []byte, method string, headerMap map[string]string, isGzip bool) ([]byte, error) {
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, err
@@ -73,8 +75,12 @@ func RequestWithHeader(url string, method string, headerMap map[string]string, i
 		req.Header.Add("Accept-Encoding", "gzip")
 	}
 	req.Close = true
+	req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
 
-	log.Debug(req.URL.String())
+	log.Debug("reqURL: ", req.URL.String())
+	if reqBody != nil && len(reqBody) > 0 {
+		log.Debug("reqBody: ", string(reqBody))
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -91,6 +97,7 @@ func RequestWithHeader(url string, method string, headerMap map[string]string, i
 		}
 	}
 	data, err := io.ReadAll(body)
+	// log.Debug(string(data))
 	return data, err
 }
 
@@ -103,15 +110,16 @@ const (
 	IS_GZIP           = true
 )
 
-type ApiType int
+type APIType int
 
 const (
-	REST ApiType = iota
+	REST APIType = iota
 )
 
 type Client struct {
-	ApiKey    string
-	ApiSecret string
+	APIKey     string
+	SecretKey  string
+	Passphrase string
 }
 
 type RestClient struct {
@@ -120,11 +128,14 @@ type RestClient struct {
 
 type PublicRestClient RestClient
 
-func (*MyOkx) NewRestClient(apiKey string, apiSecret string) *RestClient {
+type PrivateRestClient RestClient
+
+func (*MyOkx) NewRestClient(APIKey, SecretKey, Passphrase string) *RestClient {
 	client := &RestClient{
-		&Client{
-			ApiKey:    apiKey,
-			ApiSecret: apiSecret,
+		c: &Client{
+			APIKey:     APIKey,
+			SecretKey:  SecretKey,
+			Passphrase: Passphrase,
 		},
 	}
 	return client
@@ -136,9 +147,15 @@ func (c *RestClient) PublicRestClient() *PublicRestClient {
 	}
 }
 
-// 通用鉴权接口调用
-func okxCallApiWithSecret[T any](client *Client, url, method string) (*T, error) {
-	body, err := RequestWithHeader(url, method, map[string]string{"OK-ACCESS-KEY": client.ApiKey}, IS_GZIP)
+func (c *RestClient) PrivateRestClient() *PrivateRestClient {
+	return &PrivateRestClient{
+		c: c.c,
+	}
+}
+
+// 通用接口调用
+func okxCallAPI[T any](client *Client, url url.URL, reqBody []byte, method string) (*OkxRestRes[T], error) {
+	body, err := Request(url.String(), reqBody, method, IS_GZIP)
 	if err != nil {
 		return nil, err
 	}
@@ -146,36 +163,72 @@ func okxCallApiWithSecret[T any](client *Client, url, method string) (*T, error)
 	if err != nil {
 		return nil, err
 	}
-	return &res.Result, res.handlerError()
+	return res, res.handlerError()
 }
 
-// 通用鉴权接口封装
-func okxHandlerRequestApiWithSecret[T any](apiType ApiType, request *T, name, secret string) string {
-	query := okxHandlerReq(request)
-	sign := HmacSha256(secret, query)
+// 通用鉴权接口调用
+func okxCallAPIWithSecret[T any](client *Client, url url.URL, reqBody []byte, method string) (*OkxRestRes[T], error) {
 
-	u := url.URL{
-		Scheme:   "https",
-		Host:     OkxGetRestHostByApiType(apiType),
-		Path:     name,
-		RawQuery: query + "&signature=" + sign,
+	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
+	requestPath := url.Path
+	query := url.RawQuery
+
+	hmacSha256Data := timestamp + method + requestPath
+	if query != "" {
+		hmacSha256Data += "?" + query
 	}
+	if len(reqBody) != 0 {
+		hmacSha256Data += string(reqBody)
+	}
+	sign := base64.StdEncoding.EncodeToString(HmacSha256(client.SecretKey, hmacSha256Data))
 
-	log.Debug(u.String())
-	return u.String()
+	// log.Warn("timestamp: ", timestamp)
+	// log.Warn("method: ", method)
+	// log.Warn("requestPath: ", requestPath)
+	// log.Warn("query: ", query)
+	// log.Warn("reqBody: ", string(reqBody))
+	// log.Warn("hmacSha256Data: ", hmacSha256Data)
+	// log.Warn("sign: ", sign)
+
+	body, err := RequestWithHeader(url.String(), reqBody, method,
+		map[string]string{
+			"OK-ACCESS-KEY":        client.APIKey,
+			"OK-ACCESS-SIGN":       sign,
+			"OK-ACCESS-TIMESTAMP":  timestamp,
+			"OK-ACCESS-PASSPHRASE": client.Passphrase,
+		}, IS_GZIP)
+	if err != nil {
+		return nil, err
+	}
+	res, err := handlerCommonRest[T](body)
+	if err != nil {
+		return nil, err
+	}
+	return res, res.handlerError()
 }
 
-// 通用非鉴权接口封装
-func okxHandlerRequestApi[T any](apiType ApiType, request *T, name string) string {
+// URL标准封装 带路径参数
+func okxHandlerRequestAPIWithPathQueryParam[T any](apiType APIType, request *T, name string) url.URL {
 	query := okxHandlerReq(request)
 	u := url.URL{
 		Scheme:   "https",
-		Host:     OkxGetRestHostByApiType(apiType),
+		Host:     OkxGetRestHostByAPIType(apiType),
 		Path:     name,
 		RawQuery: query,
 	}
-	// log.Debug(u.String())
-	return u.String()
+	return u
+}
+
+// URL标准封装 不带路径参数
+func okxHandlerRequestAPIWithoutPathQueryParam(apiType APIType, name string) url.URL {
+	// query := okxHandlerReq(request)
+	u := url.URL{
+		Scheme:   "https",
+		Host:     OkxGetRestHostByAPIType(apiType),
+		Path:     name,
+		RawQuery: "",
+	}
+	return u
 }
 
 func okxHandlerReq[T any](req *T) string {
@@ -218,7 +271,7 @@ func okxHandlerReq[T any](req *T) string {
 	return strings.TrimRight(paramBuffer.String(), "&")
 }
 
-func OkxGetRestHostByApiType(apiType ApiType) string {
+func OkxGetRestHostByAPIType(apiType APIType) string {
 	switch apiType {
 	case REST:
 		return OKX_API_HTTP
