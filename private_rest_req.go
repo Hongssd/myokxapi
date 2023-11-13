@@ -292,3 +292,35 @@ func (algoOrds *PrivateRestTradeOrderPostReqAttachAlgoOrd) SetAmendPxOnTriggerTy
 	algoOrds.AmendPxOnTriggerType = GetPointer(amendPxOnTriggerType)
 	return algoOrds
 }
+
+// instId	String	是	产品ID，如 BTC-USD-190927
+// ordId	String	可选	订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
+// clOrdId	String	可选	用户自定义ID
+type PrivateRestTradeCancelOrderReq struct {
+	InstId  *string `json:"instId"`  //String	是	产品ID，如 BTC-USD-190927
+	OrdId   *string `json:"ordId"`   //String	可选	订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
+	ClOrdId *string `json:"clOrdId"` //String	可选	用户自定义ID
+}
+
+type PrivateRestTradeCancelOrderAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeCancelOrderReq
+}
+
+// String 是 产品ID，如 BTC-USD-190927
+func (api *PrivateRestTradeCancelOrderAPI) InstId(instId string) *PrivateRestTradeCancelOrderAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 可选 订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
+func (api *PrivateRestTradeCancelOrderAPI) OrdId(ordId string) *PrivateRestTradeCancelOrderAPI {
+	api.req.OrdId = GetPointer(ordId)
+	return api
+}
+
+// String 可选 用户自定义ID
+func (api *PrivateRestTradeCancelOrderAPI) ClOrdId(clOrdId string) *PrivateRestTradeCancelOrderAPI {
+	api.req.ClOrdId = GetPointer(clOrdId)
+	return api
+}

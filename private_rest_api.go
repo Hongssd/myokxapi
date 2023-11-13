@@ -9,8 +9,9 @@ const (
 	PrivateRestAccountConfig                         //查看账户配置
 
 	//Trade
-	PrivateRestTradeOrderGet  //查看订单信息
-	PrivateRestTradeOrderPost //下单
+	PrivateRestTradeOrderGet    //查看订单信息
+	PrivateRestTradeOrderPost   //下单
+	PrivateRestTradeCancelOrder //撤单
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
@@ -20,8 +21,9 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAccountConfig:   "/api/v5/account/config",    //GET 查看账户配置
 
 	//Trade
-	PrivateRestTradeOrderGet:  "/api/v5/trade/order", //GET 查看订单信息
-	PrivateRestTradeOrderPost: "/api/v5/trade/order", //POST 下单
+	PrivateRestTradeOrderGet:    "/api/v5/trade/order",        //GET 查看订单信息
+	PrivateRestTradeOrderPost:   "/api/v5/trade/order",        //POST 下单
+	PrivateRestTradeCancelOrder: "/api/v5/trade/cancel-order", //POST 撤单
 }
 
 // Account
@@ -88,4 +90,20 @@ func (api *PrivateRestTradeOrderPostAPI) Do() (*OkxRestRes[PrivateRestTradeOrder
 		return nil, err
 	}
 	return okxCallAPIWithSecret[PrivateRestTradeOrderPostRes](api.client.c, url, reqBody, POST)
+}
+
+// okx PrivateRestTradeCancelOrder PrivateRest接口 POST 撤单
+func (client *PrivateRestClient) NewPrivateRestTradeCancelOrder() *PrivateRestTradeCancelOrderAPI {
+	return &PrivateRestTradeCancelOrderAPI{
+		client: client,
+		req:    &PrivateRestTradeCancelOrderReq{},
+	}
+}
+func (api *PrivateRestTradeCancelOrderAPI) Do() (*OkxRestRes[PrivateRestTradeCancelOrderRes], error) {
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestTradeCancelOrder])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestTradeCancelOrderRes](api.client.c, url, reqBody, POST)
 }

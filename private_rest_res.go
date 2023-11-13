@@ -334,3 +334,11 @@ type PrivateRestTradeOrderPostResRow struct {
 	SCode   string `json:"sCode"`   //String	订单状态码
 	SMsg    string `json:"sMsg"`    //String	订单状态消息
 }
+
+type PrivateRestTradeCancelOrderRes []PrivateRestTradeCancelOrderResRow
+type PrivateRestTradeCancelOrderResRow struct {
+	OrdId   string `json:"ordId"`   //String	订单ID
+	ClOrdId string `json:"clOrdId"` //String	客户自定义订单ID
+	SCode   string `json:"sCode"`   //String	事件执行结果的code，0代表成功
+	SMsg    string `json:"sMsg"`    //String	事件执行失败时的msg
+}
