@@ -194,6 +194,8 @@ type PrivateRestTradeOrderGetResRow struct {
 	CTime              string                                        `json:"cTime"`              //订单创建时间，Unix时间戳的毫秒数格式， 如 ：1597026383085
 }
 
+type PrivateRestTradeOrdersPendingRes []PrivateRestTradeOrderGetResRow
+
 type PrivateRestTradeOrderGetResRowattachAlgoOrd struct {
 	AttachAlgoId         string `json:"attachAlgoId"`         //附带止盈止损的订单ID，订单完全成交，下止盈止损委托单时，该值不会传给 algoId
 	AttachAlgoClOrdId    string `json:"attachAlgoClOrdId"`    //下单附带止盈止损时，客户自定义的策略订单ID
@@ -223,3 +225,18 @@ type PrivateRestTradeCancelOrderResRow struct {
 	SCode   string `json:"sCode"`   //String	事件执行结果的code，0代表成功
 	SMsg    string `json:"sMsg"`    //String	事件执行失败时的msg
 }
+
+type PrivateRestTradeAmendOrderRes []PrivateRestTradeAmendOrderResRow
+type PrivateRestTradeAmendOrderResRow struct {
+	OrdId   string `json:"ordId"`   //String	订单ID
+	ClOrdId string `json:"clOrdId"` //String	客户自定义订单ID
+	ReqId   string `json:"reqId"`   //String	用户自定义修改事件ID
+	SCode   string `json:"sCode"`   //String	事件执行结果的code，0代表成功
+	SMsg    string `json:"sMsg"`    //String	事件执行失败时的msg
+}
+
+type PrivateRestTradeBatchOrdersRes []PrivateRestTradeOrderPostResRow
+
+type PrivateRestTradeCancelBatchOrdersRes []PrivateRestTradeCancelOrderResRow
+
+type PrivateRestTradeAmendBatchOrdersRes []PrivateRestTradeAmendOrderResRow
