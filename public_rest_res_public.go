@@ -1,7 +1,7 @@
 package myokxapi
 
-type PublicRestInstrumentsRes []PublicRestInstrumentsResRow
-type PublicRestInstrumentsResRow struct {
+type PublicRestPublicInstrumentsRes []PublicRestPublicInstrumentsResRow
+type PublicRestPublicInstrumentsResRow struct {
 	InstType     string `json:"instType"`     //产品类型  SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
 	InstId       string `json:"instId"`       //产品id， 如 BTC-USD-SWAP
 	Uly          string `json:"uly"`          //标的指数，如 BTC-USD，仅适用于交割/永续/期权
@@ -32,107 +32,25 @@ type PublicRestInstrumentsResRow struct {
 	MaxStopSz    string `json:"maxStopSz"`    //合约或现货止盈止损市价委托的单笔最大委托数量, 合约的数量单位是“张”，现货的数量单位是“USDT”
 }
 
-type PublicRestTimeRes []PublicRestTimeResRow
-type PublicRestTimeResRow struct {
+type PublicRestPublicTimeRes []PublicRestPublicTimeResRow
+type PublicRestPublicTimeResRow struct {
 	Ts string `json:"ts"` //系统时间，Unix时间戳的毫秒数格式，如 1597026383085
 }
 
-type PublicRestMarkPriceRes []PublicRestMarkPriceResRow
-type PublicRestMarkPriceResRow struct {
+type PublicRestPublicMarkPriceRes []PublicRestPublicMarkPriceResRow
+type PublicRestPublicMarkPriceResRow struct {
 	InstType string `json:"instType"` //产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
 	InstId   string `json:"instId"`   //产品ID，如 BTC-USD-200214
 	MarkPx   string `json:"markPx"`   //标记价格
 	Ts       string `json:"ts"`       //接口数据返回时间，Unix时间戳的毫秒数格式，如1597026383085
 }
 
-type PublicRestMarketTickersRes []PublicRestMarketTickersResRow
-type PublicRestMarketTickersResRow struct {
-	InstId  string `json:"instId"`  //指数
-	IdxPx   string `json:"idxPx"`   //最新指数价格
-	High24h string `json:"high24h"` //24小时指数最高价格
-	SodUtc0 string `json:"sodUtc0"` //UTC 0 时开盘价
-	Open24h string `json:"open24h"` //24小时指数开盘价格
-	Low24h  string `json:"low24h"`  //24小时指数最低价格
-	SodUtc8 string `json:"sodUtc8"` //UTC+8 时开盘价
-	Ts      string `json:"ts"`      //指数价格更新时间，Unix时间戳的毫秒数格式，如1597026383085
-}
-
-type PublicRestMarketBooksLiteRes []PublicRestMarketBooksLiteResRow
-type PublicRestMarketBooksLiteResRow struct {
-	Asks []BooksLite `json:"asks"` //卖方深度
-	Bids []BooksLite `json:"bids"` //买方深度
-	Ts   string      `json:"ts"`   //深度产生的时间
-}
-type BooksLite struct {
-	Price      string `json:"price"`       //价格
-	Quantity   string `json:"quantity"`    //合约张数或交易币的数量
-	OrderCount string `json:"order_count"` //订单数量
-}
-
-type PublicRestMarketBooksLiteMiddle []PublicRestMarketBooksLiteMiddleRow
-type PublicRestMarketBooksLiteMiddleRow struct {
-	Asks []interface{} `json:"asks"` //卖方深度
-	Bids []interface{} `json:"bids"` //买方深度
-	Ts   string        `json:"ts"`   //深度产生的时间
-}
-
-func (middle *PublicRestMarketBooksLiteMiddle) ConvertToRes() *PublicRestMarketBooksLiteRes {
-	resList := PublicRestMarketBooksLiteRes{}
-	for _, v := range *middle {
-		res := PublicRestMarketBooksLiteResRow{
-			Ts: v.Ts,
-		}
-		res.Bids = []BooksLite{}
-		res.Asks = []BooksLite{}
-		for _, bid := range v.Bids {
-			res.Bids = append(res.Bids, BooksLite{
-				Price:      bid.([]interface{})[0].(string),
-				Quantity:   bid.([]interface{})[1].(string),
-				OrderCount: bid.([]interface{})[3].(string),
-			})
-		}
-		for _, ask := range v.Asks {
-			res.Asks = append(res.Asks, BooksLite{
-				Price:      ask.([]interface{})[0].(string),
-				Quantity:   ask.([]interface{})[1].(string),
-				OrderCount: ask.([]interface{})[3].(string),
-			})
-		}
-		resList = append(resList, res)
-	}
-	return &resList
-}
-
-type PublicRestMarketCandlesRes []PublicRestMarketCandlesResRow
-type PublicRestMarketCandlesResRow struct {
-	Ts          string `json:"ts"`          //开始时间，Unix时间戳的毫秒数格式，如 1597026383085
-	O           string `json:"o"`           //开盘价格
-	H           string `json:"h"`           //最高价格
-	L           string `json:"l"`           //最低价格
-	C           string `json:"c"`           //收盘价格
-	Vol         string `json:"vol"`         //交易量，以张为单位
-	VolCcy      string `json:"volCcy"`      //交易量，以币为单位
-	VolCcyQuote string `json:"volCcyQuote"` //交易量，以计价货币为单位
-	Confirm     string `json:"confirm"`     //K线状态 0 代表 K 线未完结，1 代表 K 线已完结。
-}
-type PublicRestMarketCandlesMiddle []PublicRestMarketCandlesMiddleRow
-type PublicRestMarketCandlesMiddleRow [9]interface{}
-
-func (middle *PublicRestMarketCandlesMiddle) ConvertToRes() *PublicRestMarketCandlesRes {
-	resList := PublicRestMarketCandlesRes{}
-	for _, v := range *middle {
-		res := PublicRestMarketCandlesResRow{
-			Ts:          v[0].(string),
-			O:           v[1].(string),
-			H:           v[2].(string),
-			L:           v[3].(string),
-			C:           v[4].(string),
-			Vol:         v[5].(string),
-			VolCcy:      v[6].(string),
-			VolCcyQuote: v[7].(string),
-			Confirm:     v[8].(string),
-		}
-		resList = append(resList, res)
-	}
-	return &resList
+type PublicRestPublicFundingRateRes []PublicRestPublicFundingRateResRow
+type PublicRestPublicFundingRateResRow struct {
+	InstType        string `json:"instType"`        //产品类型 SWAP：永续合约
+	InstId          string `json:"instId"`          //产品ID，如BTC-USD-SWAP
+	FundingRate     string `json:"fundingRate"`     //资金费率
+	NextFundingRate string `json:"nextFundingRate"` //下一期预测资金费率
+	FundingTime     string `json:"fundingTime"`     //资金费时间 ，Unix时间戳的毫秒数格式，如 1597026383085
+	NextFundingTime string `json:"nextFundingTime"` //下一期资金费时间 ，Unix时间戳的毫秒数格式，如 1622851200000
 }

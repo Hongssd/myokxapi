@@ -1,81 +1,37 @@
 package myokxapi
 
-type PublicRestInstrumentsReq struct {
-	InstType   *string `json:"instType"`   //String 是   产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
-	Uly        *string `json:"uly"`        //String 可选 标的指数，如 BTC-USD，仅适用于交割/永续/期权，期权必填
-	InstFamily *string `json:"instFamily"` //String 否   交易品种，如 BTC-USD，仅适用于交割/永续/期权
-	InstId     *string `json:"instId"`     //String 否   产品ID，如 BTC-USD-200213
-}
-
-type PublicRestInstrumentsAPI struct {
-	client *PublicRestClient
-	req    *PublicRestInstrumentsReq
-}
-
-// String 是 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
-func (api *PublicRestInstrumentsAPI) InstType(instType string) *PublicRestInstrumentsAPI {
-	api.req.InstType = GetPointer(instType)
-	return api
-}
-
-// String 可选 标的指数，如 BTC-USD，仅适用于交割/永续/期权，期权必填
-func (api *PublicRestInstrumentsAPI) Uly(uly string) *PublicRestInstrumentsAPI {
-	api.req.Uly = GetPointer(uly)
-	return api
-}
-
-// String 否 交易品种，如 BTC-USD，仅适用于交割/永续/期权
-func (api *PublicRestInstrumentsAPI) InstFamily(instFamily string) *PublicRestInstrumentsAPI {
-	api.req.InstFamily = GetPointer(instFamily)
-	return api
-}
-
-// String 否 产品ID，如 BTC-USD-200213
-func (api *PublicRestInstrumentsAPI) InstId(instId string) *PublicRestInstrumentsAPI {
-	api.req.InstId = GetPointer(instId)
-	return api
-}
-
-type PublicRestTimeReq struct {
-}
-
-type PublicRestTimeAPI struct {
-	client *PublicRestClient
-	req    *PublicRestTimeReq
-}
-
-type PublicRestMarkPriceReq struct {
+type PublicRestPublicMarkPriceReq struct {
 	InstType   *string `json:"instType"`   //String 是 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
 	Uly        *string `json:"uly"`        //String	否 标的指数，如 BTC-USD，仅适用于交割/永续/期权
 	InstFamily *string `json:"instFamily"` //String	否 交易品种，如 BTC-USD，仅适用于交割/永续/期权
 	InstId     *string `json:"instId"`     //String	否 产品ID，如 BTC-USD-200213
 }
 
-type PublicRestMarkPriceAPI struct {
+type PublicRestPublicMarkPriceAPI struct {
 	client *PublicRestClient
-	req    *PublicRestMarkPriceReq
+	req    *PublicRestPublicMarkPriceReq
 }
 
 // String 是 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
-func (api *PublicRestMarkPriceAPI) InstType(instType string) *PublicRestMarkPriceAPI {
+func (api *PublicRestPublicMarkPriceAPI) InstType(instType string) *PublicRestPublicMarkPriceAPI {
 	api.req.InstType = GetPointer(instType)
 	return api
 }
 
 // String 否 标的指数，如 BTC-USD，仅适用于交割/永续/期权
-func (api *PublicRestMarkPriceAPI) Uly(uly string) *PublicRestMarkPriceAPI {
+func (api *PublicRestPublicMarkPriceAPI) Uly(uly string) *PublicRestPublicMarkPriceAPI {
 	api.req.Uly = GetPointer(uly)
 	return api
 }
 
 // String 否 交易品种，如 BTC-USD，仅适用于交割/永续/期权
-func (api *PublicRestMarkPriceAPI) InstFamily(instFamily string) *PublicRestMarkPriceAPI {
+func (api *PublicRestPublicMarkPriceAPI) InstFamily(instFamily string) *PublicRestPublicMarkPriceAPI {
 	api.req.InstFamily = GetPointer(instFamily)
 	return api
 }
 
 // String 否 产品ID，如 BTC-USD-200213
-func (api *PublicRestMarkPriceAPI) InstId(instId string) *PublicRestMarkPriceAPI {
+func (api *PublicRestPublicMarkPriceAPI) InstId(instId string) *PublicRestPublicMarkPriceAPI {
 	api.req.InstId = GetPointer(instId)
 	return api
 }
