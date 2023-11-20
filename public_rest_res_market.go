@@ -34,28 +34,32 @@ type PublicRestMarketBooksLiteMiddleRow struct {
 func (middle *PublicRestMarketBooksLiteMiddle) ConvertToRes() *PublicRestMarketBooksLiteRes {
 	resList := PublicRestMarketBooksLiteRes{}
 	for _, v := range *middle {
-		res := PublicRestMarketBooksLiteResRow{
-			Ts: v.Ts,
-		}
-		res.Bids = []BooksLite{}
-		res.Asks = []BooksLite{}
-		for _, bid := range v.Bids {
-			res.Bids = append(res.Bids, BooksLite{
-				Price:      bid.([]interface{})[0].(string),
-				Quantity:   bid.([]interface{})[1].(string),
-				OrderCount: bid.([]interface{})[3].(string),
-			})
-		}
-		for _, ask := range v.Asks {
-			res.Asks = append(res.Asks, BooksLite{
-				Price:      ask.([]interface{})[0].(string),
-				Quantity:   ask.([]interface{})[1].(string),
-				OrderCount: ask.([]interface{})[3].(string),
-			})
-		}
-		resList = append(resList, res)
+		resList = append(resList, *v.ConvertToRes())
 	}
 	return &resList
+}
+
+func (middleRow *PublicRestMarketBooksLiteMiddleRow) ConvertToRes() *PublicRestMarketBooksLiteResRow {
+	res := PublicRestMarketBooksLiteResRow{
+		Ts: middleRow.Ts,
+	}
+	res.Bids = []BooksLite{}
+	res.Asks = []BooksLite{}
+	for _, bid := range middleRow.Bids {
+		res.Bids = append(res.Bids, BooksLite{
+			Price:      bid.([]interface{})[0].(string),
+			Quantity:   bid.([]interface{})[1].(string),
+			OrderCount: bid.([]interface{})[3].(string),
+		})
+	}
+	for _, ask := range middleRow.Asks {
+		res.Asks = append(res.Asks, BooksLite{
+			Price:      ask.([]interface{})[0].(string),
+			Quantity:   ask.([]interface{})[1].(string),
+			OrderCount: ask.([]interface{})[3].(string),
+		})
+	}
+	return &res
 }
 
 type PublicRestMarketCandlesRes []PublicRestMarketCandlesResRow
@@ -76,18 +80,22 @@ type PublicRestMarketCandlesMiddleRow [9]interface{}
 func (middle *PublicRestMarketCandlesMiddle) ConvertToRes() *PublicRestMarketCandlesRes {
 	resList := PublicRestMarketCandlesRes{}
 	for _, v := range *middle {
-		res := PublicRestMarketCandlesResRow{
-			Ts:          v[0].(string),
-			O:           v[1].(string),
-			H:           v[2].(string),
-			L:           v[3].(string),
-			C:           v[4].(string),
-			Vol:         v[5].(string),
-			VolCcy:      v[6].(string),
-			VolCcyQuote: v[7].(string),
-			Confirm:     v[8].(string),
-		}
-		resList = append(resList, res)
+		resList = append(resList, *v.ConvertToRes())
 	}
 	return &resList
+}
+
+func (middleRow *PublicRestMarketCandlesMiddleRow) ConvertToRes() *PublicRestMarketCandlesResRow {
+	res := PublicRestMarketCandlesResRow{
+		Ts:          middleRow[0].(string),
+		O:           middleRow[1].(string),
+		H:           middleRow[2].(string),
+		L:           middleRow[3].(string),
+		C:           middleRow[4].(string),
+		Vol:         middleRow[5].(string),
+		VolCcy:      middleRow[6].(string),
+		VolCcyQuote: middleRow[7].(string),
+		Confirm:     middleRow[8].(string),
+	}
+	return &res
 }

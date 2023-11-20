@@ -114,6 +114,9 @@ type APIType int
 
 const (
 	REST APIType = iota
+	WS_PUBLIC
+	WS_PRIVATE
+	WS_BUSINESS
 )
 
 type Client struct {
@@ -232,7 +235,7 @@ func okxHandlerRequestAPIWithoutPathQueryParam(apiType APIType, name string) url
 }
 
 func okxHandlerReq[T any](req *T) string {
-	var paramBuffer bytes.Buffer
+	var argBuffer bytes.Buffer
 
 	t := reflect.TypeOf(req)
 	v := reflect.ValueOf(req)
@@ -243,32 +246,32 @@ func okxHandlerReq[T any](req *T) string {
 	v = v.Elem()
 	count := v.NumField()
 	for i := 0; i < count; i++ {
-		paramName := t.Field(i).Tag.Get("json")
+		argName := t.Field(i).Tag.Get("json")
 		switch v.Field(i).Elem().Kind() {
 		case reflect.String:
-			paramBuffer.WriteString(paramName + "=" + v.Field(i).Elem().String() + "&")
+			argBuffer.WriteString(argName + "=" + v.Field(i).Elem().String() + "&")
 		case reflect.Int, reflect.Int64:
-			paramBuffer.WriteString(paramName + "=" + strconv.FormatInt(v.Field(i).Elem().Int(), BIT_BASE_10) + "&")
+			argBuffer.WriteString(argName + "=" + strconv.FormatInt(v.Field(i).Elem().Int(), BIT_BASE_10) + "&")
 		case reflect.Float32, reflect.Float64:
-			paramBuffer.WriteString(paramName + "=" + decimal.NewFromFloat(v.Field(i).Elem().Float()).String() + "&")
+			argBuffer.WriteString(argName + "=" + decimal.NewFromFloat(v.Field(i).Elem().Float()).String() + "&")
 		case reflect.Bool:
-			paramBuffer.WriteString(paramName + "=" + strconv.FormatBool(v.Field(i).Elem().Bool()) + "&")
+			argBuffer.WriteString(argName + "=" + strconv.FormatBool(v.Field(i).Elem().Bool()) + "&")
 		case reflect.Struct:
 			sv := reflect.ValueOf(v.Field(i).Interface())
 			ToStringMethod := sv.MethodByName("String")
-			params := make([]reflect.Value, 0)
-			result := ToStringMethod.Call(params)
-			paramBuffer.WriteString(paramName + "=" + result[0].String() + "&")
+			args := make([]reflect.Value, 0)
+			result := ToStringMethod.Call(args)
+			argBuffer.WriteString(argName + "=" + result[0].String() + "&")
 		case reflect.Slice:
 			s := v.Field(i).Interface()
 			d, _ := json.Marshal(s)
-			paramBuffer.WriteString(paramName + "=" + url.QueryEscape(string(d)) + "&")
+			argBuffer.WriteString(argName + "=" + url.QueryEscape(string(d)) + "&")
 		case reflect.Invalid:
 		default:
-			log.Errorf("req type error %s:%s", paramName, v.Field(i).Elem().Kind())
+			log.Errorf("req type error %s:%s", argName, v.Field(i).Elem().Kind())
 		}
 	}
-	return strings.TrimRight(paramBuffer.String(), "&")
+	return strings.TrimRight(argBuffer.String(), "&")
 }
 
 func OkxGetRestHostByAPIType(apiType APIType) string {
