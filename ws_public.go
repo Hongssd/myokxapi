@@ -15,13 +15,13 @@ func (wsBooksType WsBooksType) String() string {
 }
 
 // 批量订阅深度 如: ["BTC-USDT","ETH-USDT"], WS_BOOKS_SNAPSHOT_5_100MS
-func (ws *PublicWsStreamClient) SubscribeLevelBooksMultiple(instIds []string, wsBooksType WsBooksType) (*Subscription[WsBooks], error) {
-	args := []SubscribeArg{}
+func (ws *PublicWsStreamClient) SubscribeBooksMultiple(instIds []string, wsBooksType WsBooksType) (*Subscription[WsBooks], error) {
+	args := []WsSubscribeArg{}
 	for _, s := range instIds {
 		arg := getBooksSubscribeArg(s, wsBooksType)
 		args = append(args, arg)
 	}
-	doSub, err := sendMsg[SubscribeResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (ws *PublicWsStreamClient) SubscribeLevelBooksMultiple(instIds []string, ws
 		resultChan: make(chan WsBooks, 50),
 		errChan:    make(chan error),
 		closeChan:  make(chan struct{}),
-		ws:         &ws.WsStreamClient,
+		Ws:         &ws.WsStreamClient,
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
@@ -47,12 +47,12 @@ func (ws *PublicWsStreamClient) SubscribeLevelBooksMultiple(instIds []string, ws
 }
 
 // 订阅深度 如: "BTC-USDT", WS_BOOKS_SNAPSHOT_5_100MS
-func (ws *PublicWsStreamClient) SubscribeLevelBooks(instIds string, wsBooksType WsBooksType) (*Subscription[WsBooks], error) {
-	return ws.SubscribeLevelBooksMultiple([]string{instIds}, wsBooksType)
+func (ws *PublicWsStreamClient) SubscribeBooks(instIds string, wsBooksType WsBooksType) (*Subscription[WsBooks], error) {
+	return ws.SubscribeBooksMultiple([]string{instIds}, wsBooksType)
 }
 
-func getBooksSubscribeArg(instId string, wsBooksType WsBooksType) SubscribeArg {
-	return SubscribeArg{
+func getBooksSubscribeArg(instId string, wsBooksType WsBooksType) WsSubscribeArg {
+	return WsSubscribeArg{
 		Channel: wsBooksType.String(),
 		InstId:  instId,
 	}
@@ -60,12 +60,12 @@ func getBooksSubscribeArg(instId string, wsBooksType WsBooksType) SubscribeArg {
 
 // 批量订阅交易 如: ["BTC-USDT","ETH-USDT"]
 func (ws *PublicWsStreamClient) SubscribeTradesMultiple(instIds []string) (*Subscription[WsTrades], error) {
-	args := []SubscribeArg{}
+	args := []WsSubscribeArg{}
 	for _, s := range instIds {
 		arg := getTradesSubscribeArg(s)
 		args = append(args, arg)
 	}
-	doSub, err := sendMsg[SubscribeResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (ws *PublicWsStreamClient) SubscribeTradesMultiple(instIds []string) (*Subs
 		resultChan: make(chan WsTrades, 50),
 		errChan:    make(chan error),
 		closeChan:  make(chan struct{}),
-		ws:         &ws.WsStreamClient,
+		Ws:         &ws.WsStreamClient,
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
@@ -90,8 +90,8 @@ func (ws *PublicWsStreamClient) SubscribeTradesMultiple(instIds []string) (*Subs
 	return sub, nil
 }
 
-func getTradesSubscribeArg(instId string) SubscribeArg {
-	return SubscribeArg{
+func getTradesSubscribeArg(instId string) WsSubscribeArg {
+	return WsSubscribeArg{
 		Channel: "trades",
 		InstId:  instId,
 	}

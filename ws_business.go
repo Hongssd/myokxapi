@@ -1,7 +1,7 @@
 package myokxapi
 
-func getCandleSubscribeArg(instId string, interval string) SubscribeArg {
-	return SubscribeArg{
+func getCandleSubscribeArg(instId string, interval string) WsSubscribeArg {
+	return WsSubscribeArg{
 		Channel: "candle" + interval,
 		InstId:  instId,
 	}
@@ -14,14 +14,14 @@ func (ws *BusinessWsStreamClient) SubscribeCandle(instId string, interval string
 
 // 订阅K线 如: ["BTC-USDT","ETH-USDT"],["1m","5m"]
 func (ws *BusinessWsStreamClient) SubscribeCandleMultiple(instId []string, interval []string) (*Subscription[WsCandles], error) {
-	args := []SubscribeArg{}
+	args := []WsSubscribeArg{}
 	for _, s := range instId {
 		for _, i := range interval {
 			arg := getCandleSubscribeArg(s, i)
 			args = append(args, arg)
 		}
 	}
-	doSub, err := sendMsg[SubscribeResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (ws *BusinessWsStreamClient) SubscribeCandleMultiple(instId []string, inter
 		resultChan: make(chan WsCandles, 50),
 		errChan:    make(chan error),
 		closeChan:  make(chan struct{}),
-		ws:         &ws.WsStreamClient,
+		Ws:         &ws.WsStreamClient,
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
