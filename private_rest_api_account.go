@@ -57,7 +57,7 @@ func (client *PrivateRestClient) NewPrivateRestAccountSetLeverage() *PrivateRest
 	}
 }
 func (api *PrivateRestAccountSetLeverageAPI) Do() (*OkxRestRes[PrivateRestAccountSetLeverageRes], error) {
-	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAccountSetLeverage])
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestAccountSetLeverage])
 	reqBody, err := json.Marshal(api.req)
 	if err != nil {
 		return nil, err
