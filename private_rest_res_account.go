@@ -140,3 +140,33 @@ type PrivateRestAccountConfigResRow struct {
 	Ip              string   `json:"ip"`              //当前请求API key绑定的ip地址，多个ip用半角逗号隔开，如：
 	Perm            string   `json:"perm"`            //当前请求的 API key权限 read_only：读取 trade：交易 withdraw：提币
 }
+
+type PrivateRestAccountTradeFeeRes []PrivateRestAccountTradeFeeResRow
+type PrivateRestAccountTradeFeeResRow struct {
+	Level     string                                 `json:"level"`     //手续费等级
+	Taker     string                                 `json:"taker"`     //对于币币/杠杆，为 USDT 交易区的吃单手续费率； 对于永续，交割和期权合约，为币本位合约费率
+	Maker     string                                 `json:"maker"`     //对于币币/杠杆，为 USDT 交易区的挂单手续费率； 对于永续，交割和期权合约，为币本位合约费率
+	TakerU    string                                 `json:"takerU"`    //USDT 合约吃单手续费率，仅适用于交割/永续
+	MakerU    string                                 `json:"makerU"`    //USDT 合约挂单手续费率，仅适用于交割/永续
+	Delivery  string                                 `json:"delivery"`  //交割手续费率
+	Exercise  string                                 `json:"exercise"`  //行权手续费率
+	InstType  string                                 `json:"instType"`  //产品类型
+	TakerUSDC string                                 `json:"takerUSDC"` //对于币币/杠杆，为 USDⓈ&Crypto 交易区的吃单手续费率； 对于永续和交割合约，为 USDC 合约费率
+	MakerUSDC string                                 `json:"makerUSDC"` //对于币币/杠杆，为 USDⓈ&Crypto 交易区的挂单手续费率； 对于永续和交割合约，为 USDC 合约费率
+	Ts        string                                 `json:"ts"`        //数据返回时间，Unix时间戳的毫秒数格式，如 1597026383085
+	Category  string                                 `json:"category"`  //币种类别（已废弃）
+	Fiat      []PrivateRestAccountTradeFeeResRowFiat `json:"fiat"`      //法币费率
+}
+type PrivateRestAccountTradeFeeResRowFiat struct {
+	Ccy   string `json:"ccy"`   //法币币种
+	Taker string `json:"taker"` //吃单手续费率
+	Maker string `json:"maker"` //挂单手续费率
+}
+
+type PrivateRestAccountSetLeverageRes []PrivateRestAccountSetLeverageResRow
+type PrivateRestAccountSetLeverageResRow struct {
+	InstId  string `json:"instId"`  //产品ID
+	Lever   string `json:"lever"`   //杠杆倍数
+	MgnMode string `json:"mgnMode"` //保证金模式 isolated：逐仓 cross：全仓
+	PosSide string `json:"posSide"` //持仓方向
+}

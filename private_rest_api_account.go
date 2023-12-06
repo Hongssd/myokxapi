@@ -36,3 +36,31 @@ func (api *PrivateRestAccountConfigAPI) Do() (*OkxRestRes[PrivateRestAccountConf
 	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAccountConfig])
 	return okxCallAPIWithSecret[PrivateRestAccountConfigRes](api.client.c, url, NIL_REQBODY, GET)
 }
+
+// okx PrivateRestAccountTradeFee PrivateRest接口 GET 查看账户手续费费率
+func (client *PrivateRestClient) NewPrivateRestAccountTradeFee() *PrivateRestAccountTradeFeeAPI {
+	return &PrivateRestAccountTradeFeeAPI{
+		client: client,
+		req:    &PrivateRestAccountTradeFeeReq{},
+	}
+}
+func (api *PrivateRestAccountTradeFeeAPI) Do() (*OkxRestRes[PrivateRestAccountTradeFeeRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAccountTradeFee])
+	return okxCallAPIWithSecret[PrivateRestAccountTradeFeeRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx PrivateRestAccountSetLeverage PrivateRest接口 POST 设置杠杆倍数
+func (client *PrivateRestClient) NewPrivateRestAccountSetLeverage() *PrivateRestAccountSetLeverageAPI {
+	return &PrivateRestAccountSetLeverageAPI{
+		client: client,
+		req:    &PrivateRestAccountSetLeverageReq{},
+	}
+}
+func (api *PrivateRestAccountSetLeverageAPI) Do() (*OkxRestRes[PrivateRestAccountSetLeverageRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAccountSetLeverage])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestAccountSetLeverageRes](api.client.c, url, reqBody, POST)
+}

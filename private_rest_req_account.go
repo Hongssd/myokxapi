@@ -51,3 +51,93 @@ type PrivateRestAccountConfigAPI struct {
 	client *PrivateRestClient
 	req    *PrivateRestAccountConfigReq
 }
+
+// instType	String	是	产品类型
+// SPOT：币币
+// MARGIN：币币杠杆
+// SWAP：永续合约
+// FUTURES：交割合约
+// OPTION：期权
+// instId	String	否	产品ID，如 BTC-USDT
+// 仅适用于instType为币币/币币杠杆
+// uly	String	否	标的指数
+// 适用于交割/永续/期权，如 BTC-USD
+// instFamily	String	否	交易品种
+// 适用于交割/永续/期权，如 BTC-USD
+type PrivateRestAccountTradeFeeReq struct {
+	InstType   *string `json:"instType"`   //String	是	产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+	InstId     *string `json:"instId"`     //String	否	产品ID，如 BTC-USDT 仅适用于instType为币币/币币杠杆
+	Uly        *string `json:"uly"`        //String	否	标的指数 适用于交割/永续/期权，如 BTC-USD
+	InstFamily *string `json:"instFamily"` //String	否	交易品种 适用于交割/永续/期权，如 BTC-USD
+}
+
+type PrivateRestAccountTradeFeeAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAccountTradeFeeReq
+}
+
+// String	是	产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+func (api *PrivateRestAccountTradeFeeAPI) InstType(instType string) *PrivateRestAccountTradeFeeAPI {
+	api.req.InstType = GetPointer(instType)
+	return api
+}
+
+// String	否	产品ID，如 BTC-USDT 仅适用于instType为币币/币币杠杆
+func (api *PrivateRestAccountTradeFeeAPI) InstId(instId string) *PrivateRestAccountTradeFeeAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String	否	标的指数 适用于交割/永续/期权，如 BTC-USD
+func (api *PrivateRestAccountTradeFeeAPI) Uly(uly string) *PrivateRestAccountTradeFeeAPI {
+	api.req.Uly = GetPointer(uly)
+	return api
+}
+
+// String	否	交易品种 适用于交割/永续/期权，如 BTC-USD
+func (api *PrivateRestAccountTradeFeeAPI) InstFamily(instFamily string) *PrivateRestAccountTradeFeeAPI {
+	api.req.InstFamily = GetPointer(instFamily)
+	return api
+}
+
+type PrivateRestAccountSetLeverageReq struct {
+	InstId  *string `json:"instId"`  //String	可选	产品ID：币对、合约 全仓下，instId和ccy至少要传一个；如果两个都传，默认使用instId
+	Ccy     *string `json:"ccy"`     //String	可选	保证金币种 仅适用于跨币种保证金模式和组合保证金模式的全仓 币币杠杆。设置自动借币的杠杆倍数时必填
+	Lever   *string `json:"lever"`   //String	是	杠杆倍数
+	MgnMode *string `json:"mgnMode"` //String	是	保证金模式 isolated：逐仓 cross：全仓 如果ccy有效传值，该参数值只能为cross。
+	PosSide *string `json:"posSide"` //String	可选	持仓方向 long：开平仓模式开多 short：开平仓模式开空 仅适用于逐仓交割/永续 在开平仓模式且保证金模式为逐仓条件下必填
+}
+type PrivateRestAccountSetLeverageAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAccountSetLeverageReq
+}
+
+// String	可选	产品ID：币对、合约 全仓下，instId和ccy至少要传一个；如果两个都传，默认使用instId
+func (api *PrivateRestAccountSetLeverageAPI) InstId(instId string) *PrivateRestAccountSetLeverageAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String	可选	保证金币种 仅适用于跨币种保证金模式和组合保证金模式的全仓 币币杠杆。设置自动借币的杠杆倍数时必填
+func (api *PrivateRestAccountSetLeverageAPI) Ccy(ccy string) *PrivateRestAccountSetLeverageAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// String	是	杠杆倍数
+func (api *PrivateRestAccountSetLeverageAPI) Lever(lever string) *PrivateRestAccountSetLeverageAPI {
+	api.req.Lever = GetPointer(lever)
+	return api
+}
+
+// String	是	保证金模式 isolated：逐仓 cross：全仓 如果ccy有效传值，该参数值只能为cross。
+func (api *PrivateRestAccountSetLeverageAPI) MgnMode(mgnMode string) *PrivateRestAccountSetLeverageAPI {
+	api.req.MgnMode = GetPointer(mgnMode)
+	return api
+}
+
+// String	可选	持仓方向 long：开平仓模式开多 short：开平仓模式开空 仅适用于逐仓交割/永续 在开平仓模式且保证金模式为逐仓条件下必填
+func (api *PrivateRestAccountSetLeverageAPI) PosSide(posSide string) *PrivateRestAccountSetLeverageAPI {
+	api.req.PosSide = GetPointer(posSide)
+	return api
+}
