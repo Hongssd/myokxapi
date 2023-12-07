@@ -21,13 +21,19 @@ const (
 )
 
 const (
-	LOGIN       = "login"
-	SUBSCRIBE   = "subscribe"
-	UNSUBSCRIBE = "unsubscribe"
+	LOGIN              = "login"               //登陆
+	SUBSCRIBE          = "subscribe"           //订阅
+	UNSUBSCRIBE        = "unsubscribe"         //取消订阅
+	ORDER              = "order"               //下单
+	BATCH_ORDER        = "batch-orders"        //批量下单
+	CANCEL_ORDER       = "cancel-order"        //撤单
+	BATCH_CANCEL_ORDER = "batch-cancel-orders" //批量撤单
+	AMEND_ORDER        = "amend-order"         //改单
+	BATCH_AMEND_ORDER  = "batch-amend-orders"  //批量改单
 )
 
 var (
-	WebsocketTimeout        = time.Second * 60
+	WebsocketTimeout        = time.Second * 10
 	WebsocketKeepalive      = true
 	SUBSCRIBE_INTERVAL_TIME = 500 * time.Millisecond //订阅间隔
 )
@@ -42,13 +48,23 @@ type WsStreamClient struct {
 	commonSubMap    map[string]*Subscription[WsActionResult] //订阅的返回结果
 	waitSubResult   *Subscription[WsActionResult]
 	waitSubResultMu *sync.Mutex
-	candleSubMap    map[string]*Subscription[WsCandles]
-	booksSubMap     map[string]*Subscription[WsBooks]
-	tradesSubMap    map[string]*Subscription[WsTrades]
-	ordersSubMap    map[string]*Subscription[WsOrders]
-	resultChan      chan []byte
-	errChan         chan error
-	isClose         bool
+
+	waitOrderResult   *Subscription[WsOrderResult]
+	waitOrderResultMu *sync.Mutex
+
+	candleSubMap map[string]*Subscription[WsCandles]
+	booksSubMap  map[string]*Subscription[WsBooks]
+	tradesSubMap map[string]*Subscription[WsTrades]
+	ordersSubMap map[string]*Subscription[WsOrders]
+	resultChan   chan []byte
+	errChan      chan error
+	isClose      bool
+}
+
+// 登陆请求相关
+type WsLoginReq struct {
+	Op   string       `json:"op"`   //String 是操作
+	Args []WsLoginArg `json:"args"` //Array 是请求订阅的频道列表
 }
 
 type WsLoginArg struct {
@@ -58,11 +74,11 @@ type WsLoginArg struct {
 	Sign       string `json:"sign"`
 }
 
-type WsLoginReq struct {
-	Op   string       `json:"op"`   //String 是操作
-	Args []WsLoginArg `json:"args"` //Array 是请求订阅的频道列表
+// 订阅请求相关
+type WsSubscribeReq struct {
+	Op   string           `json:"op"`   //String 是操作
+	Args []WsSubscribeArg `json:"args"` //Array 是请求订阅的频道列表
 }
-
 type WsSubscribeArg struct {
 	Channel    string `json:"channel"`              //频道名
 	InstType   string `json:"instType,omitempty"`   //String 否 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION ： 期权 ANY： 全部
@@ -70,13 +86,7 @@ type WsSubscribeArg struct {
 	InstId     string `json:"instId"`               //String 是 产品ID 交易对
 }
 
-// 订阅请求结构体
-type WsSubscribeReq struct {
-	Op   string           `json:"op"`   //String 是操作
-	Args []WsSubscribeArg `json:"args"` //Array 是请求订阅的频道列表
-}
-
-// 订阅结果结构体
+// 登陆及订阅返回结果
 type WsActionResult struct {
 	Event  string         `json:"event"`         //事件，subscribe error
 	Arg    WsSubscribeArg `json:"arg,omitempty"` //订阅参数
@@ -85,16 +95,44 @@ type WsActionResult struct {
 	ConnId string         `json:"connId"`        //WebSocket连接ID
 }
 
+// 订单请求相关
+type WsOrderArg[T any] struct {
+	Id      string `json:"id"`                //String	是	消息的唯一标识 用户提供，返回参数中会返回以便于找到相应的请求。 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度必须要在1-32位之间。
+	Op      string `json:"op"`                //String	是	支持的业务操作，如 order
+	Args    []T    `json:"args"`              //Array	是	请求参数
+	ExpTime string `json:"expTime,omitempty"` //String	否	请求有效截止时间。Unix时间戳的毫秒数格式，如 1597026383085
+}
+
+// 订单操作返回结果
+type WsOrderResult struct {
+	Id      string              `json:"id"`      //消息的唯一标识
+	Op      string              `json:"op"`      //业务操作
+	Code    string              `json:"code"`    //代码
+	Msg     string              `json:"msg"`     //消息
+	Data    []WsOrderResultData `json:"data"`    //请求成功后返回的数据
+	InTime  string              `json:"inTime"`  //WebSocket 网关接收请求时的时间戳，Unix时间戳的微秒数格式，如 1597026383085123
+	OutTime string              `json:"outTime"` //WebSocket 网关发送响应时的时间戳，Unix时间戳的微秒数格式，如 1597026383085123
+}
+
+type WsOrderResultData struct {
+	OrdId   string `json:"ordId"`   //订单ID
+	ClOrdId string `json:"clOrdId"` //用户提供的订单ID
+	Tag     string `json:"tag"`     //订单标签
+	ReqId   string `json:"reqId"`   //用户提供的reqId
+	SCode   string `json:"sCode"`   //订单状态码，0 代表成功
+	SMsg    string `json:"sMsg"`    //订单状态消息
+}
+
 // 数据流订阅标准结构体
 type Subscription[T any] struct {
-	SubId        int64                     //订阅ID
-	Ws           *WsStreamClient           //订阅的连接
-	Op           string                    //订阅方法
-	Args         []WsSubscribeArg          //订阅参数
-	resultChan   chan T                    //接收订阅结果的通道
-	errChan      chan error                //接收订阅错误的通道
-	closeChan    chan struct{}             //接收订阅关闭的通道
-	subResultMap map[string]WsActionResult //订阅结果
+	SubId        int64            //订阅ID
+	Ws           *WsStreamClient  //订阅的连接
+	Op           string           //订阅方法
+	Args         []WsSubscribeArg //订阅参数
+	resultChan   chan T           //接收订阅结果的通道
+	errChan      chan error       //接收订阅错误的通道
+	closeChan    chan struct{}    //接收订阅关闭的通道
+	subResultMap map[string]bool  //订阅结果
 }
 
 // 获取订阅结果
@@ -147,9 +185,54 @@ func (ws *WsStreamClient) login(op string, arg WsLoginArg) (*Subscription[WsActi
 		errChan:      make(chan error),
 		closeChan:    make(chan struct{}),
 		Ws:           ws,
-		subResultMap: map[string]WsActionResult{},
+		subResultMap: map[string]bool{},
 	}
+
 	return result, nil
+}
+
+func orderAction[T any](ws *PrivateWsStreamClient, op string, reqId string, args []T, expTimestamp int64) (*WsOrderResult, error) {
+	if ws == nil || ws.conn == nil || ws.isClose {
+		return nil, fmt.Errorf("websocket is close")
+	}
+	if ws.waitOrderResult != nil {
+		return nil, fmt.Errorf("websocket is busy")
+	}
+	ws.waitOrderResultMu.Lock()
+
+	orderReq := WsOrderArg[T]{
+		Id:      reqId,
+		Op:      op,
+		Args:    args,
+		ExpTime: strconv.FormatInt(expTimestamp, 10),
+	}
+	data, err := json.Marshal(orderReq)
+	if err != nil {
+		return nil, err
+	}
+	log.Debugf("send msg: %s", string(data))
+	err = ws.conn.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		return nil, err
+	}
+
+	node, err := snowflake.NewNode(2)
+	if err != nil {
+		return nil, err
+	}
+	id := node.Generate().Int64()
+	resultSub := &Subscription[WsOrderResult]{
+		SubId:        id,
+		Op:           op,
+		Args:         []WsSubscribeArg{},
+		resultChan:   make(chan WsOrderResult, 50),
+		errChan:      make(chan error),
+		closeChan:    make(chan struct{}),
+		Ws:           &ws.WsStreamClient,
+		subResultMap: map[string]bool{},
+	}
+
+	return ws.CatchOrderReuslt(resultSub)
 }
 
 func subscribe[T any](ws *WsStreamClient, op string, args []WsSubscribeArg) (*Subscription[T], error) {
@@ -189,7 +272,7 @@ func subscribe[T any](ws *WsStreamClient, op string, args []WsSubscribeArg) (*Su
 		errChan:      make(chan error),
 		closeChan:    make(chan struct{}),
 		Ws:           ws,
-		subResultMap: map[string]WsActionResult{},
+		subResultMap: map[string]bool{},
 	}
 	return result, nil
 }
@@ -223,6 +306,13 @@ func (ws *WsStreamClient) Close() error {
 		ws.waitSubResult.errChan <- fmt.Errorf("websocket is closed")
 		ws.waitSubResult = nil
 		ws.waitSubResultMu.Unlock()
+	}
+
+	if ws.waitOrderResult != nil {
+		ws.waitOrderResultMu.Lock()
+		ws.waitOrderResult.errChan <- fmt.Errorf("websocket is closed")
+		ws.waitOrderResult = nil
+		ws.waitOrderResultMu.Unlock()
 	}
 	return nil
 }
@@ -266,42 +356,48 @@ type BusinessWsStreamClient struct {
 func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 	return &PublicWsStreamClient{
 		WsStreamClient: WsStreamClient{
-			apiType:         WS_PUBLIC,
-			commonSubMap:    make(map[string]*Subscription[WsActionResult]),
-			candleSubMap:    make(map[string]*Subscription[WsCandles]),
-			booksSubMap:     make(map[string]*Subscription[WsBooks]),
-			tradesSubMap:    make(map[string]*Subscription[WsTrades]),
-			ordersSubMap:    make(map[string]*Subscription[WsOrders]),
-			waitSubResult:   nil,
-			waitSubResultMu: &sync.Mutex{},
+			apiType:           WS_PUBLIC,
+			commonSubMap:      make(map[string]*Subscription[WsActionResult]),
+			candleSubMap:      make(map[string]*Subscription[WsCandles]),
+			booksSubMap:       make(map[string]*Subscription[WsBooks]),
+			tradesSubMap:      make(map[string]*Subscription[WsTrades]),
+			ordersSubMap:      make(map[string]*Subscription[WsOrders]),
+			waitSubResult:     nil,
+			waitSubResultMu:   &sync.Mutex{},
+			waitOrderResult:   nil,
+			waitOrderResultMu: &sync.Mutex{},
 		},
 	}
 }
 func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 	return &PrivateWsStreamClient{
 		WsStreamClient: WsStreamClient{
-			apiType:         WS_PRIVATE,
-			commonSubMap:    make(map[string]*Subscription[WsActionResult]),
-			candleSubMap:    make(map[string]*Subscription[WsCandles]),
-			booksSubMap:     make(map[string]*Subscription[WsBooks]),
-			tradesSubMap:    make(map[string]*Subscription[WsTrades]),
-			ordersSubMap:    make(map[string]*Subscription[WsOrders]),
-			waitSubResult:   nil,
-			waitSubResultMu: &sync.Mutex{},
+			apiType:           WS_PRIVATE,
+			commonSubMap:      make(map[string]*Subscription[WsActionResult]),
+			candleSubMap:      make(map[string]*Subscription[WsCandles]),
+			booksSubMap:       make(map[string]*Subscription[WsBooks]),
+			tradesSubMap:      make(map[string]*Subscription[WsTrades]),
+			ordersSubMap:      make(map[string]*Subscription[WsOrders]),
+			waitSubResult:     nil,
+			waitSubResultMu:   &sync.Mutex{},
+			waitOrderResult:   nil,
+			waitOrderResultMu: &sync.Mutex{},
 		},
 	}
 }
 func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 	return &BusinessWsStreamClient{
 		WsStreamClient: WsStreamClient{
-			apiType:         WS_BUSINESS,
-			commonSubMap:    make(map[string]*Subscription[WsActionResult]),
-			candleSubMap:    make(map[string]*Subscription[WsCandles]),
-			booksSubMap:     make(map[string]*Subscription[WsBooks]),
-			tradesSubMap:    make(map[string]*Subscription[WsTrades]),
-			ordersSubMap:    make(map[string]*Subscription[WsOrders]),
-			waitSubResult:   nil,
-			waitSubResultMu: &sync.Mutex{},
+			apiType:           WS_BUSINESS,
+			commonSubMap:      make(map[string]*Subscription[WsActionResult]),
+			candleSubMap:      make(map[string]*Subscription[WsCandles]),
+			booksSubMap:       make(map[string]*Subscription[WsBooks]),
+			tradesSubMap:      make(map[string]*Subscription[WsTrades]),
+			ordersSubMap:      make(map[string]*Subscription[WsOrders]),
+			waitSubResult:     nil,
+			waitSubResultMu:   &sync.Mutex{},
+			waitOrderResult:   nil,
+			waitOrderResultMu: &sync.Mutex{},
 		},
 	}
 }
@@ -314,6 +410,14 @@ func (ws *WsStreamClient) sendSubscribeResultToChan(result WsActionResult) {
 		ws.waitSubResult.errChan <- fmt.Errorf("errHandler: %+v", result)
 	} else {
 		ws.waitSubResult.resultChan <- result
+	}
+}
+
+func (ws *WsStreamClient) sendOrderResultToChan(result WsOrderResult) {
+	if result.Code != "" && result.Code != "0" {
+		ws.waitOrderResult.errChan <- fmt.Errorf("errHandler: %+v", result)
+	} else {
+		ws.waitOrderResult.resultChan <- result
 	}
 }
 
@@ -444,6 +548,17 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					continue
 				}
 
+				if strings.Contains(string(data), "id") && strings.Contains(string(data), "op") && strings.Contains(string(data), "code") {
+					result := WsOrderResult{}
+					err := json.Unmarshal(data, &result)
+					if err != nil {
+						log.Error(err)
+						continue
+					}
+					ws.sendOrderResultToChan(result)
+					continue
+				}
+
 				//处理正常数据的返回结果
 				//K线处理
 				if strings.Contains(string(data), "candle") {
@@ -522,6 +637,11 @@ func (ws *WsStreamClient) DeferSub() {
 	}
 }
 
+func (ws *WsStreamClient) DeferOrder() {
+	ws.waitOrderResult = nil
+	ws.waitOrderResultMu.Unlock()
+}
+
 // 取消订阅
 func (sub *Subscription[T]) Unsubscribe() error {
 
@@ -563,7 +683,6 @@ func (ws *WsStreamClient) CatchLoginReuslt(sub *Subscription[WsActionResult]) er
 		log.Debug("catchLoginResults: ", loginResult)
 		return nil
 	}
-
 }
 
 // 捕获订阅结果
@@ -582,7 +701,7 @@ func (ws *WsStreamClient) CatchSubscribeReuslt(sub *Subscription[WsActionResult]
 				return fmt.Errorf(subResult.Code, ":", subResult.Msg)
 			}
 			keyData, _ := json.Marshal(subResult.Arg)
-			sub.subResultMap[string(keyData)] = subResult
+			sub.subResultMap[string(keyData)] = true
 			if len(sub.subResultMap) == len(sub.Args) {
 				isBreak = true
 			}
@@ -593,6 +712,19 @@ func (ws *WsStreamClient) CatchSubscribeReuslt(sub *Subscription[WsActionResult]
 	}
 	log.Debug("catchResults: ", sub.subResultMap)
 	return nil
+}
+
+// 捕获订单操作结果
+func (ws *PrivateWsStreamClient) CatchOrderReuslt(sub *Subscription[WsOrderResult]) (*WsOrderResult, error) {
+	ws.waitOrderResult = sub
+	defer sub.Ws.DeferOrder()
+	select {
+	case err := <-sub.ErrChan():
+		log.Error(err)
+		return nil, fmt.Errorf("[op:%s] Action Error: %v", sub.Op, err)
+	case orderResult := <-sub.ResultChan():
+		return &orderResult, nil
+	}
 }
 
 // okx websocket登陆功能
