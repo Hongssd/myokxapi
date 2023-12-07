@@ -45,6 +45,7 @@ type WsStreamClient struct {
 	candleSubMap    map[string]*Subscription[WsCandles]
 	booksSubMap     map[string]*Subscription[WsBooks]
 	tradesSubMap    map[string]*Subscription[WsTrades]
+	ordersSubMap    map[string]*Subscription[WsOrders]
 	resultChan      chan []byte
 	errChan         chan error
 	isClose         bool
@@ -215,6 +216,7 @@ func (ws *WsStreamClient) Close() error {
 	ws.candleSubMap = make(map[string]*Subscription[WsCandles])
 	ws.booksSubMap = make(map[string]*Subscription[WsBooks])
 	ws.tradesSubMap = make(map[string]*Subscription[WsTrades])
+	ws.ordersSubMap = make(map[string]*Subscription[WsOrders])
 	if ws.waitSubResult != nil {
 		//给当前等待订阅结果的请求返回错误
 		ws.waitSubResultMu.Lock()
@@ -269,6 +271,7 @@ func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 			candleSubMap:    make(map[string]*Subscription[WsCandles]),
 			booksSubMap:     make(map[string]*Subscription[WsBooks]),
 			tradesSubMap:    make(map[string]*Subscription[WsTrades]),
+			ordersSubMap:    make(map[string]*Subscription[WsOrders]),
 			waitSubResult:   nil,
 			waitSubResultMu: &sync.Mutex{},
 		},
@@ -282,6 +285,7 @@ func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 			candleSubMap:    make(map[string]*Subscription[WsCandles]),
 			booksSubMap:     make(map[string]*Subscription[WsBooks]),
 			tradesSubMap:    make(map[string]*Subscription[WsTrades]),
+			ordersSubMap:    make(map[string]*Subscription[WsOrders]),
 			waitSubResult:   nil,
 			waitSubResultMu: &sync.Mutex{},
 		},
@@ -295,6 +299,7 @@ func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 			candleSubMap:    make(map[string]*Subscription[WsCandles]),
 			booksSubMap:     make(map[string]*Subscription[WsBooks]),
 			tradesSubMap:    make(map[string]*Subscription[WsTrades]),
+			ordersSubMap:    make(map[string]*Subscription[WsOrders]),
 			waitSubResult:   nil,
 			waitSubResultMu: &sync.Mutex{},
 		},
@@ -332,6 +337,13 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 		}
 		if sub, ok := ws.tradesSubMap[key]; ok {
 			delete(ws.tradesSubMap, key)
+			if sub.closeChan != nil {
+				sub.closeChan <- struct{}{}
+				sub.closeChan = nil
+			}
+		}
+		if sub, ok := ws.ordersSubMap[key]; ok {
+			delete(ws.ordersSubMap, key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
@@ -396,17 +408,19 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						time.Sleep(500 * time.Millisecond)
 						err = ws.OpenConn()
 					}
-					//重新登陆
-					if ws.lastLogin != nil && ws.client != nil {
-						err = ws.Login(ws.client)
-						for err != nil {
-							time.Sleep(500 * time.Millisecond)
-							err = ws.Login(ws.client)
-						}
-					}
-					//重新订阅
 					go func() {
-						ws.reSubscribeForReconnect()
+						//重新登陆
+						if ws.lastLogin != nil && ws.client != nil {
+							err = ws.Login(ws.client)
+							for err != nil {
+								time.Sleep(500 * time.Millisecond)
+								err = ws.Login(ws.client)
+							}
+						}
+						//重新订阅
+						go func() {
+							ws.reSubscribeForReconnect()
+						}()
 					}()
 
 				} else {
@@ -433,10 +447,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 				//处理正常数据的返回结果
 				//K线处理
 				if strings.Contains(string(data), "candle") {
-					var c *WsCandles
-					var err error
-
-					c, err = handleWsCandle(data)
+					c, err := handleWsCandle(data)
 
 					arg := c.WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
@@ -450,10 +461,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					continue
 				}
 				if strings.Contains(string(data), "books") || strings.Contains(string(data), "bbo-tbt") {
-					var b *WsBooks
-					var err error
-
-					b, err = handleWsBooks(data)
+					b, err := handleWsBooks(data)
 
 					arg := b.WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
@@ -467,11 +475,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					continue
 				}
 				if strings.Contains(string(data), "trades") {
-					var t *WsTrades
-					var err error
-
-					t, err = handleWsTrades(data)
-
+					t, err := handleWsTrades(data)
 					arg := t.WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
 					if sub, ok := ws.tradesSubMap[string(keyData)]; ok {
@@ -480,6 +484,24 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 							continue
 						}
 						sub.resultChan <- *t
+					}
+					continue
+				}
+				if strings.Contains(string(data), "orders") {
+					ordersList, err := handleWsOrders(data)
+					if len(*ordersList) == 0 {
+						continue
+					}
+					arg := (*ordersList)[0].WsSubscribeArg
+					keyData, _ := json.Marshal(arg)
+					if sub, ok := ws.ordersSubMap[string(keyData)]; ok {
+						if err != nil {
+							sub.errChan <- err
+							continue
+						}
+						for _, order := range *ordersList {
+							sub.resultChan <- order
+						}
 					}
 					continue
 				}
