@@ -54,3 +54,9 @@ type PublicRestPublicFundingRateResRow struct {
 	FundingTime     string `json:"fundingTime"`     //资金费时间 ，Unix时间戳的毫秒数格式，如 1597026383085
 	NextFundingTime string `json:"nextFundingTime"` //下一期资金费时间 ，Unix时间戳的毫秒数格式，如 1622851200000
 }
+
+func (r *PublicRestMarketCandlesRes) Reverse() {
+	for i, j := 0, len(*r)-1; i < j; i, j = i+1, j-1 {
+		(*r)[i], (*r)[j] = (*r)[j], (*r)[i]
+	}
+}

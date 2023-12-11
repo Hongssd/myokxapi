@@ -509,7 +509,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					//重连
 					err := ws.OpenConn()
 					for err != nil {
-						time.Sleep(500 * time.Millisecond)
+						time.Sleep(1500 * time.Millisecond)
 						err = ws.OpenConn()
 					}
 					go func() {
@@ -517,7 +517,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						if ws.lastLogin != nil && ws.client != nil {
 							err = ws.Login(ws.client)
 							for err != nil {
-								time.Sleep(500 * time.Millisecond)
+								time.Sleep(1500 * time.Millisecond)
 								err = ws.Login(ws.client)
 							}
 						}
