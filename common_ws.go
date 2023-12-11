@@ -83,7 +83,7 @@ type WsSubscribeArg struct {
 	Channel    string `json:"channel"`              //频道名
 	InstType   string `json:"instType,omitempty"`   //String 否 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION ： 期权 ANY： 全部
 	InstFamily string `json:"instFamily,omitempty"` //String 否 交易品种 适用于交割/永续/期权
-	InstId     string `json:"instId"`               //String 是 产品ID 交易对
+	InstId     string `json:"instId,omitempty"`     //String 是 产品ID 交易对
 }
 
 // 登陆及订阅返回结果
