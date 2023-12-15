@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	OKX_API_WS_HOST     = "ws.okx.com:8443" //WebSocket请求地址
 	OKX_API_WS_PUBLIC   = "/ws/v5/public"   //公共频道
 	OKX_API_WS_PRIVATE  = "/ws/v5/private"  //私有频道
 	OKX_API_WS_BUSINESS = "/ws/v5/business" //业务频道
@@ -779,9 +778,18 @@ func wsStreamServe(api string, resultChan chan []byte, errChan chan error) (*web
 
 // 获取数据流请求URL
 func handlerWsStreamRequestApi(apiType APIType) string {
+	host := OKX_API_WEBSOCKET
+	switch SERVER_TYPE {
+	case BASE:
+		host = OKX_API_WEBSOCKET
+	case AWS:
+		host = OKX_API_WEBSOCKET_AWS
+	default:
+	}
+
 	u := url.URL{
 		Scheme:   "wss",
-		Host:     OKX_API_WS_HOST,
+		Host:     host,
 		Path:     getWsApi(apiType),
 		RawQuery: "",
 	}

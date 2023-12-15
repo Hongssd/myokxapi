@@ -105,10 +105,25 @@ type MyOkx struct {
 }
 
 const (
-	OKX_API_HTTP      = "www.okx.com"
-	OKX_API_WEBSOCKET = "wss://ws.okx.com:8443/ws/v5/public"
-	IS_GZIP           = true
+	OKX_API_HTTP          = "www.okx.com"
+	OKX_API_WEBSOCKET     = "wss://ws.okx.com:8443/ws/v5/public"
+	OKX_API_HTTP_AWS      = "aws.okx.com"
+	OKX_API_WEBSOCKET_AWS = "wss://wsaws.okx.com:8443/ws/v5/public"
+	IS_GZIP               = true
 )
+
+type ServerType int
+
+const (
+	BASE ServerType = iota
+	AWS
+)
+
+var SERVER_TYPE = BASE
+
+func SetServerType(serverType ServerType) {
+	SERVER_TYPE = serverType
+}
 
 type APIType int
 
@@ -185,13 +200,13 @@ func okxCallAPIWithSecret[T any](client *Client, url url.URL, reqBody []byte, me
 	}
 	sign := base64.StdEncoding.EncodeToString(HmacSha256(client.SecretKey, hmacSha256Data))
 
-	// log.Warn("timestamp: ", timestamp)
-	// log.Warn("method: ", method)
-	// log.Warn("requestPath: ", requestPath)
-	// log.Warn("query: ", query)
-	// log.Warn("reqBody: ", string(reqBody))
-	// log.Warn("hmacSha256Data: ", hmacSha256Data)
-	// log.Warn("sign: ", sign)
+	log.Warn("timestamp: ", timestamp)
+	log.Warn("method: ", method)
+	log.Warn("requestPath: ", requestPath)
+	log.Warn("query: ", query)
+	log.Warn("reqBody: ", string(reqBody))
+	log.Warn("hmacSha256Data: ", hmacSha256Data)
+	log.Warn("sign: ", sign)
 
 	body, err := RequestWithHeader(url.String(), reqBody, method,
 		map[string]string{
@@ -275,12 +290,17 @@ func okxHandlerReq[T any](req *T) string {
 }
 
 func OkxGetRestHostByAPIType(apiType APIType) string {
+
 	switch apiType {
 	case REST:
-		return OKX_API_HTTP
-	default:
-		return ""
+		switch SERVER_TYPE {
+		case BASE:
+			return OKX_API_HTTP
+		case AWS:
+			return OKX_API_HTTP_AWS
+		}
 	}
+	return ""
 }
 
 func interfaceStringToFloat64(inter interface{}) float64 {
