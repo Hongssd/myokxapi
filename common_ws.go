@@ -415,6 +415,7 @@ func (ws *WsStreamClient) sendSubscribeResultToChan(result WsActionResult) {
 func (ws *WsStreamClient) sendOrderResultToChan(result WsOrderResult) {
 	if result.Code != "" && result.Code != "0" {
 		ws.waitOrderResult.errChan <- fmt.Errorf("errHandler: %+v", result)
+		ws.waitOrderResult.resultChan <- result
 	} else {
 		ws.waitOrderResult.resultChan <- result
 	}
@@ -672,7 +673,7 @@ func (ws *WsStreamClient) CatchLoginReuslt(sub *Subscription[WsActionResult]) er
 
 	select {
 	case err := <-sub.ErrChan():
-		log.Error(err)
+		// log.Error(err)
 		return fmt.Errorf("Login Error: %v", err)
 	case loginResult := <-sub.ResultChan():
 		if loginResult.Code != "" && loginResult.Code != "0" {
@@ -719,8 +720,8 @@ func (ws *PrivateWsStreamClient) CatchOrderReuslt(sub *Subscription[WsOrderResul
 	defer sub.Ws.DeferOrder()
 	select {
 	case err := <-sub.ErrChan():
-		log.Error(err)
-		return nil, fmt.Errorf("[op:%s] Action Error: %v", sub.Op, err)
+		orderResult := <-sub.ResultChan()
+		return &orderResult, fmt.Errorf("[op:%s] Action Error: %v", sub.Op, err)
 	case orderResult := <-sub.ResultChan():
 		return &orderResult, nil
 	}
