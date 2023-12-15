@@ -106,9 +106,9 @@ type MyOkx struct {
 
 const (
 	OKX_API_HTTP          = "www.okx.com"
-	OKX_API_WEBSOCKET     = "wss://ws.okx.com:8443/ws/v5/public"
+	OKX_API_WEBSOCKET     = "ws.okx.com:8443"
 	OKX_API_HTTP_AWS      = "aws.okx.com"
-	OKX_API_WEBSOCKET_AWS = "wss://wsaws.okx.com:8443/ws/v5/public"
+	OKX_API_WEBSOCKET_AWS = "wsaws.okx.com:8443"
 	IS_GZIP               = true
 )
 
@@ -200,13 +200,13 @@ func okxCallAPIWithSecret[T any](client *Client, url url.URL, reqBody []byte, me
 	}
 	sign := base64.StdEncoding.EncodeToString(HmacSha256(client.SecretKey, hmacSha256Data))
 
-	log.Warn("timestamp: ", timestamp)
-	log.Warn("method: ", method)
-	log.Warn("requestPath: ", requestPath)
-	log.Warn("query: ", query)
-	log.Warn("reqBody: ", string(reqBody))
-	log.Warn("hmacSha256Data: ", hmacSha256Data)
-	log.Warn("sign: ", sign)
+	// log.Warn("timestamp: ", timestamp)
+	// log.Warn("method: ", method)
+	// log.Warn("requestPath: ", requestPath)
+	// log.Warn("query: ", query)
+	// log.Warn("reqBody: ", string(reqBody))
+	// log.Warn("hmacSha256Data: ", hmacSha256Data)
+	// log.Warn("sign: ", sign)
 
 	body, err := RequestWithHeader(url.String(), reqBody, method,
 		map[string]string{
