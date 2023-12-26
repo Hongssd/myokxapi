@@ -11,32 +11,36 @@ const (
 	PrivateRestAccountSetLeverage                       //设置杠杆倍数
 
 	//Trade
-	PrivateRestTradeOrderGet          //查看订单信息
-	PrivateRestTradeOrdersPending     //查看未成交订单列表
-	PrivateRestTradeOrderPost         //下单
-	PrivateRestTradeCancelOrder       //撤单
-	PrivateRestTradeAmendOrder        //修改订单
-	PrivateRestTradeBatchOrders       //批量下单
-	PrivateRestTradeCancelBatchOrders //批量撤单
-	PrivateRestTradeAmendBatchOrders  //批量修改订单
+	PrivateRestTradeOrderGet            //查看订单信息
+	PrivateRestTradeOrdersPending       //查看未成交订单列表
+	PrivateRestTradeOrderPost           //下单
+	PrivateRestTradeCancelOrder         //撤单
+	PrivateRestTradeAmendOrder          //修改订单
+	PrivateRestTradeBatchOrders         //批量下单
+	PrivateRestTradeCancelBatchOrders   //批量撤单
+	PrivateRestTradeAmendBatchOrders    //批量修改订单
+	PrivateRestTradeOrderHistory        //获取历史订单记录（近七天）
+	PrivateRestTradeOrderHistoryArchive //获取历史订单记录（近三个月）
 
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	//Account
-	PrivateRestAccountBalance:  "/api/v5/account/balance",   //GET 查看账户余额
-	PrivateRestAccountPosition: "/api/v5/account/positions", //GET 查看持仓信息
-	PrivateRestAccountConfig:   "/api/v5/account/config",    //GET 查看账户配置
-	PrivateRestAccountTradeFee: "/api/v5/account/trade-fee", //GET 查看账户手续费费率
+	PrivateRestAccountBalance:     "/api/v5/account/balance",      //GET 查看账户余额
+	PrivateRestAccountPosition:    "/api/v5/account/positions",    //GET 查看持仓信息
+	PrivateRestAccountConfig:      "/api/v5/account/config",       //GET 查看账户配置
+	PrivateRestAccountTradeFee:    "/api/v5/account/trade-fee",    //GET 查看账户手续费费率
 	PrivateRestAccountSetLeverage: "/api/v5/account/set-leverage", //POST 设置杠杆倍数
 
 	//Trade
-	PrivateRestTradeOrderGet:          "/api/v5/trade/order",               //GET 查看订单信息
-	PrivateRestTradeOrdersPending:     "/api/v5/trade/orders-pending",      //GET 查看未成交订单列表
-	PrivateRestTradeOrderPost:         "/api/v5/trade/order",               //POST 下单
-	PrivateRestTradeCancelOrder:       "/api/v5/trade/cancel-order",        //POST 撤单
-	PrivateRestTradeAmendOrder:        "/api/v5/trade/amend-order",         //POST 修改订单
-	PrivateRestTradeBatchOrders:       "/api/v5/trade/batch-orders",        //POST 批量下单
-	PrivateRestTradeCancelBatchOrders: "/api/v5/trade/cancel-batch-orders", //POST 批量撤单
-	PrivateRestTradeAmendBatchOrders:  "/api/v5/trade/amend-batch-orders",  //POST 批量修改订单
+	PrivateRestTradeOrderGet:            "/api/v5/trade/order",                  //GET 查看订单信息
+	PrivateRestTradeOrdersPending:       "/api/v5/trade/orders-pending",         //GET 查看未成交订单列表
+	PrivateRestTradeOrderPost:           "/api/v5/trade/order",                  //POST 下单
+	PrivateRestTradeCancelOrder:         "/api/v5/trade/cancel-order",           //POST 撤单
+	PrivateRestTradeAmendOrder:          "/api/v5/trade/amend-order",            //POST 修改订单
+	PrivateRestTradeBatchOrders:         "/api/v5/trade/batch-orders",           //POST 批量下单
+	PrivateRestTradeCancelBatchOrders:   "/api/v5/trade/cancel-batch-orders",    //POST 批量撤单
+	PrivateRestTradeAmendBatchOrders:    "/api/v5/trade/amend-batch-orders",     //POST 批量修改订单
+	PrivateRestTradeOrderHistory:        "/api/v5/trade/orders-history",         //GET 获取历史订单记录（近七天）
+	PrivateRestTradeOrderHistoryArchive: "/api/v5/trade/orders-history-archive", //GET 获取历史订单记录（近三个月）
 }

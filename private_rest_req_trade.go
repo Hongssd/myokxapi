@@ -568,3 +568,187 @@ func (api *PrivateRestTradeAmendBatchOrdersAPI) SetOrderList(orderApiList []Priv
 	}
 	return api
 }
+
+type PrivateRestTradeOrderHistoryReq struct {
+	InstType   *string `json:"instType"`   //String	是	产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+	Uly        *string `json:"uly"`        //String	否	标的指数
+	InstFamily *string `json:"instFamily"` //String	否	交易品种 适用于交割/永续/期权
+	InstId     *string `json:"instId"`     //String	否	产品ID，如BTC-USD-190927
+	OrdType    *string `json:"ordType"`    //String	否	订单类型 market：市价单 limit：限价单 post_only：只做maker单 fok：全部成交或立即取消 ioc：立即成交并取消剩余 optimal_limit_ioc：市价委托立即成交并取消剩余（仅适用交割、永续） mmp：做市商保护(仅适用于组合保证金账户模式下的期权订单) mmp_and_post_only：做市商保护且只做maker单(仅适用于组合保证金账户模式下的期权订单) op_fok：期权简选（全部成交或立即取消）
+	State      *string `json:"state"`      //String	否	订单状态 canceled：撤单成功 filled：完全成交 mmp_canceled：做市商保护机制导致的自动撤单
+	Category   *string `json:"category"`   //String	否	订单种类 twap：TWAP自动换币 adl：ADL自动减仓 full_liquidation：强制平仓 partial_liquidation：强制减仓 delivery：交割 ddh：对冲减仓类型订单
+	After      *string `json:"after"`      //String	否	请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的ordId
+	Before     *string `json:"before"`     //String	否	请求此ID之后（更新的数据）的分页内容，传的值为对应接口的ordId
+	Begin      *string `json:"begin"`      //String	否	筛选的开始时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+	End        *string `json:"end"`        //String	否	筛选的结束时间戳，Unix 时间戳为毫秒数格式，如 1597027383085
+	Limit      *string `json:"limit"`      //String	否	返回结果的数量，最大为100，默认100条
+}
+
+type PrivateRestTradeOrderHistoryAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeOrderHistoryReq
+}
+
+// String 是 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+func (api *PrivateRestTradeOrderHistoryAPI) InstType(instType string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.InstType = GetPointer(instType)
+	return api
+}
+
+// String 否 标的指数
+func (api *PrivateRestTradeOrderHistoryAPI) Uly(uly string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.Uly = GetPointer(uly)
+	return api
+}
+
+// String 否 交易品种 适用于交割/永续/期权
+func (api *PrivateRestTradeOrderHistoryAPI) InstFamily(instFamily string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.InstFamily = GetPointer(instFamily)
+	return api
+}
+
+// String 否 产品ID，如BTC-USD-190927
+func (api *PrivateRestTradeOrderHistoryAPI) InstId(instId string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 订单类型 market：市价单 limit：限价单 post_only：只做maker单 fok：全部成交或立即取消 ioc：立即成交并取消剩余 optimal_limit_ioc：市价委托立即成交并取消剩余（仅适用交割、永续） mmp：做市商保护(仅适用于组合保证金账户模式下的期权订单) mmp_and_post_only：做市商保护且只做maker单(仅适用于组合保证金账户模式下的期权订单) op_fok：期权简选（全部成交或立即取消）
+func (api *PrivateRestTradeOrderHistoryAPI) OrdType(ordType string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.OrdType = GetPointer(ordType)
+	return api
+}
+
+// String 否 订单状态 canceled：撤单成功 filled：完全成交 mmp_canceled：做市商保护机制导致的自动撤单
+func (api *PrivateRestTradeOrderHistoryAPI) State(state string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.State = GetPointer(state)
+	return api
+}
+
+// String 否 订单种类 twap：TWAP自动换币 adl：ADL自动减仓 full_liquidation：强制平仓 partial_liquidation：强制减仓 delivery：交割 ddh：对冲减仓类型订单
+func (api *PrivateRestTradeOrderHistoryAPI) Category(category string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.Category = GetPointer(category)
+	return api
+}
+
+// String 否 请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的ordId
+func (api *PrivateRestTradeOrderHistoryAPI) After(after string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String 否 请求此ID之后（更新的数据）的分页内容，传的值为对应接口的ordId
+func (api *PrivateRestTradeOrderHistoryAPI) Before(before string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String 否 筛选的开始时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+func (api *PrivateRestTradeOrderHistoryAPI) Begin(begin string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.Begin = GetPointer(begin)
+	return api
+}
+
+// String 否 筛选的结束时间戳，Unix 时间戳为毫秒数格式，如 1597027383085
+func (api *PrivateRestTradeOrderHistoryAPI) End(end string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.End = GetPointer(end)
+	return api
+}
+
+// String 否 返回结果的数量，最大为100，默认100条
+func (api *PrivateRestTradeOrderHistoryAPI) Limit(limit string) *PrivateRestTradeOrderHistoryAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
+
+type PrivateRestTradeOrderHistoryArchiveReq struct {
+	InstType   *string `json:"instType"`   //String	是	产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+	Uly        *string `json:"uly"`        //String	否	标的指数
+	InstFamily *string `json:"instFamily"` //String	否	交易品种 适用于交割/永续/期权
+	InstId     *string `json:"instId"`     //String	否	产品ID，如BTC-USD-190927
+	OrdType    *string `json:"ordType"`    //String	否	订单类型 market：市价单 limit：限价单 post_only：只做maker单 fok：全部成交或立即取消 ioc：立即成交并取消剩余 optimal_limit_ioc：市价委托立即成交并取消剩余（仅适用交割、永续） mmp：做市商保护(仅适用于组合保证金账户模式下的期权订单) mmp_and_post_only：做市商保护且只做maker单(仅适用于组合保证金账户模式下的期权订单) op_fok：期权简选（全部成交或立即取消）
+	State      *string `json:"state"`      //String	否	订单状态 canceled：撤单成功 filled：完全成交 mmp_canceled：做市商保护机制导致的自动撤单
+	Category   *string `json:"category"`   //String	否	订单种类 twap：TWAP自动换币 adl：ADL自动减仓 full_liquidation：强制平仓 partial_liquidation：强制减仓 delivery：交割 ddh：对冲减仓类型订单
+	After      *string `json:"after"`      //String	否	请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的ordId
+	Before     *string `json:"before"`     //String	否	请求此ID之后（更新的数据）的分页内容，传的值为对应接口的ordId
+	Begin      *string `json:"begin"`      //String	否	筛选的开始时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+	End        *string `json:"end"`        //String	否	筛选的结束时间戳，Unix 时间戳为毫秒数格式，如 1597027383085
+	Limit      *string `json:"limit"`      //String	否	返回结果的数量，最大为100，默认100条
+}
+
+type PrivateRestTradeOrderHistoryArchiveAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeOrderHistoryArchiveReq
+}
+
+// String 是 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) InstType(instType string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.InstType = GetPointer(instType)
+	return api
+}
+
+// String 否 标的指数
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) Uly(uly string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.Uly = GetPointer(uly)
+	return api
+}
+
+// String 否 交易品种 适用于交割/永续/期权
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) InstFamily(instFamily string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.InstFamily = GetPointer(instFamily)
+	return api
+}
+
+// String 否 产品ID，如BTC-USD-190927
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) InstId(instId string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 订单类型 market：市价单 limit：限价单 post_only：只做maker单 fok：全部成交或立即取消 ioc：立即成交并取消剩余 optimal_limit_ioc：市价委托立即成交并取消剩余（仅适用交割、永续） mmp：做市商保护(仅适用于组合保证金账户模式下的期权订单) mmp_and_post_only：做市商保护且只做maker单(仅适用于组合保证金账户模式下的期权订单) op_fok：期权简选（全部成交或立即取消）
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) OrdType(ordType string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.OrdType = GetPointer(ordType)
+	return api
+}
+
+// String 否 订单状态 canceled：撤单成功 filled：完全成交 mmp_canceled：做市商保护机制导致的自动撤单
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) State(state string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.State = GetPointer(state)
+	return api
+}
+
+// String 否 订单种类 twap：TWAP自动换币 adl：ADL自动减仓 full_liquidation：强制平仓 partial_liquidation：强制减仓 delivery：交割 ddh：对冲减仓类型订单
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) Category(category string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.Category = GetPointer(category)
+	return api
+}
+
+// String 否 请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的ordId
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) After(after string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String 否 请求此ID之后（更新的数据）的分页内容，传的值为对应接口的ordId
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) Before(before string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String 否 筛选的开始时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) Begin(begin string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.Begin = GetPointer(begin)
+	return api
+}
+
+// String 否 筛选的结束时间戳，Unix 时间戳为毫秒数格式，如 1597027383085
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) End(end string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.End = GetPointer(end)
+	return api
+}
+
+// String 否 返回结果的数量，最大为100，默认100条
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) Limit(limit string) *PrivateRestTradeOrderHistoryArchiveAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}

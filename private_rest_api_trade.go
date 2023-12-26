@@ -120,3 +120,28 @@ func (api *PrivateRestTradeAmendBatchOrdersAPI) Do() (*OkxRestRes[PrivateRestTra
 	}
 	return okxCallAPIWithSecret[PrivateRestTradeAmendBatchOrdersRes](api.client.c, url, reqBody, POST)
 }
+
+// okx PrivateRestTradeOrderHistory PrivateRest接口 GET 获取历史订单记录（近七天）
+func (client *PrivateRestClient) NewPrivateRestTradeOrderHistory() *PrivateRestTradeOrderHistoryAPI {
+	return &PrivateRestTradeOrderHistoryAPI{
+		client: client,
+		req:    &PrivateRestTradeOrderHistoryReq{},
+	}
+}
+func (api *PrivateRestTradeOrderHistoryAPI) Do() (*OkxRestRes[PrivateRestTradeOrderHistoryRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradeOrderHistory])
+	return okxCallAPIWithSecret[PrivateRestTradeOrderHistoryRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx PrivateRestTradeOrderHistoryArchive PrivateRest接口 GET 获取历史订单记录（近三个月）
+func (client *PrivateRestClient) NewPrivateRestTradeOrderHistoryArchive() *PrivateRestTradeOrderHistoryArchiveAPI {
+	return &PrivateRestTradeOrderHistoryArchiveAPI{
+
+		client: client,
+		req:    &PrivateRestTradeOrderHistoryArchiveReq{},
+	}
+}
+func (api *PrivateRestTradeOrderHistoryArchiveAPI) Do() (*OkxRestRes[PrivateRestTradeOrderHistoryArchiveRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradeOrderHistoryArchive])
+	return okxCallAPIWithSecret[PrivateRestTradeOrderHistoryArchiveRes](api.client.c, url, NIL_REQBODY, GET)
+}

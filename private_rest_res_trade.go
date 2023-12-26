@@ -99,3 +99,7 @@ type PrivateRestTradeBatchOrdersRes []PrivateRestTradeOrderPostResRow
 type PrivateRestTradeCancelBatchOrdersRes []PrivateRestTradeCancelOrderResRow
 
 type PrivateRestTradeAmendBatchOrdersRes []PrivateRestTradeAmendOrderResRow
+
+
+type PrivateRestTradeOrderHistoryRes []PrivateRestTradeOrderGetResRow
+type PrivateRestTradeOrderHistoryArchiveRes []PrivateRestTradeOrderGetResRow
