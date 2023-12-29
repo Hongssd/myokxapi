@@ -485,7 +485,7 @@ func (ws *WsStreamClient) reSubscribeForReconnect() {
 			ws.reSubscribeForReconnect()
 			return
 		}
-		log.Debugf("reSubscribe Success: args:%v", reSub.Args)
+		log.Infof("reSubscribe Success: args:%v", reSub.Args)
 		sub.SubId = reSub.SubId
 		isDoReSubscribe[sub.SubId] = true
 	}
