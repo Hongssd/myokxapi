@@ -134,6 +134,18 @@ const (
 	WS_BUSINESS
 )
 
+// 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION ： 期权 ANY： 全部
+type InstType string
+
+const (
+	SPOT    InstType = "SPOT"
+	MARGIN  InstType = "MARGIN"
+	SWAP    InstType = "SWAP"
+	FUTURES InstType = "FUTURES"
+	OPTION  InstType = "OPTION"
+	ANY     InstType = "ANY"
+)
+
 type Client struct {
 	APIKey     string
 	SecretKey  string

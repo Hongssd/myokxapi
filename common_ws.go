@@ -55,9 +55,10 @@ type WsStreamClient struct {
 	booksSubMap  map[string]*Subscription[WsBooks]
 	tradesSubMap map[string]*Subscription[WsTrades]
 	ordersSubMap map[string]*Subscription[WsOrders]
-	resultChan   chan []byte
-	errChan      chan error
-	isClose      bool
+
+	resultChan chan []byte
+	errChan    chan error
+	isClose    bool
 }
 
 // 登陆请求相关
@@ -476,12 +477,14 @@ func (ws *WsStreamClient) reSubscribeForReconnect() {
 		reSub, err := subscribe[WsActionResult](ws, sub.Op, sub.Args)
 		if err != nil {
 			log.Error(err)
+			time.Sleep(500 * time.Millisecond)
 			ws.reSubscribeForReconnect()
 			return
 		}
 		err = ws.CatchSubscribeReuslt(reSub)
 		if err != nil {
 			log.Error(err)
+			time.Sleep(500 * time.Millisecond)
 			ws.reSubscribeForReconnect()
 			return
 		}
@@ -512,20 +515,17 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						time.Sleep(1500 * time.Millisecond)
 						err = ws.OpenConn()
 					}
-					go func() {
-						//重新登陆
-						if ws.lastLogin != nil && ws.client != nil {
+
+					//重新登陆
+					if ws.lastLogin != nil && ws.client != nil {
+						err = ws.Login(ws.client)
+						for err != nil {
+							time.Sleep(1500 * time.Millisecond)
 							err = ws.Login(ws.client)
-							for err != nil {
-								time.Sleep(1500 * time.Millisecond)
-								err = ws.Login(ws.client)
-							}
 						}
-						//重新订阅
-						go func() {
-							ws.reSubscribeForReconnect()
-						}()
-					}()
+					}
+					//重新订阅
+					ws.reSubscribeForReconnect()
 
 				} else {
 					continue
@@ -580,7 +580,10 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 
 					arg := b.WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
-					if sub, ok := ws.booksSubMap[string(keyData)]; ok {
+
+					sub, ok := ws.booksSubMap[string(keyData)]
+
+					if ok {
 						if err != nil {
 							sub.errChan <- err
 							continue
