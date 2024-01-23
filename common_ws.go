@@ -467,7 +467,7 @@ func (ws *WsStreamClient) sendWsCloseToAllSub() {
 	ws.sendUnSubscribeSuccessToCloseChan(args)
 }
 
-func (ws *WsStreamClient) reSubscribeForReconnect() {
+func (ws *WsStreamClient) reSubscribeForReconnect() error {
 	isDoReSubscribe := map[int64]bool{}
 	for _, sub := range ws.commonSubMap {
 		if _, ok := isDoReSubscribe[sub.SubId]; ok {
@@ -477,21 +477,19 @@ func (ws *WsStreamClient) reSubscribeForReconnect() {
 		reSub, err := subscribe[WsActionResult](ws, sub.Op, sub.Args)
 		if err != nil {
 			log.Error(err)
-			time.Sleep(500 * time.Millisecond)
-			ws.reSubscribeForReconnect()
-			return
+			return err
 		}
 		err = ws.CatchSubscribeReuslt(reSub)
 		if err != nil {
 			log.Error(err)
-			time.Sleep(500 * time.Millisecond)
-			ws.reSubscribeForReconnect()
-			return
+			return err
 		}
 		log.Infof("reSubscribe Success: args:%v", reSub.Args)
 		sub.SubId = reSub.SubId
 		isDoReSubscribe[sub.SubId] = true
+		time.Sleep(500 * time.Millisecond)
 	}
+	return nil
 }
 
 func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan error) {
@@ -525,8 +523,10 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						}
 					}
 					//重新订阅
-					ws.reSubscribeForReconnect()
-
+					err = ws.reSubscribeForReconnect()
+					if err != nil {
+						log.Error(err)
+					}
 				} else {
 					continue
 				}
