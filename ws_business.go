@@ -29,7 +29,7 @@ func (ws *BusinessWsStreamClient) SubscribeCandleMultiple(instId []string, inter
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("SubscribeCandle Success: args:%v", doSub.Args)
+	log.Infof("SubscribeCandle Success: args:%v", doSub.Args)
 	sub := &Subscription[WsCandles]{
 		SubId:      doSub.SubId,
 		Op:         SUBSCRIBE,

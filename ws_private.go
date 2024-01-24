@@ -26,7 +26,7 @@ func (ws *PrivateWsStreamClient) SubscribeOrders(instType, instFamily, instId st
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("SubscribeOrders Success: args:%v", doSub.Args)
+	log.Infof("SubscribeOrders Success: args:%v", doSub.Args)
 	sub := &Subscription[WsOrders]{
 		SubId:      doSub.SubId,
 		Op:         SUBSCRIBE,

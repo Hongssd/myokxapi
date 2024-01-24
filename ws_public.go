@@ -29,7 +29,7 @@ func (ws *PublicWsStreamClient) SubscribeBooksMultiple(instIds []string, wsBooks
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("SubscribeBooks Success: args:%v", doSub.Args)
+	log.Infof("SubscribeBooks Success: args:%v", doSub.Args)
 	sub := &Subscription[WsBooks]{
 		SubId:      doSub.SubId,
 		Op:         SUBSCRIBE,
@@ -73,7 +73,7 @@ func (ws *PublicWsStreamClient) SubscribeTradesMultiple(instIds []string) (*Subs
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("SubscribeTrades Success: args:%v", doSub.Args)
+	log.Infof("SubscribeTrades Success: args:%v", doSub.Args)
 	sub := &Subscription[WsTrades]{
 		SubId:      doSub.SubId,
 		Op:         SUBSCRIBE,

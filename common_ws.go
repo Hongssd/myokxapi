@@ -59,6 +59,8 @@ type WsStreamClient struct {
 	resultChan chan []byte
 	errChan    chan error
 	isClose    bool
+
+	reSubscribeMu *sync.Mutex
 }
 
 // 登陆请求相关
@@ -148,6 +150,10 @@ func (sub *Subscription[T]) ErrChan() chan error {
 // 获取关闭订阅信号
 func (sub *Subscription[T]) CloseChan() chan struct{} {
 	return sub.closeChan
+}
+
+func (ws *WsStreamClient) GetConn() *websocket.Conn {
+	return ws.conn
 }
 
 func (ws *WsStreamClient) login(op string, arg WsLoginArg) (*Subscription[WsActionResult], error) {
@@ -330,14 +336,14 @@ func (ws *WsStreamClient) OpenConn() error {
 		ws.conn = conn
 		ws.isClose = false
 		ws.connId = ""
-		log.Debug("OpenConn success to ", apiUrl)
+		log.Info("OpenConn success to ", apiUrl)
 		ws.handleResult(ws.resultChan, ws.errChan)
 		return err
 	} else {
 		conn, err := wsStreamServe(apiUrl, ws.resultChan, ws.errChan)
 		ws.conn = conn
 		ws.connId = ""
-		log.Debug("Auto ReOpenConn success to ", apiUrl)
+		log.Info("Auto ReOpenConn success to ", apiUrl)
 		return err
 	}
 
@@ -366,6 +372,7 @@ func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
 			waitOrderResultMu: &sync.Mutex{},
+			reSubscribeMu:     &sync.Mutex{},
 		},
 	}
 }
@@ -382,6 +389,7 @@ func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
 			waitOrderResultMu: &sync.Mutex{},
+			reSubscribeMu:     &sync.Mutex{},
 		},
 	}
 }
@@ -398,6 +406,7 @@ func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
 			waitOrderResultMu: &sync.Mutex{},
+			reSubscribeMu:     &sync.Mutex{},
 		},
 	}
 }
@@ -468,6 +477,8 @@ func (ws *WsStreamClient) sendWsCloseToAllSub() {
 }
 
 func (ws *WsStreamClient) reSubscribeForReconnect() error {
+	ws.reSubscribeMu.Lock()
+	defer ws.reSubscribeMu.Unlock()
 	isDoReSubscribe := map[int64]bool{}
 	for _, sub := range ws.commonSubMap {
 		if _, ok := isDoReSubscribe[sub.SubId]; ok {
@@ -485,10 +496,12 @@ func (ws *WsStreamClient) reSubscribeForReconnect() error {
 			return err
 		}
 		log.Infof("reSubscribe Success: args:%v", reSub.Args)
+
 		sub.SubId = reSub.SubId
 		isDoReSubscribe[sub.SubId] = true
 		time.Sleep(500 * time.Millisecond)
 	}
+	log.Info(ws.commonSubMap)
 	return nil
 }
 
@@ -513,20 +526,22 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						time.Sleep(1500 * time.Millisecond)
 						err = ws.OpenConn()
 					}
-
-					//重新登陆
-					if ws.lastLogin != nil && ws.client != nil {
-						err = ws.Login(ws.client)
-						for err != nil {
-							time.Sleep(1500 * time.Millisecond)
+					go func() {
+						//重新登陆
+						if ws.lastLogin != nil && ws.client != nil {
 							err = ws.Login(ws.client)
+							for err != nil {
+								time.Sleep(1500 * time.Millisecond)
+								err = ws.Login(ws.client)
+							}
 						}
-					}
-					//重新订阅
-					err = ws.reSubscribeForReconnect()
-					if err != nil {
-						log.Error(err)
-					}
+
+						//重新订阅
+						err = ws.reSubscribeForReconnect()
+						if err != nil {
+							log.Error(err)
+						}
+					}()
 				} else {
 					continue
 				}
@@ -753,7 +768,7 @@ func (ws *WsStreamClient) Login(client *RestClient) error {
 	if err != nil {
 		return err
 	}
-	log.Debugf("Login Success args:%v ", ws.lastLogin.Args)
+	log.Infof("Login Success args:%v ", ws.lastLogin.Args)
 	return nil
 }
 
