@@ -415,10 +415,12 @@ func (ws *WsStreamClient) sendSubscribeResultToChan(result WsActionResult) {
 	if ws.connId == "" && result.ConnId != "" {
 		ws.connId = result.ConnId
 	}
-	if result.Code != "" && result.Code != "0" {
-		ws.waitSubResult.errChan <- fmt.Errorf("errHandler: %+v", result)
-	} else {
-		ws.waitSubResult.resultChan <- result
+	if ws.waitSubResult != nil {
+		if result.Code != "" && result.Code != "0" {
+			ws.waitSubResult.errChan <- fmt.Errorf("errHandler: %+v", result)
+		} else {
+			ws.waitSubResult.resultChan <- result
+		}
 	}
 }
 
