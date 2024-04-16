@@ -38,7 +38,7 @@ func (ws *PrivateWsStreamClient) SubscribeOrders(instType, instFamily, instId st
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
-		ws.ordersSubMap[string(keyData)] = sub
+		ws.ordersSubMap.Store(string(keyData), sub)
 	}
 	return sub, nil
 }
@@ -82,7 +82,7 @@ type WsAmendOrderArgData struct {
 	NewPxVol  string `json:"newPxVol"`  //String	可选	以隐含波动率进行期权改单，例如 1 代表 100% 仅适用于期权，期权改单时，newPx/newPxUsd/newPxVol 只能填一个
 }
 
-//下单
+// 下单
 func (ws *PrivateWsStreamClient) Order(orderArgData WsOrderArgData, expTimestamp int64) (*WsOrderResult, error) {
 	node, err := snowflake.NewNode(2)
 	if err != nil {
@@ -92,7 +92,7 @@ func (ws *PrivateWsStreamClient) Order(orderArgData WsOrderArgData, expTimestamp
 	return orderAction[WsOrderArgData](ws, ORDER, reqId, []WsOrderArgData{orderArgData}, expTimestamp)
 }
 
-//批量下单
+// 批量下单
 func (ws *PrivateWsStreamClient) BatchOrder(orderArgDataList []WsOrderArgData, expTimestamp int64) (*WsOrderResult, error) {
 	node, err := snowflake.NewNode(2)
 	if err != nil {
@@ -102,7 +102,7 @@ func (ws *PrivateWsStreamClient) BatchOrder(orderArgDataList []WsOrderArgData, e
 	return orderAction(ws, BATCH_ORDER, reqId, orderArgDataList, expTimestamp)
 }
 
-//撤单
+// 撤单
 func (ws *PrivateWsStreamClient) CancelOrder(cancelOrderArgData WsCancelOrderArgData, expTimestamp int64) (*WsOrderResult, error) {
 	node, err := snowflake.NewNode(2)
 	if err != nil {
@@ -112,7 +112,7 @@ func (ws *PrivateWsStreamClient) CancelOrder(cancelOrderArgData WsCancelOrderArg
 	return orderAction(ws, CANCEL_ORDER, reqId, []WsCancelOrderArgData{cancelOrderArgData}, expTimestamp)
 }
 
-//批量撤单
+// 批量撤单
 func (ws *PrivateWsStreamClient) BatchCancelOrder(cancelOrderArgDataList []WsCancelOrderArgData, expTimestamp int64) (*WsOrderResult, error) {
 	node, err := snowflake.NewNode(2)
 	if err != nil {
@@ -122,7 +122,7 @@ func (ws *PrivateWsStreamClient) BatchCancelOrder(cancelOrderArgDataList []WsCan
 	return orderAction(ws, BATCH_CANCEL_ORDER, reqId, cancelOrderArgDataList, expTimestamp)
 }
 
-//改单
+// 改单
 func (ws *PrivateWsStreamClient) AmendOrder(amendOrderArgData WsAmendOrderArgData, expTimestamp int64) (*WsOrderResult, error) {
 	node, err := snowflake.NewNode(2)
 	if err != nil {
@@ -132,7 +132,7 @@ func (ws *PrivateWsStreamClient) AmendOrder(amendOrderArgData WsAmendOrderArgDat
 	return orderAction(ws, AMEND_ORDER, reqId, []WsAmendOrderArgData{amendOrderArgData}, expTimestamp)
 }
 
-//批量改单
+// 批量改单
 func (ws *PrivateWsStreamClient) BatchAmendOrder(amendOrderArgDataList []WsAmendOrderArgData, expTimestamp int64) (*WsOrderResult, error) {
 	node, err := snowflake.NewNode(2)
 	if err != nil {

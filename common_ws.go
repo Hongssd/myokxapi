@@ -44,17 +44,17 @@ type WsStreamClient struct {
 	apiType         APIType
 	conn            *websocket.Conn
 	connId          string
-	commonSubMap    map[string]*Subscription[WsActionResult] //订阅的返回结果
+	commonSubMap    MySyncMap[string, *Subscription[WsActionResult]] //订阅的返回结果
 	waitSubResult   *Subscription[WsActionResult]
 	waitSubResultMu *sync.Mutex
 
 	waitOrderResult   *Subscription[WsOrderResult]
 	waitOrderResultMu *sync.Mutex
 
-	candleSubMap map[string]*Subscription[WsCandles]
-	booksSubMap  map[string]*Subscription[WsBooks]
-	tradesSubMap map[string]*Subscription[WsTrades]
-	ordersSubMap map[string]*Subscription[WsOrders]
+	candleSubMap MySyncMap[string, *Subscription[WsCandles]]
+	booksSubMap  MySyncMap[string, *Subscription[WsBooks]]
+	tradesSubMap MySyncMap[string, *Subscription[WsTrades]]
+	ordersSubMap MySyncMap[string, *Subscription[WsOrders]]
 
 	resultChan chan []byte
 	errChan    chan error
@@ -301,11 +301,12 @@ func (ws *WsStreamClient) Close() error {
 	ws.resultChan = nil
 	ws.errChan = nil
 	ws.lastLogin = nil
-	ws.commonSubMap = make(map[string]*Subscription[WsActionResult])
-	ws.candleSubMap = make(map[string]*Subscription[WsCandles])
-	ws.booksSubMap = make(map[string]*Subscription[WsBooks])
-	ws.tradesSubMap = make(map[string]*Subscription[WsTrades])
-	ws.ordersSubMap = make(map[string]*Subscription[WsOrders])
+	ws.commonSubMap = NewMySyncMap[string, *Subscription[WsActionResult]]()
+	ws.candleSubMap = NewMySyncMap[string, *Subscription[WsCandles]]()
+	ws.booksSubMap = NewMySyncMap[string, *Subscription[WsBooks]]()
+	ws.tradesSubMap = NewMySyncMap[string, *Subscription[WsTrades]]()
+	ws.ordersSubMap = NewMySyncMap[string, *Subscription[WsOrders]]()
+
 	if ws.waitSubResult != nil {
 		//给当前等待订阅结果的请求返回错误
 		ws.waitSubResultMu.Lock()
@@ -363,11 +364,11 @@ func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 	return &PublicWsStreamClient{
 		WsStreamClient: WsStreamClient{
 			apiType:           WS_PUBLIC,
-			commonSubMap:      make(map[string]*Subscription[WsActionResult]),
-			candleSubMap:      make(map[string]*Subscription[WsCandles]),
-			booksSubMap:       make(map[string]*Subscription[WsBooks]),
-			tradesSubMap:      make(map[string]*Subscription[WsTrades]),
-			ordersSubMap:      make(map[string]*Subscription[WsOrders]),
+			commonSubMap:      NewMySyncMap[string, *Subscription[WsActionResult]](),
+			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
+			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
+			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
+			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			waitSubResult:     nil,
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
@@ -380,11 +381,11 @@ func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 	return &PrivateWsStreamClient{
 		WsStreamClient: WsStreamClient{
 			apiType:           WS_PRIVATE,
-			commonSubMap:      make(map[string]*Subscription[WsActionResult]),
-			candleSubMap:      make(map[string]*Subscription[WsCandles]),
-			booksSubMap:       make(map[string]*Subscription[WsBooks]),
-			tradesSubMap:      make(map[string]*Subscription[WsTrades]),
-			ordersSubMap:      make(map[string]*Subscription[WsOrders]),
+			commonSubMap:      NewMySyncMap[string, *Subscription[WsActionResult]](),
+			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
+			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
+			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
+			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			waitSubResult:     nil,
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
@@ -397,11 +398,11 @@ func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 	return &BusinessWsStreamClient{
 		WsStreamClient: WsStreamClient{
 			apiType:           WS_BUSINESS,
-			commonSubMap:      make(map[string]*Subscription[WsActionResult]),
-			candleSubMap:      make(map[string]*Subscription[WsCandles]),
-			booksSubMap:       make(map[string]*Subscription[WsBooks]),
-			tradesSubMap:      make(map[string]*Subscription[WsTrades]),
-			ordersSubMap:      make(map[string]*Subscription[WsOrders]),
+			commonSubMap:      NewMySyncMap[string, *Subscription[WsActionResult]](),
+			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
+			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
+			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
+			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			waitSubResult:     nil,
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
@@ -437,29 +438,29 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 	for _, arg := range args {
 		data, _ := json.Marshal(&arg)
 		key := string(data)
-		if sub, ok := ws.candleSubMap[key]; ok {
-			delete(ws.candleSubMap, key)
+		if sub, ok := ws.candleSubMap.Load(key); ok {
+			ws.candleSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
 			}
 		}
-		if sub, ok := ws.booksSubMap[key]; ok {
-			delete(ws.booksSubMap, key)
+		if sub, ok := ws.booksSubMap.Load(key); ok {
+			ws.booksSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
 			}
 		}
-		if sub, ok := ws.tradesSubMap[key]; ok {
-			delete(ws.tradesSubMap, key)
+		if sub, ok := ws.tradesSubMap.Load(key); ok {
+			ws.tradesSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
 			}
 		}
-		if sub, ok := ws.ordersSubMap[key]; ok {
-			delete(ws.ordersSubMap, key)
+		if sub, ok := ws.ordersSubMap.Load(key); ok {
+			ws.ordersSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
@@ -470,11 +471,12 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 
 func (ws *WsStreamClient) sendWsCloseToAllSub() {
 	args := []WsSubscribeArg{}
-	for key := range ws.commonSubMap {
+	ws.commonSubMap.Range(func(key string, _ *Subscription[WsActionResult]) bool {
 		arg := WsSubscribeArg{}
 		json.Unmarshal([]byte(key), &arg)
 		args = append(args, arg)
-	}
+		return true
+	})
 	ws.sendUnSubscribeSuccessToCloseChan(args)
 }
 
@@ -482,29 +484,32 @@ func (ws *WsStreamClient) reSubscribeForReconnect() error {
 	ws.reSubscribeMu.Lock()
 	defer ws.reSubscribeMu.Unlock()
 	isDoReSubscribe := map[int64]bool{}
-	for _, sub := range ws.commonSubMap {
+	var wErr error
+	ws.commonSubMap.Range(func(_ string, sub *Subscription[WsActionResult]) bool {
 		if _, ok := isDoReSubscribe[sub.SubId]; ok {
-			continue
+			return true
 		}
 
 		reSub, err := subscribe[WsActionResult](ws, sub.Op, sub.Args)
 		if err != nil {
 			log.Error(err)
-			return err
+			wErr = err
+			return false
 		}
 		err = ws.CatchSubscribeReuslt(reSub)
 		if err != nil {
 			log.Error(err)
-			return err
+			wErr = err
+			return false
 		}
 		log.Infof("reSubscribe Success: args:%v", reSub.Args)
 
 		sub.SubId = reSub.SubId
 		isDoReSubscribe[sub.SubId] = true
 		time.Sleep(500 * time.Millisecond)
-	}
-	log.Info(ws.commonSubMap)
-	return nil
+		return true
+	})
+	return wErr
 }
 
 func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan error) {
@@ -583,7 +588,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 
 					arg := c.WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
-					if sub, ok := ws.candleSubMap[string(keyData)]; ok {
+					if sub, ok := ws.candleSubMap.Load(string(keyData)); ok {
 						if err != nil {
 							sub.errChan <- err
 							continue
@@ -598,7 +603,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					arg := b.WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
 
-					sub, ok := ws.booksSubMap[string(keyData)]
+					sub, ok := ws.booksSubMap.Load(string(keyData))
 
 					if ok {
 						if err != nil {
@@ -613,7 +618,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					t, err := handleWsTrades(data)
 					arg := t.WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
-					if sub, ok := ws.tradesSubMap[string(keyData)]; ok {
+					if sub, ok := ws.tradesSubMap.Load(string(keyData)); ok {
 						if err != nil {
 							sub.errChan <- err
 							continue
@@ -629,7 +634,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					}
 					arg := (*ordersList)[0].WsSubscribeArg
 					keyData, _ := json.Marshal(arg)
-					if sub, ok := ws.ordersSubMap[string(keyData)]; ok {
+					if sub, ok := ws.ordersSubMap.Load(string(keyData)); ok {
 						if err != nil {
 							sub.errChan <- err
 							continue
@@ -648,9 +653,10 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 
 func (ws *WsStreamClient) DeferSub() {
 	if len(ws.waitSubResult.subResultMap) == len(ws.waitSubResult.Args) {
+
 		for _, arg := range ws.waitSubResult.Args {
 			keyData, _ := json.Marshal(&arg)
-			ws.commonSubMap[string(keyData)] = ws.waitSubResult
+			ws.commonSubMap.Store(string(keyData), ws.waitSubResult)
 		}
 		ws.waitSubResult = nil
 		ws.waitSubResultMu.Unlock()
@@ -681,7 +687,7 @@ func (sub *Subscription[T]) Unsubscribe() error {
 	for _, arg := range unSub.Args {
 		data, _ := json.Marshal(&arg)
 		key := string(data)
-		delete(sub.Ws.commonSubMap, key)
+		sub.Ws.commonSubMap.Delete(key)
 	}
 	return nil
 }

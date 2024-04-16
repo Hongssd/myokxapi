@@ -41,7 +41,7 @@ func (ws *PublicWsStreamClient) SubscribeBooksMultiple(instIds []string, wsBooks
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
-		ws.booksSubMap[string(keyData)] = sub
+		ws.booksSubMap.Store(string(keyData), sub)
 	}
 	return sub, nil
 }
@@ -85,7 +85,7 @@ func (ws *PublicWsStreamClient) SubscribeTradesMultiple(instIds []string) (*Subs
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
-		ws.tradesSubMap[string(keyData)] = sub
+		ws.tradesSubMap.Store(string(keyData), sub)
 	}
 	return sub, nil
 }

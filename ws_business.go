@@ -41,7 +41,7 @@ func (ws *BusinessWsStreamClient) SubscribeCandleMultiple(instId []string, inter
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
-		ws.candleSubMap[string(keyData)] = sub
+		ws.candleSubMap.Store(string(keyData), sub)
 	}
 	return sub, nil
 }
