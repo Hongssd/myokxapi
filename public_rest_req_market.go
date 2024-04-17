@@ -59,18 +59,26 @@ func (api *PublicRestMarketTickersAPI) InstId(instId string) *PublicRestMarketTi
 }
 
 // instId	String	是	产品ID，如 BTC-USDT
-type PublicRestMarketBooksLiteReq struct {
+// sz	String	否	深度档位数量，最大值可传400，即买卖深度共800条 不填写此参数，默认返回1档深度数据
+type PublicRestMarketBooksReq struct {
 	InstId *string `json:"instId"` //String	是	产品ID，如 BTC-USDT
+	Sz     *string `json:"sz"`     //String	否	返回深度档位，最多返回150档
 }
 
-type PublicRestMarketBooksLiteAPI struct {
+type PublicRestMarketBooksAPI struct {
 	client *PublicRestClient
-	req    *PublicRestMarketBooksLiteReq
+	req    *PublicRestMarketBooksReq
 }
 
 // String 是 产品ID，如 BTC-USDT
-func (api *PublicRestMarketBooksLiteAPI) InstId(instId string) *PublicRestMarketBooksLiteAPI {
+func (api *PublicRestMarketBooksAPI) InstId(instId string) *PublicRestMarketBooksAPI {
 	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 返回深度档位，最多返回150档
+func (api *PublicRestMarketBooksAPI) Sz(sz string) *PublicRestMarketBooksAPI {
+	api.req.Sz = GetPointer(sz)
 	return api
 }
 

@@ -12,20 +12,20 @@ func (api *PublicRestMarketTickersAPI) Do() (*OkxRestRes[PublicRestMarketTickers
 	return okxCallAPI[PublicRestMarketTickersRes](api.client.c, url, NIL_REQBODY, GET)
 }
 
-// okx MarketBooksLite PublicRest接口 GET 获取产品轻量深度
-func (client *PublicRestClient) NewPublicRestMarketBooksLite() *PublicRestMarketBooksLiteAPI {
-	return &PublicRestMarketBooksLiteAPI{
+// okx MarketBooks PublicRest接口 GET 获取产品轻量深度
+func (client *PublicRestClient) NewPublicRestMarketBooks() *PublicRestMarketBooksAPI {
+	return &PublicRestMarketBooksAPI{
 		client: client,
-		req:    &PublicRestMarketBooksLiteReq{},
+		req:    &PublicRestMarketBooksReq{},
 	}
 }
-func (api *PublicRestMarketBooksLiteAPI) Do() (*OkxRestRes[PublicRestMarketBooksLiteRes], error) {
-	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestMarketBooksLite])
-	res, err := okxCallAPI[PublicRestMarketBooksLiteMiddle](api.client.c, url, NIL_REQBODY, GET)
+func (api *PublicRestMarketBooksAPI) Do() (*OkxRestRes[PublicRestMarketBooksRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestMarketBooks])
+	res, err := okxCallAPI[PublicRestMarketBooksMiddle](api.client.c, url, NIL_REQBODY, GET)
 	if err != nil {
 		return nil, err
 	}
-	res2 := &OkxRestRes[PublicRestMarketBooksLiteRes]{
+	res2 := &OkxRestRes[PublicRestMarketBooksRes]{
 		OkxErrorRes: res.OkxErrorRes,
 		OkxTimeRes:  res.OkxTimeRes,
 		Data:        *res.Data.ConvertToRes(),

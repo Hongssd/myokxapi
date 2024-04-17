@@ -44,14 +44,14 @@ func handleWsCandle(data []byte) (*WsCandles, error) {
 }
 
 type WsBooks struct {
-	WsSubscribeArg             //订阅信息
-	Action         string      `json:"action"`    //推送数据动作，增量推送数据还是全量推送数据 snapshot：全量 update：增量
-	Asks           []BooksLite `json:"asks"`      //卖方深度
-	Bids           []BooksLite `json:"bids"`      //买方深度
-	Ts             string      `json:"ts"`        //深度产生的时间
-	CheckSum       int64       `json:"checksum"`  //检验和
-	PrevSeqId      int64       `json:"prevSeqId"` //上一个推送的序列号。仅适用 books，books-l2-tbt，books50-l2-tbt
-	SeqId          int64       `json:"seqId"`     //推送的序列号
+	WsSubscribeArg         //订阅信息
+	Action         string  `json:"action"`    //推送数据动作，增量推送数据还是全量推送数据 snapshot：全量 update：增量
+	Asks           []Books `json:"asks"`      //卖方深度
+	Bids           []Books `json:"bids"`      //买方深度
+	Ts             string  `json:"ts"`        //深度产生的时间
+	CheckSum       int64   `json:"checksum"`  //检验和
+	PrevSeqId      int64   `json:"prevSeqId"` //上一个推送的序列号。仅适用 books，books-l2-tbt，books50-l2-tbt
+	SeqId          int64   `json:"seqId"`     //推送的序列号
 }
 
 type WsBooksMiddle struct {
@@ -79,8 +79,8 @@ func handleWsBooks(data []byte) (*WsBooks, error) {
 	wsBook := WsBooks{
 		WsSubscribeArg: wsBooksMiddle.Arg,
 		Action:         wsBooksMiddle.Action,
-		Asks:           []BooksLite{},
-		Bids:           []BooksLite{},
+		Asks:           []Books{},
+		Bids:           []Books{},
 		Ts:             middleRow.Ts,
 		CheckSum:       middleRow.CheckSum,
 		PrevSeqId:      middleRow.PrevSeqId,
@@ -88,14 +88,14 @@ func handleWsBooks(data []byte) (*WsBooks, error) {
 	}
 
 	for _, ask := range middleRow.Asks {
-		wsBook.Asks = append(wsBook.Asks, BooksLite{
+		wsBook.Asks = append(wsBook.Asks, Books{
 			Price:      ask[0].(string),
 			Quantity:   ask[1].(string),
 			OrderCount: ask[3].(string),
 		})
 	}
 	for _, bid := range middleRow.Bids {
-		wsBook.Bids = append(wsBook.Bids, BooksLite{
+		wsBook.Bids = append(wsBook.Bids, Books{
 			Price:      bid[0].(string),
 			Quantity:   bid[1].(string),
 			OrderCount: bid[3].(string),
@@ -258,6 +258,3 @@ func handleWsOrders(data []byte) (*[]WsOrders, error) {
 	}
 	return &wsOrdersList, nil
 }
-
-
-

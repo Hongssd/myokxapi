@@ -12,48 +12,48 @@ type PublicRestMarketTickersResRow struct {
 	Ts      string `json:"ts"`      //指数价格更新时间，Unix时间戳的毫秒数格式，如1597026383085
 }
 
-type PublicRestMarketBooksLiteRes []PublicRestMarketBooksLiteResRow
-type PublicRestMarketBooksLiteResRow struct {
-	Asks []BooksLite `json:"asks"` //卖方深度
-	Bids []BooksLite `json:"bids"` //买方深度
-	Ts   string      `json:"ts"`   //深度产生的时间
+type PublicRestMarketBooksRes []PublicRestMarketBooksResRow
+type PublicRestMarketBooksResRow struct {
+	Asks []Books `json:"asks"` //卖方深度
+	Bids []Books `json:"bids"` //买方深度
+	Ts   string  `json:"ts"`   //深度产生的时间
 }
-type BooksLite struct {
+type Books struct {
 	Price      string `json:"price"`       //价格
 	Quantity   string `json:"quantity"`    //合约张数或交易币的数量
 	OrderCount string `json:"order_count"` //订单数量
 }
 
-type PublicRestMarketBooksLiteMiddle []PublicRestMarketBooksLiteMiddleRow
-type PublicRestMarketBooksLiteMiddleRow struct {
+type PublicRestMarketBooksMiddle []PublicRestMarketBooksMiddleRow
+type PublicRestMarketBooksMiddleRow struct {
 	Asks []interface{} `json:"asks"` //卖方深度
 	Bids []interface{} `json:"bids"` //买方深度
 	Ts   string        `json:"ts"`   //深度产生的时间
 }
 
-func (middle *PublicRestMarketBooksLiteMiddle) ConvertToRes() *PublicRestMarketBooksLiteRes {
-	resList := PublicRestMarketBooksLiteRes{}
+func (middle *PublicRestMarketBooksMiddle) ConvertToRes() *PublicRestMarketBooksRes {
+	resList := PublicRestMarketBooksRes{}
 	for _, v := range *middle {
 		resList = append(resList, *v.ConvertToRes())
 	}
 	return &resList
 }
 
-func (middleRow *PublicRestMarketBooksLiteMiddleRow) ConvertToRes() *PublicRestMarketBooksLiteResRow {
-	res := PublicRestMarketBooksLiteResRow{
+func (middleRow *PublicRestMarketBooksMiddleRow) ConvertToRes() *PublicRestMarketBooksResRow {
+	res := PublicRestMarketBooksResRow{
 		Ts: middleRow.Ts,
 	}
-	res.Bids = []BooksLite{}
-	res.Asks = []BooksLite{}
+	res.Bids = []Books{}
+	res.Asks = []Books{}
 	for _, bid := range middleRow.Bids {
-		res.Bids = append(res.Bids, BooksLite{
+		res.Bids = append(res.Bids, Books{
 			Price:      bid.([]interface{})[0].(string),
 			Quantity:   bid.([]interface{})[1].(string),
 			OrderCount: bid.([]interface{})[3].(string),
 		})
 	}
 	for _, ask := range middleRow.Asks {
-		res.Asks = append(res.Asks, BooksLite{
+		res.Asks = append(res.Asks, Books{
 			Price:      ask.([]interface{})[0].(string),
 			Quantity:   ask.([]interface{})[1].(string),
 			OrderCount: ask.([]interface{})[3].(string),
