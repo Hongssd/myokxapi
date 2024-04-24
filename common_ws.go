@@ -60,7 +60,8 @@ type WsStreamClient struct {
 	errChan    chan error
 	isClose    bool
 
-	reSubscribeMu *sync.Mutex
+	reSubscribeMu      *sync.Mutex
+	AutoReConnectTimes int //自动重连次数
 }
 
 // 登陆请求相关
@@ -533,6 +534,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						time.Sleep(1500 * time.Millisecond)
 						err = ws.OpenConn()
 					}
+					ws.AutoReConnectTimes += 1
 					go func() {
 						//重新登陆
 						if ws.lastLogin != nil && ws.client != nil {
