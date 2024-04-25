@@ -43,6 +43,30 @@ func (ws *PrivateWsStreamClient) SubscribeOrders(instType, instFamily, instId st
 	return sub, nil
 }
 
+// 取消订阅订单频道
+// > instType	String	是	产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权 ANY：全部
+// > instFamily	String	否	交易品种 适用于交割/永续/期权
+// > instId	    String	否	产品ID
+func (ws *PrivateWsStreamClient) UnSubscribeOrders(instType, instFamily, instId string) error {
+	arg := getOrdersSubscribeArg(instType, instFamily, instId)
+	args := []WsSubscribeArg{arg}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return err
+	}
+	err = ws.CatchSubscribeReuslt(doSub)
+	if err != nil {
+		return err
+	}
+	log.Infof("UnSubscribeOrders Success: args:%v", doSub.Args)
+
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.ordersSubMap.Delete(string(keyData))
+	}
+	return nil
+}
+
 type WsOrderArgData struct {
 	InstId       string `json:"instId"`                 //String	是	产品ID，如 BTC-USD-190927-5000-C
 	TdMode       string `json:"tdMode"`                 //String	是	交易模式 保证金模式 isolated：逐仓 cross： 全仓 非保证金模式 cash：现金 spot_isolated：现货逐仓(仅适用于现货带单)

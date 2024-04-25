@@ -722,7 +722,7 @@ func (ws *WsStreamClient) CatchSubscribeReuslt(sub *Subscription[WsActionResult]
 		select {
 		case err := <-sub.ErrChan():
 			log.Error(err)
-			return fmt.Errorf("Unsubscribe Error: %v", err)
+			return fmt.Errorf("SubAction Error: %v", err)
 		case subResult := <-sub.ResultChan():
 			if subResult.Code != "" && subResult.Code != "0" {
 				log.Error(subResult.Code, ":", subResult.Msg)

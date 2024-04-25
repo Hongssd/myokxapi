@@ -46,9 +46,37 @@ func (ws *PublicWsStreamClient) SubscribeBooksMultiple(instIds []string, wsBooks
 	return sub, nil
 }
 
-// 订阅深度 如: "BTC-USDT", WS_BOOKS_SNAPSHOT_5_100MS
+// 批量取消订阅深度 如: ["BTC-USDT","ETH-USDT"], WS_BOOKS_SNAPSHOT_5_100MS
+func (ws *PublicWsStreamClient) UnSubscribeBooksMultiple(instIds []string, wsBooksType WsBooksType) error {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getBooksSubscribeArg(s, wsBooksType)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return err
+	}
+	err = ws.CatchSubscribeReuslt(doSub)
+	if err != nil {
+		return err
+	}
+	log.Infof("UnSubscribeBooks Success: args:%v", doSub.Args)
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.booksSubMap.Delete(string(keyData))
+	}
+	return nil
+}
+
+// 订阅单个深度 如: "BTC-USDT", WS_BOOKS_SNAPSHOT_5_100MS
 func (ws *PublicWsStreamClient) SubscribeBooks(instIds string, wsBooksType WsBooksType) (*Subscription[WsBooks], error) {
 	return ws.SubscribeBooksMultiple([]string{instIds}, wsBooksType)
+}
+
+// 取消订阅单个深度 如: "BTC-USDT", WS_BOOKS_SNAPSHOT_5_100MS
+func (ws *PublicWsStreamClient) UnSubscribeBooks(instIds string, wsBooksType WsBooksType) error {
+	return ws.UnSubscribeBooksMultiple([]string{instIds}, wsBooksType)
 }
 
 func getBooksSubscribeArg(instId string, wsBooksType WsBooksType) WsSubscribeArg {
@@ -88,6 +116,39 @@ func (ws *PublicWsStreamClient) SubscribeTradesMultiple(instIds []string) (*Subs
 		ws.tradesSubMap.Store(string(keyData), sub)
 	}
 	return sub, nil
+}
+
+// 批量取消订阅交易 如: ["BTC-USDT","ETH-USDT"]
+func (ws *PublicWsStreamClient) UnSubscribeTradesMultiple(instIds []string) error {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getTradesSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return err
+	}
+	err = ws.CatchSubscribeReuslt(doSub)
+	if err != nil {
+		return err
+	}
+	log.Infof("UnSubscribeTrades Success: args:%v", doSub.Args)
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.tradesSubMap.Delete(string(keyData))
+	}
+	return nil
+}
+
+// 订阅单个交易
+func (ws *PublicWsStreamClient) SubscribeTrades(instIds string) (*Subscription[WsTrades], error) {
+	return ws.SubscribeTradesMultiple([]string{instIds})
+}
+
+// 取消订阅单个交易
+func (ws *PublicWsStreamClient) UnSubscribeTrades(instIds string) error {
+	return ws.UnSubscribeTradesMultiple([]string{instIds})
 }
 
 func getTradesSubscribeArg(instId string) WsSubscribeArg {
