@@ -22,7 +22,7 @@ func (ws *PrivateWsStreamClient) SubscribeOrders(instType, instFamily, instId st
 	if err != nil {
 		return nil, err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (ws *PrivateWsStreamClient) UnSubscribeOrders(instType, instFamily, instId 
 	if err != nil {
 		return err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return err
 	}

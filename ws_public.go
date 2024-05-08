@@ -25,7 +25,7 @@ func (ws *PublicWsStreamClient) SubscribeBooksMultiple(instIds []string, wsBooks
 	if err != nil {
 		return nil, err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (ws *PublicWsStreamClient) UnSubscribeBooksMultiple(instIds []string, wsBoo
 	if err != nil {
 		return err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (ws *PublicWsStreamClient) SubscribeTradesMultiple(instIds []string) (*Subs
 	if err != nil {
 		return nil, err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (ws *PublicWsStreamClient) UnSubscribeTradesMultiple(instIds []string) erro
 	if err != nil {
 		return err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return err
 	}

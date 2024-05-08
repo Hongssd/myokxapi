@@ -25,7 +25,7 @@ func (ws *BusinessWsStreamClient) SubscribeCandleMultiple(instId []string, inter
 	if err != nil {
 		return nil, err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (ws *BusinessWsStreamClient) UnSubscribeCandleMultiple(instId []string, int
 	if err != nil {
 		return err
 	}
-	err = ws.CatchSubscribeReuslt(doSub)
+	err = ws.catchSubscribeResult(doSub)
 	if err != nil {
 		return err
 	}

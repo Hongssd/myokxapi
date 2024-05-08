@@ -474,7 +474,10 @@ func (ws *WsStreamClient) sendWsCloseToAllSub() {
 	args := []WsSubscribeArg{}
 	ws.commonSubMap.Range(func(key string, _ *Subscription[WsActionResult]) bool {
 		arg := WsSubscribeArg{}
-		json.Unmarshal([]byte(key), &arg)
+		err := json.Unmarshal([]byte(key), &arg)
+		if err != nil {
+			return false
+		}
 		args = append(args, arg)
 		return true
 	})
@@ -497,7 +500,7 @@ func (ws *WsStreamClient) reSubscribeForReconnect() error {
 			wErr = err
 			return false
 		}
-		err = ws.CatchSubscribeReuslt(reSub)
+		err = ws.catchSubscribeResult(reSub)
 		if err != nil {
 			log.Error(err)
 			wErr = err
@@ -655,7 +658,6 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 
 func (ws *WsStreamClient) DeferSub() {
 	if len(ws.waitSubResult.subResultMap) == len(ws.waitSubResult.Args) {
-
 		for _, arg := range ws.waitSubResult.Args {
 			keyData, _ := json.Marshal(&arg)
 			ws.commonSubMap.Store(string(keyData), ws.waitSubResult)
@@ -677,7 +679,7 @@ func (sub *Subscription[T]) Unsubscribe() error {
 	if err != nil {
 		return err
 	}
-	err = sub.Ws.CatchSubscribeReuslt(unSub)
+	err = sub.Ws.catchSubscribeResult(unSub)
 	if err != nil {
 		return err
 	}
@@ -714,7 +716,7 @@ func (ws *WsStreamClient) CatchLoginReuslt(sub *Subscription[WsActionResult]) er
 }
 
 // 捕获订阅结果
-func (ws *WsStreamClient) CatchSubscribeReuslt(sub *Subscription[WsActionResult]) error {
+func (ws *WsStreamClient) catchSubscribeResult(sub *Subscription[WsActionResult]) error {
 	ws.waitSubResult = sub
 	defer sub.Ws.DeferSub()
 	isBreak := false
@@ -860,7 +862,11 @@ func keepAlive(c *websocket.Conn, timeout time.Duration) {
 			}
 			<-ticker.C
 			if time.Since(lastResponse) > timeout {
-				c.Close()
+				err := c.Close()
+				if err != nil {
+					log.Error(err)
+					return
+				}
 				return
 			}
 		}
