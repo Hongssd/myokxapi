@@ -70,6 +70,12 @@ func RequestWithHeader(url string, reqBody []byte, method string, headerMap map[
 		req.Header.Set(k, v)
 	}
 	req.Header.Set("Content-Type", "application/json")
+
+	//ok模拟盘额外参数
+	if NowNetType == TEST_NET {
+		req.Header.Set("x-simulated-trading", "1")
+	}
+
 	client := &http.Client{}
 	if isGzip { // 请求 header 添加 gzip
 		req.Header.Add("Content-Encoding", "gzip")
@@ -124,6 +130,19 @@ var SERVER_TYPE = BASE
 
 func SetServerType(serverType ServerType) {
 	SERVER_TYPE = serverType
+}
+
+type NetType int
+
+const (
+	MAIN_NET NetType = iota
+	TEST_NET
+)
+
+var NowNetType = MAIN_NET
+
+func SetNetType(netType NetType) {
+	NowNetType = netType
 }
 
 type APIType int
