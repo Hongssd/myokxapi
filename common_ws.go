@@ -14,12 +14,9 @@ import (
 )
 
 const (
-	OKX_API_WS_PUBLIC        = "/ws/v5/public"                 //公共频道
-	OKX_API_WS_PRIVATE       = "/ws/v5/private"                //私有频道
-	OKX_API_WS_BUSINESS      = "/ws/v5/business"               //业务频道
-	OKX_API_WS_PUBLIC_TEST   = "/ws/v5/public?brokerId=9999"   //公共频道
-	OKX_API_WS_PRIVATE_TEST  = "/ws/v5/private?brokerId=9999"  //私有频道
-	OKX_API_WS_BUSINESS_TEST = "/ws/v5/business?brokerId=9999" //业务频道
+	OKX_API_WS_PUBLIC   = "/ws/v5/public"   //公共频道
+	OKX_API_WS_PRIVATE  = "/ws/v5/private"  //私有频道
+	OKX_API_WS_BUSINESS = "/ws/v5/business" //业务频道
 )
 
 const (
@@ -821,11 +818,15 @@ func handlerWsStreamRequestApi(apiType APIType) string {
 	default:
 	}
 
+	query := ""
+	if NowNetType == TEST_NET {
+		query = "brokerId=9999"
+	}
 	u := url.URL{
 		Scheme:   "wss",
 		Host:     host,
 		Path:     getWsApi(apiType),
-		RawQuery: "",
+		RawQuery: query,
 	}
 	return u.String()
 }
@@ -834,31 +835,15 @@ func handlerWsStreamRequestApi(apiType APIType) string {
 func getWsApi(apiType APIType) string {
 	switch apiType {
 	case WS_PUBLIC:
-		switch NowNetType {
-		case MAIN_NET:
-			return OKX_API_WS_PUBLIC
-		case TEST_NET:
-			return OKX_API_WS_PUBLIC_TEST
-		}
+		return OKX_API_WS_PUBLIC
 	case WS_PRIVATE:
-		switch NowNetType {
-		case MAIN_NET:
-			return OKX_API_WS_PRIVATE
-		case TEST_NET:
-			return OKX_API_WS_PRIVATE_TEST
-		}
+		return OKX_API_WS_PRIVATE
 	case WS_BUSINESS:
-		switch NowNetType {
-		case MAIN_NET:
-			return OKX_API_WS_BUSINESS
-		case TEST_NET:
-			return OKX_API_WS_BUSINESS_TEST
-		}
+		return OKX_API_WS_BUSINESS
 	default:
 		log.Error("apiType Error is ", apiType)
 		return ""
 	}
-	return ""
 }
 
 // 发送ping/pong消息以检查连接稳定性
