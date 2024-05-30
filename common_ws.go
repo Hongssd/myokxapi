@@ -14,9 +14,12 @@ import (
 )
 
 const (
-	OKX_API_WS_PUBLIC   = "/ws/v5/public"   //公共频道
-	OKX_API_WS_PRIVATE  = "/ws/v5/private"  //私有频道
-	OKX_API_WS_BUSINESS = "/ws/v5/business" //业务频道
+	OKX_API_WS_PUBLIC        = "/ws/v5/public"                 //公共频道
+	OKX_API_WS_PRIVATE       = "/ws/v5/private"                //私有频道
+	OKX_API_WS_BUSINESS      = "/ws/v5/business"               //业务频道
+	OKX_API_WS_PUBLIC_TEST   = "/ws/v5/public?brokerId=9999"   //公共频道
+	OKX_API_WS_PRIVATE_TEST  = "/ws/v5/private?brokerId=9999"  //私有频道
+	OKX_API_WS_BUSINESS_TEST = "/ws/v5/business?brokerId=9999" //业务频道
 )
 
 const (
@@ -831,11 +834,26 @@ func handlerWsStreamRequestApi(apiType APIType) string {
 func getWsApi(apiType APIType) string {
 	switch apiType {
 	case WS_PUBLIC:
-		return OKX_API_WS_PUBLIC
+		switch NowNetType {
+		case MAIN_NET:
+			return OKX_API_WS_PUBLIC
+		case TEST_NET:
+			return OKX_API_WS_PUBLIC_TEST
+		}
 	case WS_PRIVATE:
-		return OKX_API_WS_PRIVATE
+		switch NowNetType {
+		case MAIN_NET:
+			return OKX_API_WS_PRIVATE
+		case TEST_NET:
+			return OKX_API_WS_PRIVATE_TEST
+		}
 	case WS_BUSINESS:
-		return OKX_API_WS_BUSINESS
+		switch NowNetType {
+		case MAIN_NET:
+			return OKX_API_WS_BUSINESS
+		case TEST_NET:
+			return OKX_API_WS_BUSINESS_TEST
+		}
 	default:
 		log.Error("apiType Error is ", apiType)
 		return ""
