@@ -858,6 +858,7 @@ func getWsApi(apiType APIType) string {
 		log.Error("apiType Error is ", apiType)
 		return ""
 	}
+	return ""
 }
 
 // 发送ping/pong消息以检查连接稳定性
