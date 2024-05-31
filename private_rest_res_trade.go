@@ -100,6 +100,35 @@ type PrivateRestTradeCancelBatchOrdersRes []PrivateRestTradeCancelOrderResRow
 
 type PrivateRestTradeAmendBatchOrdersRes []PrivateRestTradeAmendOrderResRow
 
-
 type PrivateRestTradeOrderHistoryRes []PrivateRestTradeOrderGetResRow
 type PrivateRestTradeOrderHistoryArchiveRes []PrivateRestTradeOrderGetResRow
+
+type PrivateRestTradeFillsRes []PrivateRestTradeFillsResRow
+type PrivateRestTradeFillsResRow struct {
+	InstType    string `json:"instType"`    //String	产品类型
+	InstId      string `json:"instId"`      //String	产品 ID
+	TradeId     string `json:"tradeId"`     //String	最新成交 ID
+	OrdId       string `json:"ordId"`       //String	订单 ID
+	ClOrdId     string `json:"clOrdId"`     //String	用户自定义订单ID
+	BillId      string `json:"billId"`      //String	账单 ID
+	SubType     string `json:"subType"`     //String	成交类型
+	Tag         string `json:"tag"`         //String	订单标签
+	FillPx      string `json:"fillPx"`      //String	最新成交价格
+	FillSz      string `json:"fillSz"`      //String	最新成交数量
+	FillIdxPx   string `json:"fillIdxPx"`   //String	交易执行时的指数价格
+	FillPnl     string `json:"fillPnl"`     //String	最新成交收益，适用于有成交的平仓订单。其他情况均为0。
+	FillPxVol   string `json:"fillPxVol"`   //String	成交时的隐含波动率，仅适用于期权，其他业务线返回空字符串""
+	FillPxUsd   string `json:"fillPxUsd"`   //String	成交时的期权价格，以USD为单位，仅适用于期权，其他业务线返回空字符串""
+	FillMarkVol string `json:"fillMarkVol"` //String	成交时的标记波动率，仅适用于期权，其他业务线返回空字符串""
+	FillFwdPx   string `json:"fillFwdPx"`   //String	成交时的远期价格，仅适用于期权，其他业务线返回空字符串""
+	FillMarkPx  string `json:"fillMarkPx"`  //String	成交时的标记价格，仅适用于 交割/永续/期权
+	Side        string `json:"side"`        //String	订单方向
+	PosSide     string `json:"posSide"`     //String	持仓方向
+	ExecType    string `json:"execType"`    //String	流动性方向
+	FeeCcy      string `json:"feeCcy"`      //String	交易手续费币种或者返佣金币种
+	Fee         string `json:"fee"`         //String	手续费金额或者返佣金额
+	Ts          string `json:"ts"`          //String	成交明细产生时间，Unix时间戳的毫秒数格式，如 1597026383085
+	FillTime    string `json:"fillTime"`    //String	成交时间，与订单频道的fillTime相同
+}
+
+type PrivateRestTradeFillsHistoryRes PrivateRestTradeFillsRes

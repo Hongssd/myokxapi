@@ -145,3 +145,29 @@ func (api *PrivateRestTradeOrderHistoryArchiveAPI) Do() (*OkxRestRes[PrivateRest
 	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradeOrderHistoryArchive])
 	return okxCallAPIWithSecret[PrivateRestTradeOrderHistoryArchiveRes](api.client.c, url, NIL_REQBODY, GET)
 }
+
+// okx PrivateRestTradeFills PrivateRest接口 GET 获取成交明细（近三天）
+func (client *PrivateRestClient) NewPrivateRestTradeFills() *PrivateRestTradeFillsAPI {
+	return &PrivateRestTradeFillsAPI{
+		client: client,
+		req:    &PrivateRestTradeFillsReq{},
+	}
+}
+func (api *PrivateRestTradeFillsAPI) Do() (*OkxRestRes[PrivateRestTradeFillsRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradeFills])
+	return okxCallAPIWithSecret[PrivateRestTradeFillsRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx PrivateRestTradeFillsHistory PrivateRest接口 GET 获取成交明细（近三个月）
+func (client *PrivateRestClient) NewPrivateRestTradeFillsHistory() *PrivateRestTradeFillsHistoryAPI {
+	return &PrivateRestTradeFillsHistoryAPI{
+		PrivateRestTradeFillsAPI{
+			client: client,
+			req:    &PrivateRestTradeFillsReq{},
+		},
+	}
+}
+func (api *PrivateRestTradeFillsHistoryAPI) Do() (*OkxRestRes[PrivateRestTradeFillsHistoryRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradeFillsHistory])
+	return okxCallAPIWithSecret[PrivateRestTradeFillsHistoryRes](api.client.c, url, NIL_REQBODY, GET)
+}

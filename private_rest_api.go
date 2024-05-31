@@ -22,6 +22,8 @@ const (
 	PrivateRestTradeOrderHistory        //获取历史订单记录（近七天）
 	PrivateRestTradeOrderHistoryArchive //获取历史订单记录（近三个月）
 
+	PrivateRestTradeFills        //获取成交明细（近三天）
+	PrivateRestTradeFillsHistory //获取成交明细（近三个月）
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
@@ -43,4 +45,8 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestTradeAmendBatchOrders:    "/api/v5/trade/amend-batch-orders",     //POST 批量修改订单
 	PrivateRestTradeOrderHistory:        "/api/v5/trade/orders-history",         //GET 获取历史订单记录（近七天）
 	PrivateRestTradeOrderHistoryArchive: "/api/v5/trade/orders-history-archive", //GET 获取历史订单记录（近三个月）
+
+	PrivateRestTradeFills:        "/api/v5/trade/fills",         //GET 获取成交明细（近三天）
+	PrivateRestTradeFillsHistory: "/api/v5/trade/fills-history", //GET 获取成交明细（近三个月）
+
 }

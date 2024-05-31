@@ -752,3 +752,92 @@ func (api *PrivateRestTradeOrderHistoryArchiveAPI) Limit(limit string) *PrivateR
 	api.req.Limit = GetPointer(limit)
 	return api
 }
+
+type PrivateRestTradeFillsReq struct {
+	InstType   *string `json:"instType"`   //String	是	产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+	Uly        *string `json:"uly"`        //String	否	标的指数
+	InstFamily *string `json:"instFamily"` //String	否	交易品种 适用于交割/永续/期权
+	InstId     *string `json:"instId"`     //String	否	产品ID，如BTC-USD-190927
+	OrdId      *string `json:"ordId"`      //String	否	订单ID
+	SubType    *string `json:"subType"`    //String	否	成交类型 1：买入 2：卖出 3：开多 4：开空 5：平多 6：平空 100：强减平多 101：强减平空 102：强减买入 103：强减卖出 104：强平平多 105：强平平空 106：强平买入 107：强平卖出 110：强平换币转入 111：强平换币转出 118：系统换币转入 119：系统换币转出 125：自动减仓平多 126：自动减仓平空 127：自动减仓买入 128：自动减仓卖出 212：一键借币的自动借币 213：一键借币的自动还币 204：大宗交易买 205：大宗交易卖 206：大宗交易开多 207：大宗交易开空 208：大宗交易平多 209：大宗交易平空 270：价差交易买 271：价差交易卖 272：价差交易开多 273：价差交易开空 274：价差交易平多 275：价差交易平空
+	After      *string `json:"after"`      //String	否	请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的billId
+	Before     *string `json:"before"`     //String	否	请求此ID之后（更新的数据）的分页内容，传的值为对应接口的billId
+	Begin      *string `json:"begin"`      //String	否	筛选的开始时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+	End        *string `json:"end"`        //String	否	筛选的结束时间戳，Unix 时间戳为毫秒数格式，如 1597027383085
+	Limit      *string `json:"limit"`      //String	否	返回结果的数量，最大为100，默认100条
+}
+
+type PrivateRestTradeFillsAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeFillsReq
+}
+
+// String 是 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+func (api *PrivateRestTradeFillsAPI) InstType(instType string) *PrivateRestTradeFillsAPI {
+	api.req.InstType = GetPointer(instType)
+	return api
+}
+
+// String 否 标的指数
+func (api *PrivateRestTradeFillsAPI) Uly(uly string) *PrivateRestTradeFillsAPI {
+	api.req.Uly = GetPointer(uly)
+	return api
+}
+
+// String 否 交易品种 适用于交割/永续/期权
+func (api *PrivateRestTradeFillsAPI) InstFamily(instFamily string) *PrivateRestTradeFillsAPI {
+	api.req.InstFamily = GetPointer(instFamily)
+	return api
+}
+
+// String 否 产品ID，如BTC-USD-190927
+func (api *PrivateRestTradeFillsAPI) InstId(instId string) *PrivateRestTradeFillsAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 订单ID
+func (api *PrivateRestTradeFillsAPI) OrdId(ordId string) *PrivateRestTradeFillsAPI {
+	api.req.OrdId = GetPointer(ordId)
+	return api
+}
+
+// String 否 成交类型 1：买入 2：卖出 3：开多 4：开空 5：平多 6：平空 100：强减平多 101：强减平空 102：强减买入 103：强减卖出 104：强平平多 105：强平平空 106：强平买入 107：强平卖出 110：强平换币转入 111：强平换币转出 118：系统换币转入 119：系统换币转出 125：自动减仓平多 126：自动减仓平空 127：自动减仓买入 128：自动减仓卖出 212：一键借币的自动借币 213：一键借币的自动还币 204：大宗交易买 205：大宗交易卖 206：大宗交易开多 207：大宗交易开空 208：大宗交易平多 209：大宗交易平空 270：价差交易买 271：价差交易卖 272：价差交易开多 273：价差交易开空 274：价差交易平多 275：价差交易平空
+func (api *PrivateRestTradeFillsAPI) SubType(subType string) *PrivateRestTradeFillsAPI {
+	api.req.SubType = GetPointer(subType)
+	return api
+}
+
+// String 否 请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的billId
+func (api *PrivateRestTradeFillsAPI) After(after string) *PrivateRestTradeFillsAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String 否 请求此ID之后（更新的数据）的分页内容，传的值为对应接口的billId
+func (api *PrivateRestTradeFillsAPI) Before(before string) *PrivateRestTradeFillsAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String 否 筛选的开始时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+func (api *PrivateRestTradeFillsAPI) Begin(begin string) *PrivateRestTradeFillsAPI {
+	api.req.Begin = GetPointer(begin)
+	return api
+}
+
+// String 否 筛选的结束时间戳，Unix 时间戳为毫秒数格式，如 1597027383085
+func (api *PrivateRestTradeFillsAPI) End(end string) *PrivateRestTradeFillsAPI {
+	api.req.End = GetPointer(end)
+	return api
+}
+
+// String 否 返回结果的数量，最大为100，默认100条
+func (api *PrivateRestTradeFillsAPI) Limit(limit string) *PrivateRestTradeFillsAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
+
+type PrivateRestTradeFillsHistoryAPI struct {
+	PrivateRestTradeFillsAPI
+}
