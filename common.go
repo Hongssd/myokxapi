@@ -232,7 +232,7 @@ func okxCallAPIWithSecret[T any](client *Client, url url.URL, reqBody []byte, me
 	}
 	sign := base64.StdEncoding.EncodeToString(HmacSha256(client.SecretKey, hmacSha256Data))
 
-	log.Warn(hmacSha256Data)
+	//log.Warn(hmacSha256Data)
 	// log.Warn("timestamp: ", timestamp)
 	// log.Warn("method: ", method)
 	// log.Warn("requestPath: ", requestPath)
