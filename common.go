@@ -81,7 +81,7 @@ func RequestWithHeader(url string, reqBody []byte, method string, headerMap map[
 		req.Header.Add("Content-Encoding", "gzip")
 		req.Header.Add("Accept-Encoding", "gzip")
 	}
-	req.Close = true
+
 	req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
 
 	log.Debug("reqURL: ", req.URL.String())
@@ -232,6 +232,7 @@ func okxCallAPIWithSecret[T any](client *Client, url url.URL, reqBody []byte, me
 	}
 	sign := base64.StdEncoding.EncodeToString(HmacSha256(client.SecretKey, hmacSha256Data))
 
+	log.Warn(hmacSha256Data)
 	// log.Warn("timestamp: ", timestamp)
 	// log.Warn("method: ", method)
 	// log.Warn("requestPath: ", requestPath)
