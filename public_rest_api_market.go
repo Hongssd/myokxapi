@@ -54,3 +54,24 @@ func (api *PublicRestMarketCandlesAPI) Do() (*OkxRestRes[PublicRestMarketCandles
 	}
 	return res2, nil
 }
+
+// okx MarketHistoryCandles PublicRest接口 GET 获取历史K线数据
+func (client *PublicRestClient) NewPublicRestMarketHistoryCandles() *PublicRestMarketHistoryCandlesAPI {
+	return &PublicRestMarketHistoryCandlesAPI{
+		client: client,
+		req:    &PublicRestMarketHistoryCandlesReq{},
+	}
+}
+func (api *PublicRestMarketHistoryCandlesAPI) Do() (*OkxRestRes[PublicRestMarketCandlesRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestMarketHistoryCandles])
+	res, err := okxCallAPI[PublicRestMarketCandlesMiddle](api.client.c, url, NIL_REQBODY, GET)
+	if err != nil {
+		return nil, err
+	}
+	res2 := &OkxRestRes[PublicRestMarketCandlesRes]{
+		OkxErrorRes: res.OkxErrorRes,
+		OkxTimeRes:  res.OkxTimeRes,
+		Data:        *res.Data.ConvertToRes(),
+	}
+	return res2, nil
+}

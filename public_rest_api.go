@@ -11,10 +11,10 @@ const (
 	PublicRestPublicFundingRate                      //获取永续合约当前资金费率
 
 	//Market
-	PublicRestMarketTickers //获取指数行情
-	PublicRestMarketBooks   // 获取产品轻量深度
-	PublicRestMarketCandles // 获取K线数据
-
+	PublicRestMarketTickers        //获取指数行情
+	PublicRestMarketBooks          // 获取产品轻量深度
+	PublicRestMarketCandles        // 获取K线数据 最近1440条
+	PublicRestMarketHistoryCandles // 获取K线数据 最近几年 1sK线为最近3个月
 )
 
 var PublicRestAPIMap = map[PublicRestAPI]string{
@@ -25,8 +25,9 @@ var PublicRestAPIMap = map[PublicRestAPI]string{
 	PublicRestPublicFundingRate: "/api/v5/public/funding-rate", //GET 获取永续合约当前资金费率
 
 	//Market
-	PublicRestMarketTickers: "/api/v5/market/index-tickers", //GET 获取指数行情
-	PublicRestMarketBooks:   "/api/v5/market/books",         //GET 获取产品轻量深度
-	PublicRestMarketCandles: "/api/v5/market/candles",       //GET 获取K线数据
+	PublicRestMarketTickers:        "/api/v5/market/index-tickers",   //GET 获取指数行情
+	PublicRestMarketBooks:          "/api/v5/market/books",           //GET 获取产品轻量深度
+	PublicRestMarketCandles:        "/api/v5/market/candles",         //GET 获取K线数据
+	PublicRestMarketHistoryCandles: "/api/v5/market/history-candles", //GET 获取K线数据
 
 }

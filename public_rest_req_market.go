@@ -127,3 +127,46 @@ func (api *PublicRestMarketCandlesAPI) Limit(limit int) *PublicRestMarketCandles
 	api.req.Limit = GetPointer(limit)
 	return api
 }
+
+type PublicRestMarketHistoryCandlesReq struct {
+	InstId *string `json:"instId"` //String	是	产品ID，如BTC-USD-190927-5000-C
+	Bar    *string `json:"bar"`    //String	否	时间粒度，默认值1m
+	After  *int64  `json:"after"`  //String	否	请求此时间戳之前（更旧的数据）的分页内容，传的值为对应接口的ts
+	Before *int64  `json:"before"` //String	否	请求此时间戳之后（更新的数据）的分页内容，传的值为对应接口的ts, 单独使用时，会返回最新的数据。
+	Limit  *int    `json:"limit"`  //String	否	分页返回的结果集数量，最大为300，不填默认返回100条
+}
+
+type PublicRestMarketHistoryCandlesAPI struct {
+	client *PublicRestClient
+	req    *PublicRestMarketHistoryCandlesReq
+}
+
+// String 是 产品ID，如BTC-USD-190927-5000-C
+func (api *PublicRestMarketHistoryCandlesAPI) InstId(instId string) *PublicRestMarketHistoryCandlesAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 时间粒度，默认值1m
+func (api *PublicRestMarketHistoryCandlesAPI) Bar(bar string) *PublicRestMarketHistoryCandlesAPI {
+	api.req.Bar = GetPointer(bar)
+	return api
+}
+
+// String 否 请求此时间戳之前（更旧的数据）的分页内容，传的值为对应接口的ts
+func (api *PublicRestMarketHistoryCandlesAPI) After(after int64) *PublicRestMarketHistoryCandlesAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String 否 请求此时间戳之后（更新的数据）的分页内容，传的值为对应接口的ts, 单独使用时，会返回最新的数据。
+func (api *PublicRestMarketHistoryCandlesAPI) Before(before int64) *PublicRestMarketHistoryCandlesAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String 否 分页返回的结果集数量，最大为100，不填默认返回100条
+func (api *PublicRestMarketHistoryCandlesAPI) Limit(limit int) *PublicRestMarketHistoryCandlesAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
