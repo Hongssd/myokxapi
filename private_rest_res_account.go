@@ -163,10 +163,28 @@ type PrivateRestAccountTradeFeeResRowFiat struct {
 	Maker string `json:"maker"` //挂单手续费率
 }
 
+type PrivateRestAccountLeverageInfoRes []PrivateRestAccountLeverageInfoResRow
+type PrivateRestAccountLeverageInfoResRow struct {
+	InstId  string `json:"instId"`  //产品ID
+	MgnMode string `json:"mgnMode"` //保证金模式 isolated：逐仓 cross：全仓
+	PosSide string `json:"posSide"` //持仓方向
+	Lever   string `json:"lever"`   //杠杆倍数
+}
+
 type PrivateRestAccountSetLeverageRes []PrivateRestAccountSetLeverageResRow
 type PrivateRestAccountSetLeverageResRow struct {
 	InstId  string `json:"instId"`  //产品ID
 	Lever   string `json:"lever"`   //杠杆倍数
 	MgnMode string `json:"mgnMode"` //保证金模式 isolated：逐仓 cross：全仓
 	PosSide string `json:"posSide"` //持仓方向
+}
+
+type PrivateRestAccountSetPositionModeRes []PrivateRestAccountSetPositionModeResRow
+type PrivateRestAccountSetPositionModeResRow struct {
+	PosMode string `json:"posMode"` //持仓方式 long_short_mode：开平仓模式 net_mode：买卖模式 仅适用交割/永续
+}
+
+type PrivateRestAccountSetAccountLevelRes []PrivateRestAccountSetAccountLevelResRow
+type PrivateRestAccountSetAccountLevelResRow struct {
+	AcctLv string `json:"acctLv"` //账户
 }

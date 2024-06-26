@@ -49,6 +49,18 @@ func (api *PrivateRestAccountTradeFeeAPI) Do() (*OkxRestRes[PrivateRestAccountTr
 	return okxCallAPIWithSecret[PrivateRestAccountTradeFeeRes](api.client.c, url, NIL_REQBODY, GET)
 }
 
+// okx PrivateRestAccountLeverageInfo PrivateRest接口 GET 获取杠杆倍数
+func (client *PrivateRestClient) NewPrivateRestAccountLeverageInfo() *PrivateRestAccountLeverageInfoAPI {
+	return &PrivateRestAccountLeverageInfoAPI{
+		client: client,
+		req:    &PrivateRestAccountLeverageInfoReq{},
+	}
+}
+func (api *PrivateRestAccountLeverageInfoAPI) Do() (*OkxRestRes[PrivateRestAccountLeverageInfoRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAccountLeverageInfo])
+	return okxCallAPIWithSecret[PrivateRestAccountLeverageInfoRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
 // okx PrivateRestAccountSetLeverage PrivateRest接口 POST 设置杠杆倍数
 func (client *PrivateRestClient) NewPrivateRestAccountSetLeverage() *PrivateRestAccountSetLeverageAPI {
 	return &PrivateRestAccountSetLeverageAPI{
@@ -63,4 +75,36 @@ func (api *PrivateRestAccountSetLeverageAPI) Do() (*OkxRestRes[PrivateRestAccoun
 		return nil, err
 	}
 	return okxCallAPIWithSecret[PrivateRestAccountSetLeverageRes](api.client.c, url, reqBody, POST)
+}
+
+// okx PrivateRestAccountSetPositionMode PrivateRest接口 POST 设置持仓模式
+func (client *PrivateRestClient) NewPrivateRestAccountSetPositionMode() *PrivateRestAccountSetPositionModeAPI {
+	return &PrivateRestAccountSetPositionModeAPI{
+		client: client,
+		req:    &PrivateRestAccountSetPositionModeReq{},
+	}
+}
+func (api *PrivateRestAccountSetPositionModeAPI) Do() (*OkxRestRes[PrivateRestAccountSetPositionModeRes], error) {
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestAccountSetPositionMode])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestAccountSetPositionModeRes](api.client.c, url, reqBody, POST)
+}
+
+// okx PrivateRestAccountSetAccountLevel PrivateRest接口 POST 设置账户模式
+func (client *PrivateRestClient) NewPrivateRestAccountSetAccountLevel() *PrivateRestAccountSetAccountLevelAPI {
+	return &PrivateRestAccountSetAccountLevelAPI{
+		client: client,
+		req:    &PrivateRestAccountSetAccountLevelReq{},
+	}
+}
+func (api *PrivateRestAccountSetAccountLevelAPI) Do() (*OkxRestRes[PrivateRestAccountSetAccountLevelRes], error) {
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestAccountSetAccountLevel])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestAccountSetAccountLevelRes](api.client.c, url, reqBody, POST)
 }

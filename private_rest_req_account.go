@@ -100,6 +100,28 @@ func (api *PrivateRestAccountTradeFeeAPI) InstFamily(instFamily string) *Private
 	return api
 }
 
+type PrivateRestAccountLeverageInfoReq struct {
+	InstId  *string `json:"instId"`  //String	是	产品ID 支持多个instId查询，半角逗号分隔。instId个数不超过20个
+	MgnMode *string `json:"mgnMode"` //String	是	保证金模式 isolated：逐仓 cross：全仓
+}
+
+type PrivateRestAccountLeverageInfoAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAccountLeverageInfoReq
+}
+
+// String	是	产品ID 支持多个instId查询，半角逗号分隔。instId个数不超过20个
+func (api *PrivateRestAccountLeverageInfoAPI) InstId(instId string) *PrivateRestAccountLeverageInfoAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String	是	保证金模式 isolated：逐仓 cross：全仓
+func (api *PrivateRestAccountLeverageInfoAPI) MgnMode(mgnMode string) *PrivateRestAccountLeverageInfoAPI {
+	api.req.MgnMode = GetPointer(mgnMode)
+	return api
+}
+
 type PrivateRestAccountSetLeverageReq struct {
 	InstId  *string `json:"instId"`  //String	可选	产品ID：币对、合约 全仓下，instId和ccy至少要传一个；如果两个都传，默认使用instId
 	Ccy     *string `json:"ccy"`     //String	可选	保证金币种 仅适用于跨币种保证金模式和组合保证金模式的全仓 币币杠杆。设置自动借币的杠杆倍数时必填
@@ -139,5 +161,43 @@ func (api *PrivateRestAccountSetLeverageAPI) MgnMode(mgnMode string) *PrivateRes
 // String	可选	持仓方向 long：开平仓模式开多 short：开平仓模式开空 仅适用于逐仓交割/永续 在开平仓模式且保证金模式为逐仓条件下必填
 func (api *PrivateRestAccountSetLeverageAPI) PosSide(posSide string) *PrivateRestAccountSetLeverageAPI {
 	api.req.PosSide = GetPointer(posSide)
+	return api
+}
+
+// posMode	String	是	持仓方式
+// long_short_mode：开平仓模式 net_mode：买卖模式
+// 仅适用交割/永续
+type PrivateRestAccountSetPositionModeReq struct {
+	PosMode *string `json:"posMode"` //String	是	持仓方式 long_short_mode：开平仓模式 net_mode：买卖模式 仅适用交割/永续
+}
+
+type PrivateRestAccountSetPositionModeAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAccountSetPositionModeReq
+}
+
+// String	是	持仓方式 long_short_mode：开平仓模式 net_mode：买卖模式 仅适用交割/永续
+func (api *PrivateRestAccountSetPositionModeAPI) PosMode(posMode string) *PrivateRestAccountSetPositionModeAPI {
+	api.req.PosMode = GetPointer(posMode)
+	return api
+}
+
+// acctLv	String	是	账户模式
+// 1: 简单交易模式
+// 2: 单币种保证金模式
+// 3: 跨币种保证金模式
+// 4: 组合保证金模式
+type PrivateRestAccountSetAccountLevelReq struct {
+	AcctLv *string `json:"acctLv"` //String	是	账户模式 1: 简单交易模式 2: 单币种保证金模式 3: 跨币种保证金模式 4: 组合保证金模式
+}
+
+type PrivateRestAccountSetAccountLevelAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAccountSetAccountLevelReq
+}
+
+// String	是	账户模式 1: 简单交易模式 2: 单币种保证金模式 3: 跨币种保证金模式 4: 组合保证金模式
+func (api *PrivateRestAccountSetAccountLevelAPI) AcctLv(acctLv string) *PrivateRestAccountSetAccountLevelAPI {
+	api.req.AcctLv = GetPointer(acctLv)
 	return api
 }

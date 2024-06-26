@@ -4,11 +4,14 @@ type PrivateRestAPI int
 
 const (
 	//Account
-	PrivateRestAccountBalance     PrivateRestAPI = iota //查看账户余额
-	PrivateRestAccountPosition                          //查看持仓信息
-	PrivateRestAccountConfig                            //查看账户配置
-	PrivateRestAccountTradeFee                          //查看账户手续费费率
-	PrivateRestAccountSetLeverage                       //设置杠杆倍数
+	PrivateRestAccountBalance         PrivateRestAPI = iota //查看账户余额
+	PrivateRestAccountPosition                              //查看持仓信息
+	PrivateRestAccountConfig                                //查看账户配置
+	PrivateRestAccountTradeFee                              //查看账户手续费费率
+	PrivateRestAccountLeverageInfo                          //获取杠杆倍数
+	PrivateRestAccountSetLeverage                           //设置杠杆倍数
+	PrivateRestAccountSetPositionMode                       //设置持仓模式
+	PrivateRestAccountSetAccountLevel                       //设置账户模式
 
 	//Trade
 	PrivateRestTradeOrderGet            //查看订单信息
@@ -28,11 +31,14 @@ const (
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	//Account
-	PrivateRestAccountBalance:     "/api/v5/account/balance",      //GET 查看账户余额
-	PrivateRestAccountPosition:    "/api/v5/account/positions",    //GET 查看持仓信息
-	PrivateRestAccountConfig:      "/api/v5/account/config",       //GET 查看账户配置
-	PrivateRestAccountTradeFee:    "/api/v5/account/trade-fee",    //GET 查看账户手续费费率
-	PrivateRestAccountSetLeverage: "/api/v5/account/set-leverage", //POST 设置杠杆倍数
+	PrivateRestAccountBalance:         "/api/v5/account/balance",           //GET 查看账户余额
+	PrivateRestAccountPosition:        "/api/v5/account/positions",         //GET 查看持仓信息
+	PrivateRestAccountConfig:          "/api/v5/account/config",            //GET 查看账户配置
+	PrivateRestAccountTradeFee:        "/api/v5/account/trade-fee",         //GET 查看账户手续费费率
+	PrivateRestAccountLeverageInfo:    "/api/v5/account/leverage-info",     //GET 获取杠杆倍数
+	PrivateRestAccountSetLeverage:     "/api/v5/account/set-leverage",      //POST 设置杠杆倍数
+	PrivateRestAccountSetPositionMode: "/api/v5/account/set-position-mode", //POST 设置持仓模式
+	PrivateRestAccountSetAccountLevel: "/api/v5/account/set-account-level", //POST 设置账户模式
 
 	//Trade
 	PrivateRestTradeOrderGet:            "/api/v5/trade/order",                  //GET 查看订单信息
