@@ -118,7 +118,7 @@ type PrivateRestTradeOrderAlgoGetResRow struct {
 	InstId               string                                               `json:"instId"`               //产品ID
 	Ccy                  string                                               `json:"ccy"`                  //保证金币种，仅适用于单币种保证金模式下的全仓杠杆订单
 	OrdId                string                                               `json:"ordId"`                //最新一笔订单ID，即将废弃。
-	OrdIdList            []string                                             `json:"ordIdList"`            //订单ID列表，当止盈止损存在市价拆单时，会有多个。
+	OrdIdList            []string                                             `json:"ordIdList,omitempty"`  //订单ID列表，当止盈止损存在市价拆单时，会有多个。
 	AlgoId               string                                               `json:"algoId"`               //策略委托单ID
 	ClOrdId              string                                               `json:"clOrdId"`              //客户自定义订单ID
 	Sz                   string                                               `json:"sz"`                   //委托数量
@@ -183,7 +183,7 @@ type PrivateRestTradeAlgoOrdersPendingResRow struct {
 	InstId               string                                              `json:"instId"`               //产品ID
 	Ccy                  string                                              `json:"ccy"`                  //保证金币种，仅适用于单币种保证金模式下的全仓杠杆订单
 	OrdId                string                                              `json:"ordId"`                //最新一笔订单ID，即将废弃。
-	OrdIdList            []string                                            `json:"ordIdList"`            //订单ID列表，当止盈止损存在市价拆单时，会有多个。
+	OrdIdList            []string                                            `json:"ordIdList,omitempty"`  //订单ID列表，当止盈止损存在市价拆单时，会有多个。
 	AlgoId               string                                              `json:"algoId"`               //策略委托单ID
 	ClOrdId              string                                              `json:"clOrdId"`              //客户自定义订单ID
 	Sz                   string                                              `json:"sz"`                   //委托数量
