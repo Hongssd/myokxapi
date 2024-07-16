@@ -789,6 +789,69 @@ func (api *PrivateRestTradeOrderAlgoGetAPI) AlgoClOrdId(algoClOrdId string) *Pri
 	return api
 }
 
+type PrivateRestTradePendingOrderAlgoAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradePendingOrderAlgoReq
+}
+type PrivateRestTradePendingOrderAlgoReq struct {
+	AlgoId      *string `json:"algoId"`      //String	否	策略委托单ID
+	InstType    *string `json:"instType"`    //String	否	产品类型
+	InstId      *string `json:"instId"`      //String	否	产品ID，如 BTC-USDT
+	OrdType     *string `json:"ordType"`     //String	是	订单类型
+	After       *string `json:"after"`       //String	否	请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的algoId
+	Before      *string `json:"before"`      //String	否	请求此ID之后（更新的数据）的分页内容，传的值为对应接口的algoId
+	Limit       *string `json:"limit"`       //String	否	返回结果的数量，最大为100，默认100条
+	AlgoClOrdId *string `json:"algoClOrdId"` //String	否	客户自定义策略订单ID
+}
+
+// String	否	策略委托单ID
+func (api *PrivateRestTradePendingOrderAlgoAPI) AlgoId(algoId string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.AlgoId = GetPointer(algoId)
+	return api
+}
+
+// String	否	产品类型
+func (api *PrivateRestTradePendingOrderAlgoAPI) InstType(instType string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.InstType = GetPointer(instType)
+	return api
+}
+
+// String	否	产品ID，如 BTC-USDT
+func (api *PrivateRestTradePendingOrderAlgoAPI) InstId(instId string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String	是	订单类型
+func (api *PrivateRestTradePendingOrderAlgoAPI) OrdType(ordType string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.OrdType = GetPointer(ordType)
+	return api
+}
+
+// String	否	请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的algoId
+func (api *PrivateRestTradePendingOrderAlgoAPI) After(after string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String	否	请求此ID之后（更新的数据）的分页内容，传的值为对应接口的algoId
+func (api *PrivateRestTradePendingOrderAlgoAPI) Before(before string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String	否	返回结果的数量，最大为100，默认100条
+func (api *PrivateRestTradePendingOrderAlgoAPI) Limit(limit string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
+
+// String	否	客户自定义策略订单ID
+func (api *PrivateRestTradePendingOrderAlgoAPI) AlgoClOrdId(algoClOrdId string) *PrivateRestTradePendingOrderAlgoAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
 // instId	String	是	产品ID，如 BTC-USD-190927
 // ordId	String	可选	订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
 // clOrdId	String	可选	用户自定义ID
