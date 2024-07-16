@@ -312,6 +312,335 @@ func (algoOrds *PrivateRestTradeOrderPostReqAttachAlgoOrd) SetAmendPxOnTriggerTy
 	return algoOrds
 }
 
+type PrivateRestTradeOrderAlgoPostReq struct {
+	//策略委托基本参数
+	InstId        *string `json:"instId,omitempty"`        //String	是	产品ID
+	TdMode        *string `json:"tdMode,omitempty"`        //String	是	交易模式 保证金模式：isolated：逐仓 ；cross：全仓 非保证金模式：cash：非保证金 spot_isolated：现货逐仓(仅适用于现货带单)
+	Ccy           *string `json:"ccy,omitempty"`           //String	否	保证金币种，仅适用于单币种保证金模式下的全仓杠杆订单
+	Side          *string `json:"side,omitempty"`          //String	是	订单方向 buy：买， sell：卖
+	PosSide       *string `json:"posSide,omitempty"`       //String	可选	持仓方向 在开平仓模式下必填，且仅可选择 long 或 short。
+	OrdType       *string `json:"ordType,omitempty"`       //String	是	订单类型 conditional：单向止盈止损 oco：双向止盈止损 trigger：计划委托 move_order_stop：移动止盈止损 twap：时间加权委托
+	Sz            *string `json:"sz,omitempty"`            //String	可选	委托数量 sz和closeFraction必填且只能填其一
+	Tag           *string `json:"tag,omitempty"`           //String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间
+	TgtCcy        *string `json:"tgtCcy,omitempty"`        //String	否	委托数量的类型 base_ccy: 交易货币 ；quote_ccy：计价货币 买单默认quote_ccy， 卖单默认base_ccy
+	AlgoClOrdId   *string `json:"algoClOrdId,omitempty"`   //String	否	客户自定义策略订单ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间
+	CloseFraction *string `json:"closeFraction,omitempty"` //String	可选	策略委托触发时，平仓的百分比。1 代表100% 现在系统只支持全部平仓，唯一接受参数为1 对于同一个仓位，仅支持一笔全部平仓的止盈止损挂单 仅适用于交割或永续 当posSide = net时，reduceOnly必须为true 仅适用于止盈止损 ordType = conditional 或 oco 仅适用于止盈止损市价订单 不支持组合保证金模式 sz和closeFraction必填且只能填其一
+
+	//止盈止损策略参数
+	PrivateRestTradeOrderAlgoPostReqConditional
+
+	//条件委托策略参数
+	PrivateRestTradeOrderAlgoPostReqTrigger
+
+	//移动止盈止损策略参数
+	PrivateRestTradeOrderAlgoPostReqMoveOrderStop
+
+	//时间加权策略参数
+	PrivateRestTradeOrderAlgoPostReqTwap
+}
+
+type PrivateRestTradeOrderAlgoPostReqConditional struct {
+	//止盈止损特有参数
+	TpTriggerPx     *string `json:"tpTriggerPx,omitempty"`     //String	否	止盈触发价，如果填写此参数，必须填写止盈委托价
+	TpTriggerPxType *string `json:"tpTriggerPxType,omitempty"` //String	否	止盈触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+	TpOrdPx         *string `json:"tpOrdPx,omitempty"`         //String	否	止盈委托价，如果填写此参数，必须填写止盈触发价 委托价格为-1时，执行市价止盈
+	TpOrdKind       *string `json:"tpOrdKind,omitempty"`       //String	否	止盈订单类型 condition: 条件单 limit: 限价单 默认为condition
+	SlTriggerPx     *string `json:"slTriggerPx,omitempty"`     //String	否	止损触发价，如果填写此参数，必须填写止损委托价
+	SlTriggerPxType *string `json:"slTriggerPxType,omitempty"` //String	否	止损触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+	SlOrdPx         *string `json:"slOrdPx,omitempty"`         //String	否	止损委托价，如果填写此参数，必须填写止损触发价 委托价格为-1时，执行市价止损
+	CxlOnClosePos   *bool   `json:"cxlOnClosePos,omitempty"`   //Boolean	否	决定用户所下的止盈止损订单是否与该交易产品对应的仓位关联。若关联，仓位被全平时，该止盈止损订单会被同时撤销；若不关联，仓位被撤销时，该止盈止损订单不受影响。 有效值： true：下单与仓位关联的止盈止损订单 false：下单与仓位不关联的止盈止损订单 默认值为false。若传入true，用户必须同时传入 reduceOnly = true，说明当下单与仓位关联的止盈止损订单时，必须为只减仓。 适用于单币种保证金模式、跨币种保证金模式。
+	ReduceOnly      *bool   `json:"reduceOnly,omitempty"`      //Boolean	否	是否只减仓，true 或 false，默认false 仅适用于币币杠杆，以及买卖模式下的交割/永续 仅适用于单币种保证金模式和跨币种保证金模式
+}
+
+type PrivateRestTradeOrderAlgoPostReqTrigger struct {
+	//条件委托特有参数
+	TriggerPx      *string                                                 `json:"triggerPx,omitempty"`      //String	是	计划委托触发价格
+	OrderPx        *string                                                 `json:"orderPx,omitempty"`        //String	是	委托价格 委托价格为-1时，执行市价委托
+	TriggerPxType  *string                                                 `json:"triggerPxType,omitempty"`  //String	否	计划委托触发价格类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+	AttachAlgoOrds *[]PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd `json:"attachAlgoOrds,omitempty"` //Array of object	否	下单附带止盈止损信息
+}
+
+type PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd struct {
+	//条件委托附带止盈止损
+	AttachAlgoClOrdId *string `json:"attachAlgoClOrdId,omitempty"` //String	否	下单附带止盈止损时，客户自定义的策略订单ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。 订单完全成交，下止盈止损委托单时，该值会传给algoClOrdId。
+	TpTriggerPx       *string `json:"tpTriggerPx,omitempty"`       //String	否	止盈触发价，如果填写此参数，必须填写止盈委托价
+	TpTriggerPxType   *string `json:"tpTriggerPxType,omitempty"`   //String	否	止盈触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+	TpOrdPx           *string `json:"tpOrdPx,omitempty"`           //String	否	止盈委托价，如果填写此参数，必须填写止盈触发价 委托价格为-1时，执行市价止盈
+	SlTriggerPx       *string `json:"slTriggerPx,omitempty"`       //String	否	止损触发价，如果填写此参数，必须填写止损委托价
+	SlTriggerPxType   *string `json:"slTriggerPxType,omitempty"`   //String	否	止损触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+	SlOrdPx           *string `json:"slOrdPx,omitempty"`           //String	否	止损委托价，如果填写此参数，必须填写止损触发价 委托价格为-1时，执行市价止损
+}
+type PrivateRestTradeOrderAlgoPostReqMoveOrderStop struct {
+	//移动止盈止损特有参数
+	CallbackRatio  *string `json:"callbackRatio,omitempty"`  //String	可选	回调幅度的比例，如 "0.05"代表"5%" callbackRatio和callbackSpread只能传入一个
+	CallbackSpread *string `json:"callbackSpread,omitempty"` //String	可选	回调幅度的价距
+	ActivePx       *string `json:"activePx,omitempty"`       //String	否	激活价格 激活价格是移动止盈止损的激活条件，当市场最新成交价达到或超过激活价格，委托被激活。激活后系统开始计算止盈止损的实际触发价格。如果不填写激活价格，即下单后就被激活。
+	ReduceOnly     *bool   `json:"reduceOnly,omitempty"`     //Boolean	否	是否只减仓，true 或 false，默认false 该参数仅在 交割/永续 的买卖模式下有效，开平模式忽略此参数
+}
+
+type PrivateRestTradeOrderAlgoPostReqTwap struct {
+	//时间加权委托特有参数
+	PxVar        *string `json:"pxVar,omitempty"`        //String	可选	吃单价优于盘口的比例，取值范围在 [0.0001,0.01] 之间，如 "0.01"代表"1%" 以买入为例，市价低于限制价时，策略开始用买一价向上取一定比例的委托价来委托小额买单。当前这个参数就用来确定向上的比例。 pxVar和pxSpread只能传入一个
+	PxSpread     *string `json:"pxSpread,omitempty"`     //String	可选	吃单单价优于盘口的价距，取值范围不小于0（无上限） 以买入为例，市价低于限制价时，策略开始用买一价向上取一定价距的委托价来委托小额买单。当前这个参数就用来确定向上的价距。
+	SzLimit      *string `json:"szLimit,omitempty"`      //String	是	单笔数量 以买入为例，市价低于 “限制价” 时，策略开始用买一价向上取一定价距 / 比例的委托价来委托 “一定数量” 的买单。当前这个参数用来确定其中的 “一定数量”。
+	PxLimit      *string `json:"pxLimit,omitempty"`      //String	是	吃单限制价，取值范围不小于0（无上限） 以买入为例，市价低于 “限制价” 时，策略开始用买一价向上取一定价距 / 比例的委托价来委托小额买单。当前这个参数就是其中的 “限制价”。
+	TimeInterval *string `json:"timeInterval,omitempty"` //String	是	下单间隔，单位为秒。 以买入为例，市价低于 “限制价” 时，策略开始按 “时间周期” 用买一价向上取一定价距 / 比例的委托价来委托小额买单。当前这个参数就是其中的 “时间周期”。
+}
+
+type PrivateRestTradeOrderAlgoPostAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeOrderAlgoPostReq
+}
+
+// String 是 产品ID
+func (api *PrivateRestTradeOrderAlgoPostAPI) InstId(instId string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 是 交易模式 保证金模式：isolated：逐仓 ；cross：全仓 非保证金模式：cash：非保证金 spot_isolated：现货逐仓(仅适用于现货带单)
+func (api *PrivateRestTradeOrderAlgoPostAPI) TdMode(tdMode string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.TdMode = GetPointer(tdMode)
+	return api
+}
+
+// String 否 保证金币种，仅适用于单币种保证金模式下的全仓杠杆订单
+func (api *PrivateRestTradeOrderAlgoPostAPI) Ccy(ccy string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// String 否 订单方向 buy：买， sell：卖
+func (api *PrivateRestTradeOrderAlgoPostAPI) Side(side string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.Side = GetPointer(side)
+	return api
+}
+
+// String 可选 持仓方向 在开平仓模式下必填，且仅可选择 long 或 short。 仅适用交割、永续。
+func (api *PrivateRestTradeOrderAlgoPostAPI) PosSide(posSide string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PosSide = GetPointer(posSide)
+	return api
+}
+
+// String 是 订单类型 conditional：单向止盈止损 oco：双向止盈止损 trigger：计划委托 move_order_stop：移动止盈止损 twap：时间加权委托
+func (api *PrivateRestTradeOrderAlgoPostAPI) OrdType(ordType string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.OrdType = GetPointer(ordType)
+	return api
+}
+
+// String 可选 委托数量 sz和closeFraction必填且只能填其一
+func (api *PrivateRestTradeOrderAlgoPostAPI) Sz(sz string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.Sz = GetPointer(sz)
+	return api
+}
+
+// String 否 订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间
+func (api *PrivateRestTradeOrderAlgoPostAPI) Tag(tag string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// String 否 委托数量的类型 base_ccy: 交易货币 ；quote_ccy：计价货币 买单默认quote_ccy， 卖单默认base_ccy
+func (api *PrivateRestTradeOrderAlgoPostAPI) TgtCcy(tgtCcy string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.TgtCcy = GetPointer(tgtCcy)
+	return api
+}
+
+// String 否 客户自定义策略订单ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间
+func (api *PrivateRestTradeOrderAlgoPostAPI) AlgoClOrdId(algoClOrdId string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
+// String 可选 策略委托触发时，平仓的百分比。1 代表100% 现在系统只支持全部平仓，唯一接受参数为1 对于同一个仓位，仅支持一笔全部平仓的止盈止损挂单 仅适用于交割或永续 当posSide = net时，reduceOnly必须为true 仅适用于止盈止损 ordType = conditional 或 oco 仅适用于止盈止损市价订单 不支持组合保证金模式 sz和closeFraction必填且只能填其一
+func (api *PrivateRestTradeOrderAlgoPostAPI) CloseFraction(closeFraction string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.CloseFraction = GetPointer(closeFraction)
+	return api
+}
+
+// 止盈止损特有参数
+// String 否 止盈触发价，如果填写此参数，必须填写止盈委托价
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalTpTriggerPx(tpTriggerPx string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.TpTriggerPx = GetPointer(tpTriggerPx)
+	return api
+}
+
+// String 否 止盈触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalTpTriggerPxType(tpTriggerPxType string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.TpTriggerPxType = GetPointer(tpTriggerPxType)
+	return api
+}
+
+// String 否 止盈委托价，如果填写此参数，必须填写止盈触发价 委托价格为-1时，执行市价止盈
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalTpOrdPx(tpOrdPx string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.TpOrdPx = GetPointer(tpOrdPx)
+	return api
+}
+
+// String 否 止盈订单类型 condition: 条件单 limit: 限价单 默认为condition
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalTpOrdKind(tpOrdKind string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.TpOrdKind = GetPointer(tpOrdKind)
+	return api
+}
+
+// String 否 止损触发价，如果填写此参数，必须填写止损委托价
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalSlTriggerPx(slTriggerPx string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.SlTriggerPx = GetPointer(slTriggerPx)
+	return api
+}
+
+// String 否 止损触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalSlTriggerPxType(slTriggerPxType string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.SlTriggerPxType = GetPointer(slTriggerPxType)
+	return api
+}
+
+// String 否 止损委托价，如果填写此参数，必须填写止损触发价 委托价格为-1时，执行市价止损
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalSlOrdPx(slOrdPx string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.SlOrdPx = GetPointer(slOrdPx)
+	return api
+}
+
+// Boolean 否 决定用户所下的止盈止损订单是否与该交易产品对应的仓位关联。若关联，仓位被全平时，该止盈止损订单会被同时撤销；若不关联，仓位被撤销时，该止盈止损订单不受影响。 有效值： true：下单与仓位关联的止盈止损订单 false：下单与仓位不关联的止盈止损订单 默认值为false。若传入true，用户必须同时传入 reduceOnly = true，说明当下单与仓位关联的止盈止损订单时，必须为只减仓。 适用于单币种保证金模式、跨币种保证金模式。
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalCxlOnClosePos(cxlOnClosePos bool) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.CxlOnClosePos = GetPointer(cxlOnClosePos)
+	return api
+}
+
+// Boolean 否 是否只减仓，true 或 false，默认false 仅适用于币币杠杆，以及买卖模式下的交割/永续 仅适用于单币种保证金模式和跨币种保证金模式
+func (api *PrivateRestTradeOrderAlgoPostAPI) ConditionalReduceOnly(reduceOnly bool) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqConditional.ReduceOnly = GetPointer(reduceOnly)
+	return api
+}
+
+// 计划委托特有参数
+// String 是 计划委托触发价格
+func (api *PrivateRestTradeOrderAlgoPostAPI) TriggerTriggerPx(triggerPx string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTrigger.TriggerPx = GetPointer(triggerPx)
+	return api
+}
+
+// String 是 委托价格 委托价格为-1时，执行市价委托
+func (api *PrivateRestTradeOrderAlgoPostAPI) TriggerOrderPx(orderPx string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTrigger.OrderPx = GetPointer(orderPx)
+	return api
+}
+
+// String 否 计划委托触发价格类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+func (api *PrivateRestTradeOrderAlgoPostAPI) TriggerTriggerPxType(triggerPxType string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTrigger.TriggerPxType = GetPointer(triggerPxType)
+	return api
+}
+
+// 下单附带止盈止损信息
+func (api *PrivateRestTradeOrderAlgoPostAPI) TriggerAttachAlgoOrds(attachAlgoOrds []PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTrigger.AttachAlgoOrds = &attachAlgoOrds
+	return api
+}
+
+func (api *PrivateRestTradeOrderAlgoPostAPI) TriggerNewAttachAlgoOrd() *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	attachAlgoOrd := PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd{}
+	return &attachAlgoOrd
+}
+
+// String 可选 下单附带止盈止损时，客户自定义的策略订单ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。 订单完全成交，下止盈止损委托单时，该值会传给algoClOrdId。
+func (algoOrds *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) SetAttachAlgoClOrdId(attachAlgoClOrdId string) *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	algoOrds.AttachAlgoClOrdId = GetPointer(attachAlgoClOrdId)
+	return algoOrds
+}
+
+// String 可选 止盈触发价，如果填写此参数，必须填写止盈委托价
+func (algoOrds *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) SetTpTriggerPx(tpTriggerPx string) *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	algoOrds.TpTriggerPx = GetPointer(tpTriggerPx)
+	return algoOrds
+}
+
+// String 可选 止盈触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+func (algoOrds *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) SetTpTriggerPxType(tpTriggerPxType string) *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	algoOrds.TpTriggerPxType = GetPointer(tpTriggerPxType)
+	return algoOrds
+}
+
+// String 可选 止盈委托价，如果填写此参数，必须填写止盈触发价 委托价格为-1时，执行市价止盈
+func (algoOrds *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) SetTpOrdPx(tpOrdPx string) *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	algoOrds.TpOrdPx = GetPointer(tpOrdPx)
+	return algoOrds
+}
+
+// String 可选 止损触发价，如果填写此参数，必须填写止损委托价
+func (algoOrds *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) SetSlTriggerPx(slTriggerPx string) *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	algoOrds.SlTriggerPx = GetPointer(slTriggerPx)
+	return algoOrds
+}
+
+// String 可选 止损触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+func (algoOrds *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) SetSlTriggerPxType(slTriggerPxType string) *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	algoOrds.SlTriggerPxType = GetPointer(slTriggerPxType)
+	return algoOrds
+}
+
+// String 可选 止损委托价，如果填写此参数，必须填写止损触发价 委托价格为-1时，执行市价止损
+func (algoOrds *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd) SetSlOrdPx(slOrdPx string) *PrivateRestTradeOrderAlgoPostReqTriggerAttachAlgoOrd {
+	algoOrds.SlOrdPx = GetPointer(slOrdPx)
+	return algoOrds
+}
+
+// 移动止盈止损特有参数
+// String 可选 回调幅度的比例，如 "0.05"代表"5%" callbackRatio和callbackSpread只能传入一个
+func (api *PrivateRestTradeOrderAlgoPostAPI) MoveOrderStopCallbackRatio(callbackRatio string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqMoveOrderStop.CallbackRatio = GetPointer(callbackRatio)
+	return api
+}
+
+// String 可选 回调幅度的价距，取值范围不小于0（无上限） 以买入为例，市价低于限制价时，策略开始用买一价向上取一定价距的委托价来委托小额买单。当前这个参数就用来确定向上的价距。
+func (api *PrivateRestTradeOrderAlgoPostAPI) MoveOrderStopCallbackSpread(callbackSpread string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqMoveOrderStop.CallbackSpread = GetPointer(callbackSpread)
+	return api
+}
+
+// String 可选 激活价格 激活价格是移动止盈止损的激活条件，当市场最新成交价达到或超过激活价格，委托被激活。激活后系统开始计算止盈止损的实际触发价格。如果不填写激活价格，即下单后就被激活。
+func (api *PrivateRestTradeOrderAlgoPostAPI) MoveOrderStopActivePx(activePx string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqMoveOrderStop.ActivePx = GetPointer(activePx)
+	return api
+}
+
+// Boolean 否 是否只减仓，true 或 false，默认false 该参数仅在 交割/永续 的买卖模式下有效，开平模式忽略此参数
+func (api *PrivateRestTradeOrderAlgoPostAPI) MoveOrderStopReduceOnly(reduceOnly bool) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqMoveOrderStop.ReduceOnly = GetPointer(reduceOnly)
+	return api
+}
+
+// 时间加权委托特有参数
+// String 可选 吃单价优于盘口的比例，取值范围在 [0.0001,0.01] 之间，如 "0.01"代表"1%" 以买入为例，市价低于限制价时，策略开始用买一价向上取一定比例的委托价来委托小额买单。当前这个参数就用来确定向上的比例。 pxVar和pxSpread只能传入一个
+func (api *PrivateRestTradeOrderAlgoPostAPI) TwapPxVar(pxVar string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTwap.PxVar = GetPointer(pxVar)
+	return api
+}
+
+// String 可选 吃单单价优于盘口的价距，取值范围不小于0（无上限） 以买入为例，市价低于限制价时，策略开始用买一价向上取一定价距的委托价来委托小额买单。当前这个参数就用来确定向上的价距。
+func (api *PrivateRestTradeOrderAlgoPostAPI) TwapPxSpread(pxSpread string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTwap.PxSpread = GetPointer(pxSpread)
+	return api
+}
+
+// String 是 单笔数量 以买入为例，市价低于 “限制价” 时，策略开始用买一价向上取一定价距 / 比例的委托价来委托 “一定数量” 的买单。当前这个参数用来确定其中的 “一定数量”。
+func (api *PrivateRestTradeOrderAlgoPostAPI) TwapSzLimit(szLimit string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTwap.SzLimit = GetPointer(szLimit)
+	return api
+}
+
+// String 是 吃单限制价，取值范围不小于0（无上限） 以买入为例，市价低于 “限制价” 时，策略开始用买一价向上取一定价距 / 比例的委托价来委托小额买单。当前这个参数就是其中的 “限制价”。
+func (api *PrivateRestTradeOrderAlgoPostAPI) TwapPxLimit(pxLimit string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTwap.PxLimit = GetPointer(pxLimit)
+	return api
+}
+
+// String 是 下单间隔，单位为秒。 以买入为例，市价低于 “限制价” 时，策略开始按 “时间周期” 用买一价向上取一定价距 / 比例的委托价来委托小额买单。当前这个参数就是其中的 “时间周期”。
+func (api *PrivateRestTradeOrderAlgoPostAPI) TwapTimeInterval(timeInterval string) *PrivateRestTradeOrderAlgoPostAPI {
+	api.req.PrivateRestTradeOrderAlgoPostReqTwap.TimeInterval = GetPointer(timeInterval)
+	return api
+}
+
 // instId	String	是	产品ID，如 BTC-USD-190927
 // ordId	String	可选	订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
 // clOrdId	String	可选	用户自定义ID

@@ -632,7 +632,7 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					}
 					continue
 				}
-				if strings.Contains(string(data), "orders") {
+				if strings.Contains(string(data), "channel\":\"orders\"") {
 					ordersList, err := handleWsOrders(data)
 					if len(*ordersList) == 0 {
 						continue
@@ -648,6 +648,11 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 							sub.resultChan <- order
 						}
 					}
+					continue
+				}
+
+				if strings.Contains(string(data), "channel\":\"orders-algo\"") {
+					log.Warn(string(data))
 					continue
 				}
 

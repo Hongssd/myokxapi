@@ -14,9 +14,12 @@ const (
 	PrivateRestAccountSetAccountLevel                       //设置账户模式
 
 	//Trade
-	PrivateRestTradeOrderGet            //查看订单信息
-	PrivateRestTradeOrdersPending       //查看未成交订单列表
-	PrivateRestTradeOrderPost           //下单
+	PrivateRestTradeOrderGet      //查看订单信息
+	PrivateRestTradeOrdersPending //查看未成交订单列表
+	PrivateRestTradeOrderPost     //下单
+
+	PrivateRestTradeOrderAlgoPost //策略委托下单
+
 	PrivateRestTradeCancelOrder         //撤单
 	PrivateRestTradeAmendOrder          //修改订单
 	PrivateRestTradeBatchOrders         //批量下单
@@ -41,9 +44,12 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAccountSetAccountLevel: "/api/v5/account/set-account-level", //POST 设置账户模式
 
 	//Trade
-	PrivateRestTradeOrderGet:            "/api/v5/trade/order",                  //GET 查看订单信息
-	PrivateRestTradeOrdersPending:       "/api/v5/trade/orders-pending",         //GET 查看未成交订单列表
-	PrivateRestTradeOrderPost:           "/api/v5/trade/order",                  //POST 下单
+	PrivateRestTradeOrderGet:      "/api/v5/trade/order",          //GET 查看订单信息
+	PrivateRestTradeOrdersPending: "/api/v5/trade/orders-pending", //GET 查看未成交订单列表
+	PrivateRestTradeOrderPost:     "/api/v5/trade/order",          //POST 下单
+
+	PrivateRestTradeOrderAlgoPost: "/api/v5/trade/order-algo", //POST  策略委托下单
+
 	PrivateRestTradeCancelOrder:         "/api/v5/trade/cancel-order",           //POST 撤单
 	PrivateRestTradeAmendOrder:          "/api/v5/trade/amend-order",            //POST 修改订单
 	PrivateRestTradeBatchOrders:         "/api/v5/trade/batch-orders",           //POST 批量下单

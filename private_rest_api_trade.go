@@ -41,6 +41,22 @@ func (api *PrivateRestTradeOrderPostAPI) Do() (*OkxRestRes[PrivateRestTradeOrder
 	return okxCallAPIWithSecret[PrivateRestTradeOrderPostRes](api.client.c, url, reqBody, POST)
 }
 
+// okx PrivateRestTradeOrderAlgoPost PrivateRest接口 POST 策略委托下单
+func (client *PrivateRestClient) NewPrivateRestTradeOrderAlgoPost() *PrivateRestTradeOrderAlgoPostAPI {
+	return &PrivateRestTradeOrderAlgoPostAPI{
+		client: client,
+		req:    &PrivateRestTradeOrderAlgoPostReq{},
+	}
+}
+func (api *PrivateRestTradeOrderAlgoPostAPI) Do() (*OkxRestRes[PrivateRestTradeOrderAlgoPostRes], error) {
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestTradeOrderAlgoPost])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestTradeOrderAlgoPostRes](api.client.c, url, reqBody, POST)
+}
+
 // okx PrivateRestTradeCancelOrder PrivateRest接口 POST 撤单
 func (client *PrivateRestClient) NewPrivateRestTradeCancelOrder() *PrivateRestTradeCancelOrderAPI {
 	return &PrivateRestTradeCancelOrderAPI{
