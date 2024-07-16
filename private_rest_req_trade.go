@@ -767,6 +767,28 @@ func (api *PrivateRestTradeAmendOrderAlgoAPI) NewTpTriggerPxType(newTpTriggerPxT
 	return api
 }
 
+type PrivateRestTradeOrderAlgoGetAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeOrderAlgoGetReq
+}
+
+// algoId和algoClOrdId必须传一个，若传两个，以algoId为主
+// algoClOrdId	String	可选	客户自定义策略订单ID
+// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+type PrivateRestTradeOrderAlgoGetReq struct {
+	AlgoId      *string `json:"algoId"`      //String	可选	策略委托单ID
+	AlgoClOrdId *string `json:"algoClOrdId"` //String	可选	客户自定义策略订单ID
+}
+
+func (api *PrivateRestTradeOrderAlgoGetAPI) AlgoId(algoId string) *PrivateRestTradeOrderAlgoGetAPI {
+	api.req.AlgoId = GetPointer(algoId)
+	return api
+}
+func (api *PrivateRestTradeOrderAlgoGetAPI) AlgoClOrdId(algoClOrdId string) *PrivateRestTradeOrderAlgoGetAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
 // instId	String	是	产品ID，如 BTC-USD-190927
 // ordId	String	可选	订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
 // clOrdId	String	可选	用户自定义ID
