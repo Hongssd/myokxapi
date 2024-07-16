@@ -641,6 +641,46 @@ func (api *PrivateRestTradeOrderAlgoPostAPI) TwapTimeInterval(timeInterval strin
 	return api
 }
 
+type PrivateRestTradeCancelOrderAlgoReq []PrivateRestTradeCancelOrderAlgoReqRow
+
+type PrivateRestTradeCancelOrderAlgoReqRow struct {
+	AlgoId string `json:"algoId"` //String	是	策略委托ID
+	InstId string `json:"instId"` //String	是	产品ID 如 BTC-USDT
+}
+
+type PrivateRestTradeCancelOrderAlgoAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeCancelOrderAlgoReq
+}
+
+func (api *PrivateRestTradeCancelOrderAlgoAPI) AddCancelOrderAlgo(row ...*PrivateRestTradeCancelOrderAlgoReqRow) *PrivateRestTradeCancelOrderAlgoAPI {
+	if api.req == nil {
+		api.req = &PrivateRestTradeCancelOrderAlgoReq{}
+	}
+
+	for _, r := range row {
+		*api.req = append(*api.req, *r)
+	}
+
+	return api
+}
+
+func (api *PrivateRestTradeCancelOrderAlgoAPI) NewCancelOrderAlgo() *PrivateRestTradeCancelOrderAlgoReqRow {
+	return &PrivateRestTradeCancelOrderAlgoReqRow{}
+}
+
+// String	是	策略委托ID
+func (row *PrivateRestTradeCancelOrderAlgoReqRow) SetAlgoId(algoId string) *PrivateRestTradeCancelOrderAlgoReqRow {
+	row.AlgoId = algoId
+	return row
+}
+
+// String	是	产品ID 如 BTC-USDT
+func (row *PrivateRestTradeCancelOrderAlgoReqRow) SetInstId(instId string) *PrivateRestTradeCancelOrderAlgoReqRow {
+	row.InstId = instId
+	return row
+}
+
 // instId	String	是	产品ID，如 BTC-USD-190927
 // ordId	String	可选	订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
 // clOrdId	String	可选	用户自定义ID
