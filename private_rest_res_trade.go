@@ -93,6 +93,14 @@ type PrivateRestTradeCancelOrderAlgoResRow struct {
 	SCode       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
 }
 
+type PrivateRestTradeAmendOrderAlgoRes []PrivateRestTradeAmendOrderAlgoResRow
+type PrivateRestTradeAmendOrderAlgoResRow struct {
+	AlgoId      string `json:"algoId"`      //String	策略委托单ID
+	AlgoClOrdId string `json:"algoClOrdId"` //String	客户自定义策略订单ID
+	SCode       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
+	SMsg        string `json:"sMsg"`        //String	事件执行失败时的msg
+}
+
 type PrivateRestTradeCancelOrderRes []PrivateRestTradeCancelOrderResRow
 type PrivateRestTradeCancelOrderResRow struct {
 	OrdId   string `json:"ordId"`   //String	订单ID
