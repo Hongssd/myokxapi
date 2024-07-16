@@ -18,7 +18,10 @@ const (
 	PrivateRestTradeOrdersPending //查看未成交订单列表
 	PrivateRestTradeOrderPost     //下单
 
-	PrivateRestTradeOrderAlgoPost //策略委托下单
+	PrivateRestTradeOrderAlgoPost   //策略委托下单
+	PrivateRestTradeCancelOrderAlgo //撤销策略委托订单
+	PrivateRestTradeAmendOrderAlgo  //修改策略委托订单
+	PrivateRestTradeOrderAlgoGet    //获取策略委托单信息
 
 	PrivateRestTradeCancelOrder         //撤单
 	PrivateRestTradeAmendOrder          //修改订单
@@ -48,7 +51,10 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestTradeOrdersPending: "/api/v5/trade/orders-pending", //GET 查看未成交订单列表
 	PrivateRestTradeOrderPost:     "/api/v5/trade/order",          //POST 下单
 
-	PrivateRestTradeOrderAlgoPost: "/api/v5/trade/order-algo", //POST  策略委托下单
+	PrivateRestTradeOrderAlgoPost:   "/api/v5/trade/order-algo",   //POST  策略委托下单
+	PrivateRestTradeCancelOrderAlgo: "/api/v5/trade/cancel-algos", // POST 撤销策略委托订单
+	PrivateRestTradeAmendOrderAlgo:  "/api/v5/trade/amend-algos",  // POST 修改策略委托订单
+	PrivateRestTradeOrderAlgoGet:    "/api/v5/trade/order-algo",   //GET 获取策略委托单信息
 
 	PrivateRestTradeCancelOrder:         "/api/v5/trade/cancel-order",           //POST 撤单
 	PrivateRestTradeAmendOrder:          "/api/v5/trade/amend-order",            //POST 修改订单

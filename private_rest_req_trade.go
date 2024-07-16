@@ -641,6 +641,154 @@ func (api *PrivateRestTradeOrderAlgoPostAPI) TwapTimeInterval(timeInterval strin
 	return api
 }
 
+type PrivateRestTradeCancelOrderAlgoReq []PrivateRestTradeCancelOrderAlgoReqRow
+
+type PrivateRestTradeCancelOrderAlgoReqRow struct {
+	AlgoId string `json:"algoId"` //String	是	策略委托ID
+	InstId string `json:"instId"` //String	是	产品ID 如 BTC-USDT
+}
+
+type PrivateRestTradeCancelOrderAlgoAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeCancelOrderAlgoReq
+}
+
+func (api *PrivateRestTradeCancelOrderAlgoAPI) AddCancelOrderAlgo(row ...*PrivateRestTradeCancelOrderAlgoReqRow) *PrivateRestTradeCancelOrderAlgoAPI {
+	if api.req == nil {
+		api.req = &PrivateRestTradeCancelOrderAlgoReq{}
+	}
+
+	for _, r := range row {
+		*api.req = append(*api.req, *r)
+	}
+
+	return api
+}
+
+func (api *PrivateRestTradeCancelOrderAlgoAPI) NewCancelOrderAlgo() *PrivateRestTradeCancelOrderAlgoReqRow {
+	return &PrivateRestTradeCancelOrderAlgoReqRow{}
+}
+
+// String	是	策略委托ID
+func (row *PrivateRestTradeCancelOrderAlgoReqRow) SetAlgoId(algoId string) *PrivateRestTradeCancelOrderAlgoReqRow {
+	row.AlgoId = algoId
+	return row
+}
+
+// String	是	产品ID 如 BTC-USDT
+func (row *PrivateRestTradeCancelOrderAlgoReqRow) SetInstId(instId string) *PrivateRestTradeCancelOrderAlgoReqRow {
+	row.InstId = instId
+	return row
+}
+
+type PrivateRestTradeAmendOrderAlgoAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeAmendOrderAlgoReq
+}
+
+type PrivateRestTradeAmendOrderAlgoReq struct {
+	InstId             *string `json:"instId,omitempty"`             //String	是	产品ID
+	AlgoId             *string `json:"algoId,omitempty"`             //String	可选	策略委托单ID algoId和algoClOrdId必须传一个，若传两个，以algoId为主
+	AlgoClOrdId        *string `json:"algoClOrdId,omitempty"`        //String	可选	客户自定义策略订单ID algoId和algoClOrdId必须传一个，若传两个，以algoId为主
+	CxlOnFail          *bool   `json:"cxlOnFail,omitempty"`          //Boolean	否	当订单修改失败时，该订单是否需要自动撤销。默认为false
+	ReqId              *string `json:"reqId,omitempty"`              //String	否	用户自定义修改事件ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间
+	NewSz              *string `json:"newSz,omitempty"`              //String	可选	修改的新数量，必须大于0。
+	NewTpTriggerPx     *string `json:"newTpTriggerPx,omitempty"`     //String	可选	止盈触发价 如果止盈触发价或者委托价为0，那代表删除止盈。只适用于交割和永续合约。
+	NewTpOrdPx         *string `json:"newTpOrdPx,omitempty"`         //String	可选	止盈委托价 委托价格为-1时，执行市价止盈
+	NewSlTriggerPx     *string `json:"newSlTriggerPx,omitempty"`     //String	可选	止损触发价 如果止损触发价或者委托价为0，那代表删除止损。只适用于交割和永续合约。
+	NewSlOrdPx         *string `json:"newSlOrdPx,omitempty"`         //String	可选	止损委托价 委托价格为-1时，执行市价止损
+	NewTpTriggerPxType *string `json:"newTpTriggerPxType,omitempty"` //String	可选	止盈触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+	NewSlTriggerPxType *string `json:"newSlTriggerPxType,omitempty"` //String	可选	止损触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+}
+
+// instid String 是 产品ID
+func (api *PrivateRestTradeAmendOrderAlgoAPI) InstId(instId string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// algoId String 可选 策略委托单ID algoId和algoClOrdId必须传一个，若传两个，以algoId为主
+func (api *PrivateRestTradeAmendOrderAlgoAPI) AlgoId(algoId string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.AlgoId = GetPointer(algoId)
+	return api
+}
+
+// algoClOrdId String 可选 客户自定义策略订单ID algoId和algoClOrdId必须传一个，若传两个，以algoId为主
+func (api *PrivateRestTradeAmendOrderAlgoAPI) AlgoClOrdId(algoClOrdId string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
+// cxlOnFail Boolean 否 当订单修改失败时，该订单是否需要自动撤销。默认为false
+func (api *PrivateRestTradeAmendOrderAlgoAPI) CxlOnFail(cxlOnFail bool) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.CxlOnFail = GetPointer(cxlOnFail)
+	return api
+}
+
+// reqId String 否 用户自定义修改事件ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间
+func (api *PrivateRestTradeAmendOrderAlgoAPI) ReqId(reqId string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.ReqId = GetPointer(reqId)
+	return api
+}
+
+// newSz String 可选 修改的新数量，必须大于0。
+func (api *PrivateRestTradeAmendOrderAlgoAPI) NewSz(newSz string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.NewSz = GetPointer(newSz)
+	return api
+}
+
+// newTpTriggerPx String 可选 止盈触发价 如果止盈触发价或者委托价为0，那代表删除止盈。只适用于交割和永续合约。
+func (api *PrivateRestTradeAmendOrderAlgoAPI) NewTpTriggerPx(newTpTriggerPx string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.NewTpTriggerPx = GetPointer(newTpTriggerPx)
+	return api
+}
+
+// newTpOrdPx String 可选 止盈委托价 委托价格为-1时，执行市价止盈
+func (api *PrivateRestTradeAmendOrderAlgoAPI) NewTpOrdPx(newTpOrdPx string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.NewTpOrdPx = GetPointer(newTpOrdPx)
+	return api
+}
+
+// newSlTriggerPx String 可选 止损触发价 如果止损触发价或者委托价为0，那代表删除止损。只适用于交割和永续合约。
+func (api *PrivateRestTradeAmendOrderAlgoAPI) NewSlTriggerPx(newSlTriggerPx string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.NewSlTriggerPx = GetPointer(newSlTriggerPx)
+	return api
+}
+
+// newSlOrdPx String 可选 止损委托价 委托价格为-1时，执行市价止损
+func (api *PrivateRestTradeAmendOrderAlgoAPI) NewSlOrdPx(newSlOrdPx string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.NewSlOrdPx = GetPointer(newSlOrdPx)
+	return api
+}
+
+// newTpTriggerPxType String 可选 止盈触发价类型 last：最新价格 index：指数价格 mark：标记价格 默认为last
+func (api *PrivateRestTradeAmendOrderAlgoAPI) NewTpTriggerPxType(newTpTriggerPxType string) *PrivateRestTradeAmendOrderAlgoAPI {
+	api.req.NewTpTriggerPxType = GetPointer(newTpTriggerPxType)
+	return api
+}
+
+type PrivateRestTradeOrderAlgoGetAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeOrderAlgoGetReq
+}
+
+// algoId和algoClOrdId必须传一个，若传两个，以algoId为主
+// algoClOrdId	String	可选	客户自定义策略订单ID
+// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+type PrivateRestTradeOrderAlgoGetReq struct {
+	AlgoId      *string `json:"algoId"`      //String	可选	策略委托单ID
+	AlgoClOrdId *string `json:"algoClOrdId"` //String	可选	客户自定义策略订单ID
+}
+
+func (api *PrivateRestTradeOrderAlgoGetAPI) AlgoId(algoId string) *PrivateRestTradeOrderAlgoGetAPI {
+	api.req.AlgoId = GetPointer(algoId)
+	return api
+}
+func (api *PrivateRestTradeOrderAlgoGetAPI) AlgoClOrdId(algoClOrdId string) *PrivateRestTradeOrderAlgoGetAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
 // instId	String	是	产品ID，如 BTC-USD-190927
 // ordId	String	可选	订单ID， ordId和clOrdId必须传一个，若传两个，以ordId为主
 // clOrdId	String	可选	用户自定义ID
