@@ -45,16 +45,16 @@ type WsStreamClient struct {
 	conn            *websocket.Conn
 	connId          string
 	commonSubMap    MySyncMap[string, *Subscription[WsActionResult]] //订阅的返回结果
-	waitSubResult   *Subscription[WsActionResult]
-	waitSubResultMu *sync.Mutex
+	waitSubResult   *Subscription[WsActionResult]                    //订阅结果
+	waitSubResultMu *sync.Mutex                                      //订阅结果锁
 
-	waitOrderResult   *Subscription[WsOrderResult]
-	waitOrderResultMu *sync.Mutex
+	waitOrderResult   *Subscription[WsOrderResult] //订单操作结果
+	waitOrderResultMu *sync.Mutex                  //订单操作结果锁
 
-	candleSubMap MySyncMap[string, *Subscription[WsCandles]]
-	booksSubMap  MySyncMap[string, *Subscription[WsBooks]]
-	tradesSubMap MySyncMap[string, *Subscription[WsTrades]]
-	ordersSubMap MySyncMap[string, *Subscription[WsOrders]]
+	candleSubMap MySyncMap[string, *Subscription[WsCandles]] //K线推送订阅频道
+	booksSubMap  MySyncMap[string, *Subscription[WsBooks]]   //深度推送订阅频道
+	tradesSubMap MySyncMap[string, *Subscription[WsTrades]]  //成交流推送订阅频道
+	ordersSubMap MySyncMap[string, *Subscription[WsOrders]]  //订单推送订阅频道
 
 	resultChan chan []byte
 	errChan    chan error
