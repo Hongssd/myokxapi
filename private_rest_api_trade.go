@@ -134,6 +134,30 @@ func (api *PrivateRestTradeAmendOrderAPI) Do() (*OkxRestRes[PrivateRestTradeAmen
 	return okxCallAPIWithSecret[PrivateRestTradeAmendOrderRes](api.client.c, url, reqBody, POST)
 }
 
+// okx PrivateRestTradePendingOrderAlgo PrivateRest接口 GET 获取未完成策略委托单列表
+func (client *PrivateRestClient) NewPrivateRestTradePendingOrderAlgo() *PrivateRestTradePendingOrderAlgoAPI {
+	return &PrivateRestTradePendingOrderAlgoAPI{
+		client: client,
+		req:    &PrivateRestTradePendingOrderAlgoReq{},
+	}
+}
+func (api *PrivateRestTradePendingOrderAlgoAPI) Do() (*OkxRestRes[PrivateRestTradePendingOrderAlgoRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradePendingOrderAlgo])
+	return okxCallAPIWithSecret[PrivateRestTradePendingOrderAlgoRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx PrivateRestTradeOrderAlgoHistory PrivateRest接口 GET 获取历史策略委托单记录
+func (client *PrivateRestClient) NewPrivateRestTradeOrderAlgoHistory() *PrivateRestTradeOrderAlgoHistoryAPI {
+	return &PrivateRestTradeOrderAlgoHistoryAPI{
+		client: client,
+		req:    &PrivateRestTradeOrderAlgoHistoryReq{},
+	}
+}
+func (api *PrivateRestTradeOrderAlgoHistoryAPI) Do() (*OkxRestRes[PrivateRestTradeOrderAlgoHistoryRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradeOrderAlgoHistory])
+	return okxCallAPIWithSecret[PrivateRestTradeOrderAlgoHistoryRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
 // okx PrivateRestTradeBatchOrders PrivateRest接口 POST 批量下单
 func (client *PrivateRestClient) NewPrivateRestTradeBatchOrders() *PrivateRestTradeBatchOrdersAPI {
 	return &PrivateRestTradeBatchOrdersAPI{
