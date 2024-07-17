@@ -20,7 +20,7 @@ func getOrdersAlgoSubscribeArg(instType, instFamily, instId string) WsSubscribeA
 // > instType	String	是	产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权 ANY：全部
 // > instFamily	String	否	交易品种 适用于交割/永续/期权
 // > instId	    String	否	产品ID
-func (ws *BusinessWsStreamClient) SubscribeOrdersAlgo(instType, instFamily, instId string) (*Subscription[WsOrders], error) {
+func (ws *BusinessWsStreamClient) SubscribeOrdersAlgo(instType, instFamily, instId string) (*Subscription[WsOrdersAlgo], error) {
 	arg := getOrdersAlgoSubscribeArg(instType, instFamily, instId)
 	args := []WsSubscribeArg{arg}
 	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
@@ -32,20 +32,41 @@ func (ws *BusinessWsStreamClient) SubscribeOrdersAlgo(instType, instFamily, inst
 		return nil, err
 	}
 	log.Infof("SubscribeOrders Success: args:%v", doSub.Args)
-	sub := &Subscription[WsOrders]{
+	sub := &Subscription[WsOrdersAlgo]{
 		SubId:      doSub.SubId,
 		Op:         SUBSCRIBE,
 		Args:       doSub.Args,
-		resultChan: make(chan WsOrders, 50),
+		resultChan: make(chan WsOrdersAlgo, 50),
 		errChan:    make(chan error),
 		closeChan:  make(chan struct{}),
 		Ws:         &ws.WsStreamClient,
 	}
 	for _, arg := range args {
 		keyData, _ := json.Marshal(&arg)
-		ws.ordersSubMap.Store(string(keyData), sub)
+		ws.ordersAlgoSubMap.Store(string(keyData), sub)
 	}
 	return sub, nil
+}
+
+// 取消订阅策略订单频道
+func (ws *BusinessWsStreamClient) UnSubscribeOrdersAlgo(instType, instFamily, instId string) error {
+	arg := getOrdersAlgoSubscribeArg(instType, instFamily, instId)
+	args := []WsSubscribeArg{arg}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return err
+	}
+	log.Infof("UnSubscribeOrders Success: args:%v", doSub.Args)
+
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.ordersAlgoSubMap.Delete(string(keyData))
+	}
+	return nil
 }
 
 // 订阅单个K线 如: "BTCUSDT","1m"

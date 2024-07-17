@@ -258,3 +258,79 @@ func handleWsOrders(data []byte) (*[]WsOrders, error) {
 	}
 	return &wsOrdersList, nil
 }
+
+type LinkedOrd struct {
+	OrdId string `json:"ordId"` //String	关联订单ID
+}
+type WsOrdersAlgo struct {
+	WsSubscribeArg
+	OrdersAlgo
+}
+type OrdersAlgo struct {
+	InstType             string          `json:"instType"`             //String	产品类型
+	InstId               string          `json:"instId"`               //String	产品ID
+	Ccy                  string          `json:"ccy"`                  //String	保证金币种，仅单币种保证金账户下的全仓币币杠杆需要选择保证金币种
+	OrdId                string          `json:"ordId"`                //String	最新一笔订单ID，与策略委托订单关联的订单ID，即将废弃。
+	OrdIdList            []string        `json:"ordIdList"`            //String	订单ID列表，当止盈止损存在市价拆单时，会有多个。
+	AlgoId               string          `json:"algoId"`               //String	策略委托单ID
+	ClOrdId              string          `json:"clOrdId"`              //String	客户自定义订单ID
+	Sz                   string          `json:"sz"`                   //String	委托数量，币币/币币杠杆 以币为单位；交割/永续/期权 以张为单位
+	OrdType              string          `json:"ordType"`              //String	订单类型
+	Side                 string          `json:"side"`                 //String	订单方向，buy sell
+	PosSide              string          `json:"posSide"`              //String	持仓方向
+	TdMode               string          `json:"tdMode"`               //String	交易模式
+	TgtCcy               string          `json:"tgtCcy"`               //String	币币市价单委托数量sz的单位
+	Lever                string          `json:"lever"`                //String	杠杆倍数，0.01到125之间的数值，仅适用于 币币杠杆/交割/永续
+	State                string          `json:"state"`                //String	订单状态
+	TpTriggerPx          string          `json:"tpTriggerPx"`          //String	止盈触发价
+	TpTriggerPxType      string          `json:"tpTriggerPxType"`      //String	止盈触发价类型
+	TpOrdPx              string          `json:"tpOrdPx"`              //String	止盈委托价，委托价格为-1时，执行市价止盈
+	SlTriggerPx          string          `json:"slTriggerPx"`          //String	止损触发价
+	SlTriggerPxType      string          `json:"slTriggerPxType"`      //String	止损触发价类型
+	SlOrdPx              string          `json:"slOrdPx"`              //String	止损委托价委托价格为-1时，执行市价止损
+	TriggerPx            string          `json:"triggerPx"`            //String	计划委托单的触发价格
+	TriggerPxType        string          `json:"triggerPxType"`        //String	计划委托单的触发价类型
+	OrdPx                string          `json:"ordPx"`                //String	计划委托单的委托价格
+	Last                 string          `json:"last"`                 //String	下单时的最新成交价
+	ActualSz             string          `json:"actualSz"`             //String	实际委托量
+	ActualPx             string          `json:"actualPx"`             //String	实际委价
+	Tag                  string          `json:"tag"`                  //String	订单标签
+	NotionalUsd          string          `json:"notionalUsd"`          //String	委托单预估美元价值
+	ActualSide           string          `json:"actualSide"`           //String	实际触发方向
+	TriggerTime          string          `json:"triggerTime"`          //String	策略委托触发时间，Unix时间戳的毫秒数格式，如 1597026383085
+	ReduceOnly           string          `json:"reduceOnly"`           //String	是否只减仓，true 或 false
+	FailCode             string          `json:"failCode"`             //String	代表策略触发失败的原因，已撤销和已生效时为""，委托失败时有值，如 51008；
+	AlgoClOrdId          string          `json:"algoClOrdId"`          //String	客户自定义策略订单ID
+	ReqId                string          `json:"reqId"`                //String	修改订单时使用的request ID，如果没有修改，该字段为""
+	AmendResult          string          `json:"amendResult"`          //String	修改订单的结果
+	AmendPxOnTriggerType string          `json:"amendPxOnTriggerType"` //String	是否启用开仓价止损，仅适用于分批止盈的止损订单
+	AttachAlgoOrds       []AttachAlgoOrd `json:"attachAlgoOrds"`       //Array	附带止盈止损信息
+	LinkedOrd            LinkedOrd       `json:"linkedOrd"`            //Object	止盈订单信息，仅适用于双向止盈止损的限价止盈单
+	CTime                string          `json:"cTime"`                //String	订单创建时间，Unix时间戳的毫秒数格式，如 1597026383085
+	UTime                string          `json:"uTime"`                //String	订单更新时间，Unix时间戳的毫秒数格式，如 1597026383085
+}
+
+type WsOrdersAlgoMiddle struct {
+	Arg  WsSubscribeArg `json:"arg"`
+	Data []OrdersAlgo   `json:"data"`
+}
+
+func handleWsOrdersAlgo(data []byte) (*[]WsOrdersAlgo, error) {
+	wsOrdersAlgoMiddle := WsOrdersAlgoMiddle{}
+	err := json.Unmarshal(data, &wsOrdersAlgoMiddle)
+	if err != nil {
+		return nil, err
+	}
+
+	ordersAlgo := wsOrdersAlgoMiddle.Data
+	wsOrdersAlgoList := []WsOrdersAlgo{}
+	for _, orderAlgo := range ordersAlgo {
+		wsOrderAlgo := WsOrdersAlgo{
+			WsSubscribeArg: wsOrdersAlgoMiddle.Arg,
+			OrdersAlgo:     orderAlgo,
+		}
+		wsOrdersAlgoList = append(wsOrdersAlgoList, wsOrderAlgo)
+	}
+
+	return &wsOrdersAlgoList, nil
+}
