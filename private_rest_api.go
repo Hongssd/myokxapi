@@ -23,6 +23,7 @@ const (
 	PrivateRestTradeAmendOrderAlgo   //修改策略委托订单
 	PrivateRestTradeOrderAlgoGet     //获取策略委托单信息
 	PrivateRestTradePendingOrderAlgo // 获取未完成策略委托单列表
+	PrivateRestTradeOrderAlgoHistory //获取历史策略委托单记录
 
 	PrivateRestTradeCancelOrder         //撤单
 	PrivateRestTradeAmendOrder          //修改订单
@@ -57,6 +58,7 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestTradeAmendOrderAlgo:   "/api/v5/trade/amend-algos",         // POST 修改策略委托订单
 	PrivateRestTradeOrderAlgoGet:     "/api/v5/trade/order-algo",          //GET 获取策略委托单信息
 	PrivateRestTradePendingOrderAlgo: "/api/v5/trade/orders-algo-pending", //GET  获取未完成策略委托单列表
+	PrivateRestTradeOrderAlgoHistory: "/api/v5/trade/orders-algo-history", //GET 获取历史策略委托单记录
 
 	PrivateRestTradeCancelOrder:         "/api/v5/trade/cancel-order",           //POST 撤单
 	PrivateRestTradeAmendOrder:          "/api/v5/trade/amend-order",            //POST 修改订单
