@@ -29,6 +29,7 @@ const (
 	BATCH_CANCEL_ORDER = "batch-cancel-orders" //批量撤单
 	AMEND_ORDER        = "amend-order"         //改单
 	BATCH_AMEND_ORDER  = "batch-amend-orders"  //批量改单
+	ORDERS_ALGO        = "orders-algo"         //策略委托订单频道
 )
 
 var (
@@ -51,10 +52,11 @@ type WsStreamClient struct {
 	waitOrderResult   *Subscription[WsOrderResult]
 	waitOrderResultMu *sync.Mutex
 
-	candleSubMap MySyncMap[string, *Subscription[WsCandles]]
-	booksSubMap  MySyncMap[string, *Subscription[WsBooks]]
-	tradesSubMap MySyncMap[string, *Subscription[WsTrades]]
-	ordersSubMap MySyncMap[string, *Subscription[WsOrders]]
+	candleSubMap     MySyncMap[string, *Subscription[WsCandles]]
+	booksSubMap      MySyncMap[string, *Subscription[WsBooks]]
+	tradesSubMap     MySyncMap[string, *Subscription[WsTrades]]
+	ordersSubMap     MySyncMap[string, *Subscription[WsOrders]]
+	ordersAlgoSubMap MySyncMap[string, *Subscription[WsOrdersAlgo]]
 
 	resultChan chan []byte
 	errChan    chan error
@@ -307,6 +309,7 @@ func (ws *WsStreamClient) Close() error {
 	ws.booksSubMap = NewMySyncMap[string, *Subscription[WsBooks]]()
 	ws.tradesSubMap = NewMySyncMap[string, *Subscription[WsTrades]]()
 	ws.ordersSubMap = NewMySyncMap[string, *Subscription[WsOrders]]()
+	ws.ordersAlgoSubMap = NewMySyncMap[string, *Subscription[WsOrdersAlgo]]()
 
 	if ws.waitSubResult != nil {
 		//给当前等待订阅结果的请求返回错误
@@ -370,6 +373,7 @@ func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
+			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
@@ -387,6 +391,7 @@ func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
+			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
@@ -404,6 +409,7 @@ func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
+			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
 			waitSubResultMu:   &sync.Mutex{},
 			waitOrderResult:   nil,
@@ -462,6 +468,13 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 		}
 		if sub, ok := ws.ordersSubMap.Load(key); ok {
 			ws.ordersSubMap.Delete(key)
+			if sub.closeChan != nil {
+				sub.closeChan <- struct{}{}
+				sub.closeChan = nil
+			}
+		}
+		if sub, ok := ws.ordersAlgoSubMap.Load(key); ok {
+			ws.ordersAlgoSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
@@ -652,7 +665,27 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 				}
 
 				if strings.Contains(string(data), "channel\":\"orders-algo\"") {
-					log.Warn(string(data))
+					ordersAlgoList, err := handleWsOrdersAlgo(data)
+					if err != nil {
+						log.Error(err)
+						continue
+					}
+					if len(*ordersAlgoList) == 0 {
+						continue
+					}
+					arg := (*ordersAlgoList)[0].WsSubscribeArg
+					keyData, _ := json.Marshal(arg)
+					if sub, ok := ws.ordersAlgoSubMap.Load(string(keyData)); ok {
+						if err != nil {
+							sub.errChan <- err
+							continue
+						}
+						for _, order := range *ordersAlgoList {
+							d, _ := json.Marshal(order)
+							log.Debug("orders-algo: ", string(d))
+							sub.resultChan <- order
+						}
+					}
 					continue
 				}
 
