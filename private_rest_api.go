@@ -13,6 +13,9 @@ const (
 	PrivateRestAccountSetPositionMode                       //设置持仓模式
 	PrivateRestAccountSetAccountLevel                       //设置账户模式
 
+	//SubAccount
+	PrivateRestSubAccountSetTransferOut //设置子账户主动转出权限
+
 	//Trade
 	PrivateRestTradeOrderGet      //查看订单信息
 	PrivateRestTradeOrdersPending //查看未成交订单列表
@@ -35,6 +38,12 @@ const (
 
 	PrivateRestTradeFills        //获取成交明细（近三天）
 	PrivateRestTradeFillsHistory //获取成交明细（近三个月）
+
+	//Asset
+	PrivateRestAssetCurrencies    //获取币种列表
+	PrivateRestAssetBalances      //获取资金账户余额
+	PrivateRestAssetTransfer      //资金划转
+	PrivateRestAssetTransferState //查询资金划转状态
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
@@ -47,6 +56,9 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAccountSetLeverage:     "/api/v5/account/set-leverage",      //POST 设置杠杆倍数
 	PrivateRestAccountSetPositionMode: "/api/v5/account/set-position-mode", //POST 设置持仓模式
 	PrivateRestAccountSetAccountLevel: "/api/v5/account/set-account-level", //POST 设置账户模式
+
+	//SubAccount
+	PrivateRestSubAccountSetTransferOut: "/api/v5/users/subaccount/set-transfer-out", // 设置子账户主动转出权限
 
 	//Trade
 	PrivateRestTradeOrderGet:      "/api/v5/trade/order",          //GET 查看订单信息
@@ -71,4 +83,9 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestTradeFills:        "/api/v5/trade/fills",         //GET 获取成交明细（近三天）
 	PrivateRestTradeFillsHistory: "/api/v5/trade/fills-history", //GET 获取成交明细（近三个月）
 
+	// Asset
+	PrivateRestAssetCurrencies:    "/api/v5/asset/currencies",     // GET 获取币种列表
+	PrivateRestAssetBalances:      "/api/v5/asset/balances",       // GET 获取资金账户余额
+	PrivateRestAssetTransfer:      "/api/v5/asset/transfer",       // POST 资金划转
+	PrivateRestAssetTransferState: "/api/v5/asset/transfer-state", // GET 查询资金划转状态
 }
