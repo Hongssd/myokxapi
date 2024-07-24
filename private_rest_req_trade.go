@@ -1444,3 +1444,145 @@ func (api *PrivateRestTradeFillsAPI) Limit(limit string) *PrivateRestTradeFillsA
 type PrivateRestTradeFillsHistoryAPI struct {
 	PrivateRestTradeFillsAPI
 }
+
+// Asset
+// 获取币种列表
+type PrivateRestAssetCurrenciesReq struct {
+	Ccy *string `json:"ccy"` //String	否	币种，如BTC 支持多币种查询（不超过20个），币种之间半角逗号分隔
+}
+type PrivateRestAssetCurrenciesAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetCurrenciesReq
+}
+
+// String	否	币种，如BTC 支持多币种查询（不超过20个），币种之间半角逗号分隔
+func (api *PrivateRestAssetCurrenciesAPI) Ccy(ccy string) *PrivateRestAssetCurrenciesAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// 获取资金账户余额
+type PrivateRestAssetBalancesReq struct {
+	Ccy *string `json:"ccy"` //String	否	币种，如BTC 支持多币种查询（不超过20个），币种之间半角逗号分隔
+}
+type PrivateRestAssetBalancesAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetBalancesReq
+}
+
+// String	否	币种，如BTC 支持多币种查询（不超过20个），币种之间半角逗号分隔
+func (api *PrivateRestAssetBalancesAPI) Ccy(ccy string) *PrivateRestAssetBalancesAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// 资金划转
+type PrivateRestAssetTransferReq struct {
+	Type        *string `json:"type"`        //String	否	划转类型 0：账户内划转 1：母账户转子账户(仅适用于母账户APIKey) 2：子账户转母账户(仅适用于母账户APIKey) 3：子账户转母账户(仅适用于子账户APIKey) 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户。子账户主动转出权限默认是关闭的，权限调整参考 设置子账户主动转出权限。) 默认是0 如果您希望通过母账户API Key控制子账户之间的划转，参考接口 子账户间资金划转
+	Ccy         *string `json:"ccy"`         //String	是	划转币种，如 USDT
+	Amt         *string `json:"amt"`         //String	是	划转数量
+	From        *string `json:"from"`        //String	是	转出账户 6：资金账户 18：交易账户
+	To          *string `json:"to"`          //String	是	转入账户 6：资金账户 18：交易账户
+	SubAcct     *string `json:"subAcct"`     //String	可选	子账户名称 当type为1/2/4时，该字段必填
+	LoanTrans   *bool   `json:"loanTrans"`   //Boolean	否	是否支持跨币种保证金模式或组合保证金模式下的借币转出 true：支持借币转出 false：不支持借币转出 默认为false
+	OmitPosRisk *string `json:"omitPosRisk"` //String	否	是否忽略仓位风险 默认为false 仅适用于组合保证金模式
+	ClientId    *string `json:"clientId"`    //String	否	客户自定义ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+}
+
+type PrivateRestAssetTransferAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetTransferReq
+}
+
+// String	否	划转类型 0：账户内划转 1：母账户转子账户(仅适用于母账户APIKey) 2：子账户转母账户(仅适用于母账户APIKey) 3：子账户转母账户(仅适用于子账户APIKey) 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户。子账户主动转出权限默认是关闭的，权限调整参考 设置子账户主动转出权限。) 默认是0 如果您希望通过母账户API Key控制子账户之间的划转，参考接口 子账户间资金划转
+func (api *PrivateRestAssetTransferAPI) Type(t string) *PrivateRestAssetTransferAPI {
+	api.req.Type = GetPointer(t)
+	return api
+}
+
+// String	是	划转币种，如 USDT
+func (api *PrivateRestAssetTransferAPI) Ccy(ccy string) *PrivateRestAssetTransferAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// String	是	划转数量
+func (api *PrivateRestAssetTransferAPI) Amt(amt string) *PrivateRestAssetTransferAPI {
+	api.req.Amt = GetPointer(amt)
+	return api
+}
+
+// String	是	转出账户 6：资金账户 18：交易账户
+func (api *PrivateRestAssetTransferAPI) From(from string) *PrivateRestAssetTransferAPI {
+	api.req.From = GetPointer(from)
+	return api
+}
+
+// String	是	转入账户 6：资金账户 18：交易账户
+func (api *PrivateRestAssetTransferAPI) To(to string) *PrivateRestAssetTransferAPI {
+	api.req.To = GetPointer(to)
+	return api
+}
+
+// String	可选	子账户名称 当type为1/2/4时，该字段必填
+func (api *PrivateRestAssetTransferAPI) SubAcct(subAcct string) *PrivateRestAssetTransferAPI {
+	api.req.SubAcct = GetPointer(subAcct)
+	return api
+}
+
+// Boolean	否	是否支持跨币种保证金模式或组合保证金模式下的借币转出 true：支持借币转出 false：不支持借币转出 默认为false
+func (api *PrivateRestAssetTransferAPI) LoanTrans(loanTrans bool) *PrivateRestAssetTransferAPI {
+	api.req.LoanTrans = GetPointer(loanTrans)
+	return api
+}
+
+// String	否	是否忽略仓位风险 默认为false 仅适用于组合保证金模式
+func (api *PrivateRestAssetTransferAPI) OmitPosRisk(omitPosRisk string) *PrivateRestAssetTransferAPI {
+	api.req.OmitPosRisk = GetPointer(omitPosRisk)
+	return api
+}
+
+// String	否	客户自定义ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestAssetTransferAPI) ClientId(clientId string) *PrivateRestAssetTransferAPI {
+	api.req.ClientId = GetPointer(clientId)
+	return api
+}
+
+// 资金划转状态查询
+// transId	String	可选	划转ID
+// transId和clientId必须传一个，若传两个，以transId为主
+// clientId	String	可选	客户自定义ID
+// type	String	否	划转类型
+// 0：账户内划转
+// 1：母账户转子账户(仅适用于母账户APIKey)
+// 2：子账户转母账户(仅适用于母账户APIKey)
+// 3：子账户转母账户(仅适用于子账户APIKey)
+// 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户)
+// 默认是0
+type PrivateRestAssetTransferStateReq struct {
+	TransId  *string `json:"transId"`  //String	可选	划转ID
+	ClientId *string `json:"clientId"` //String	可选	客户自定义ID
+	Type     *string `json:"type"`     //String	否	划转类型 0：账户内划转 1：母账户转子账户(仅适用于母账户APIKey) 2：子账户转母账户(仅适用于母账户APIKey) 3：子账户转母账户(仅适用于子账户APIKey) 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户) 默认是0
+}
+type PrivateRestAssetTransferStateAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetTransferStateReq
+}
+
+// String	可选	划转ID
+func (api *PrivateRestAssetTransferStateAPI) TransId(transId string) *PrivateRestAssetTransferStateAPI {
+	api.req.TransId = GetPointer(transId)
+	return api
+}
+
+// String	可选	客户自定义ID
+func (api *PrivateRestAssetTransferStateAPI) ClientId(clientId string) *PrivateRestAssetTransferStateAPI {
+	api.req.ClientId = GetPointer(clientId)
+	return api
+}
+
+// String	否	划转类型 0：账户内划转 1：母账户转子账户(仅适用于母账户APIKey) 2：子账户转母账户(仅适用于母账户APIKey) 3：子账户转母账户(仅适用于子账户APIKey) 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户) 默认是0
+func (api *PrivateRestAssetTransferStateAPI) Type(t string) *PrivateRestAssetTransferStateAPI {
+	api.req.Type = GetPointer(t)
+	return api
+}

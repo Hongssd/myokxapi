@@ -221,7 +221,6 @@ func (api *PrivateRestTradeOrderHistoryAPI) Do() (*OkxRestRes[PrivateRestTradeOr
 // okx PrivateRestTradeOrderHistoryArchive PrivateRest接口 GET 获取历史订单记录（近三个月）
 func (client *PrivateRestClient) NewPrivateRestTradeOrderHistoryArchive() *PrivateRestTradeOrderHistoryArchiveAPI {
 	return &PrivateRestTradeOrderHistoryArchiveAPI{
-
 		client: client,
 		req:    &PrivateRestTradeOrderHistoryArchiveReq{},
 	}
@@ -255,4 +254,57 @@ func (client *PrivateRestClient) NewPrivateRestTradeFillsHistory() *PrivateRestT
 func (api *PrivateRestTradeFillsHistoryAPI) Do() (*OkxRestRes[PrivateRestTradeFillsHistoryRes], error) {
 	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestTradeFillsHistory])
 	return okxCallAPIWithSecret[PrivateRestTradeFillsHistoryRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// Asset
+// okx PrivateRestAssetCurrencies PrivateRest接口 GET 获取币种列表
+func (client *PrivateRestClient) NewPrivateRestAssetCurrencies() *PrivateRestAssetCurrenciesAPI {
+	return &PrivateRestAssetCurrenciesAPI{
+		client: client,
+		req:    &PrivateRestAssetCurrenciesReq{},
+	}
+}
+func (api *PrivateRestAssetCurrenciesAPI) Do() (*OkxRestRes[PrivateRestAssetCurrenciesRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAssetCurrencies])
+	return okxCallAPIWithSecret[PrivateRestAssetCurrenciesRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx PrivateRestAssetBalances PrivateRest接口 GET 获取资金账户余额
+func (client *PrivateRestClient) NewPrivateRestAssetBalances() *PrivateRestAssetBalancesAPI {
+	return &PrivateRestAssetBalancesAPI{
+		client: client,
+		req:    &PrivateRestAssetBalancesReq{},
+	}
+}
+func (api *PrivateRestAssetBalancesAPI) Do() (*OkxRestRes[PrivateRestAssetBalancesRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAssetBalances])
+	return okxCallAPIWithSecret[PrivateRestAssetBalancesRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx PrivateAssetTransfer PrivateRest接口 POST 资金划转
+func (client *PrivateRestClient) NewPrivateRestAssetTransfer() *PrivateRestAssetTransferAPI {
+	return &PrivateRestAssetTransferAPI{
+		client: client,
+		req:    &PrivateRestAssetTransferReq{},
+	}
+}
+func (api *PrivateRestAssetTransferAPI) Do() (*OkxRestRes[PrivateRestAssetTransferRes], error) {
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestAssetTransfer])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestAssetTransferRes](api.client.c, url, reqBody, POST)
+}
+
+// okx PrivateRestAssetTransferState PrivateRest接口 GET 查询资金划转状态
+func (client *PrivateRestClient) NewPrivateRestAssetTransferState() *PrivateRestAssetTransferStateAPI {
+	return &PrivateRestAssetTransferStateAPI{
+		client: client,
+		req:    &PrivateRestAssetTransferStateReq{},
+	}
+}
+func (api *PrivateRestAssetTransferStateAPI) Do() (*OkxRestRes[PrivateRestAssetTransferStateRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAssetTransferState])
+	return okxCallAPIWithSecret[PrivateRestAssetTransferStateRes](api.client.c, url, NIL_REQBODY, GET)
 }

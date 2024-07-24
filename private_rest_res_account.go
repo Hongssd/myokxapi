@@ -188,3 +188,15 @@ type PrivateRestAccountSetAccountLevelRes []PrivateRestAccountSetAccountLevelRes
 type PrivateRestAccountSetAccountLevelResRow struct {
 	AcctLv string `json:"acctLv"` //账户
 }
+
+// SubAccount
+//subAcct	String	子账户名称
+//canTransOut	Boolean	是否可以主动转出
+//false：不可转出
+//true：可以转出
+
+type PrivateRestSubAccountSetTransferOutRes []PrivateRestSubAccountSetTransferOutResRow
+type PrivateRestSubAccountSetTransferOutResRow struct {
+	SubAcct     string `json:"subAcct"`     //子账户名称
+	CanTransOut bool   `json:"canTransOut"` //是否可以主动转出
+}

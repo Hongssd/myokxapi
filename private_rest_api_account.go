@@ -108,3 +108,21 @@ func (api *PrivateRestAccountSetAccountLevelAPI) Do() (*OkxRestRes[PrivateRestAc
 	}
 	return okxCallAPIWithSecret[PrivateRestAccountSetAccountLevelRes](api.client.c, url, reqBody, POST)
 }
+
+// SubAccount
+
+// okx PrivateRestSubAccountSetTransferOut PrivateRest接口 POST 设置子账户主动转出权限
+func (client *PrivateRestClient) NewPrivateRestSubAccountSetTransferOut() *PrivateRestSubAccountSetTransferOutAPI {
+	return &PrivateRestSubAccountSetTransferOutAPI{
+		client: client,
+		req:    &PrivateRestSubAccountSetTransferOutReq{},
+	}
+}
+func (api *PrivateRestSubAccountSetTransferOutAPI) Do() (*OkxRestRes[PrivateRestSubAccountSetTransferOutRes], error) {
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestSubAccountSetTransferOut])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestSubAccountSetTransferOutRes](api.client.c, url, reqBody, POST)
+}

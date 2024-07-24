@@ -201,3 +201,26 @@ func (api *PrivateRestAccountSetAccountLevelAPI) AcctLv(acctLv string) *PrivateR
 	api.req.AcctLv = GetPointer(acctLv)
 	return api
 }
+
+// SubAccount
+
+type PrivateRestSubAccountSetTransferOutReq struct {
+	SubAcct     *string `json:"subAcct"`     //String	是	子账户名称，支持设置多个（不超过20个），子账户名称之间半角逗号分隔
+	CanTransOut *bool   `json:"canTransOut"` //Boolean	否	是否可以主动转出，默认为true false：不可转出 true：可以转出
+}
+type PrivateRestSubAccountSetTransferOutAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestSubAccountSetTransferOutReq
+}
+
+// String	是	子账户名称，支持设置多个（不超过20个），子账户名称之间半角逗号分隔
+func (api *PrivateRestSubAccountSetTransferOutAPI) SubAcct(subAcct string) *PrivateRestSubAccountSetTransferOutAPI {
+	api.req.SubAcct = GetPointer(subAcct)
+	return api
+}
+
+// Boolean	否	是否可以主动转出，默认为true false：不可转出 true：可以转出
+func (api *PrivateRestSubAccountSetTransferOutAPI) CanTransOut(canTransOut bool) *PrivateRestSubAccountSetTransferOutAPI {
+	api.req.CanTransOut = GetPointer(canTransOut)
+	return api
+}

@@ -350,3 +350,67 @@ type PrivateRestTradeFillsResRow struct {
 }
 
 type PrivateRestTradeFillsHistoryRes PrivateRestTradeFillsRes
+
+// Asset
+// 获取币种列表
+type PrivateRestAssetCurrenciesRes []PrivateRestAssetCurrenciesResRow
+type PrivateRestAssetCurrenciesResRow struct {
+	Ccy                  string `json:"ccy"`                  //String	币种名称，如 BTC
+	Name                 string `json:"name"`                 //String	币种名称，不显示则无对应名称
+	LogoLink             string `json:"logoLink"`             //String	币种Logo链接
+	Chain                string `json:"chain"`                //String	币种链信息
+	CanDep               bool   `json:"canDep"`               //Boolean	当前是否可充值
+	CanWd                bool   `json:"canWd"`                //Boolean	当前是否可提币
+	CanInternal          bool   `json:"canInternal"`          //Boolean	当前是否可内部转账
+	MinDep               string `json:"minDep"`               //String	币种单笔最小充值量
+	MinWd                string `json:"minWd"`                //String	币种单笔最小链上提币量
+	MaxWd                string `json:"maxWd"`                //String	币种单笔最大链上提币量
+	WdTickSz             string `json:"wdTickSz"`             //String	提币精度,表示小数点后的位数。提币手续费精度与提币精度保持一致。
+	WdQuota              string `json:"wdQuota"`              //String	过去24小时内提币额度（包含链上提币和内部转账），单位为USD
+	UsedWdQuota          string `json:"usedWdQuota"`          //String	过去24小时内已用提币额度，单位为USD
+	MinFee               string `json:"minFee"`               //String	普通地址最小提币手续费数量
+	MaxFee               string `json:"maxFee"`               //String	普通地址最大提币手续费数量
+	MinFeeForCtAddr      string `json:"minFeeForCtAddr"`      //String	合约地址最小提币手续费数量
+	MaxFeeForCtAddr      string `json:"maxFeeForCtAddr"`      //String	合约地址最大提币手续费数量
+	MainNet              bool   `json:"mainNet"`              //Boolean	当前链是否为主链
+	NeedTag              bool   `json:"needTag"`              //Boolean	当前链是否需要标签（tag/memo）信息，如 EOS该字段为true
+	MinDepArrivalConfirm string `json:"minDepArrivalConfirm"` //String	充值到账最小网络确认数。币已到账但不可提。
+	MinWdUnlockConfirm   string `json:"minWdUnlockConfirm"`   //String	提现解锁最小网络确认数
+	DepQuotaFixed        string `json:"depQuotaFixed"`        //String	充币固定限额，单位为USD
+	UsedDepQuotaFixed    string `json:"usedDepQuotaFixed"`    //String	已用充币固定额度，单位为USD
+	DepQuoteDailyLayer2  string `json:"depQuoteDailyLayer2"`  //String	Layer2网络每日充值上限
+}
+
+// 获取资金账户余额
+type PrivateRestAssetBalancesRes []PrivateRestAssetBalancesResRow
+type PrivateRestAssetBalancesResRow struct {
+	Ccy       string `json:"ccy"`       //String	币种，如 BTC
+	Bal       string `json:"bal"`       //String	余额
+	FrozenBal string `json:"frozenBal"` //String	冻结余额
+	AvailBal  string `json:"availBal"`  //String	可用余额
+}
+
+// 资金划转
+type PrivateRestAssetTransferRes []PrivateRestAssetTransferResRow
+type PrivateRestAssetTransferResRow struct {
+	TransId  string `json:"transId"`  //String	划转ID
+	Ccy      string `json:"ccy"`      //String	划转币种
+	From     string `json:"from"`     //String	转出账户
+	Amt      string `json:"amt"`      //String	划转量
+	To       string `json:"to"`       //String	转入账户
+	ClientId string `json:"clientId"` //String	客户自定义ID
+}
+
+// 资金划转状态查询
+type PrivateRestAssetTransferStateRes []PrivateRestAssetTransferStateResRow
+type PrivateRestAssetTransferStateResRow struct {
+	TransId  string `json:"transId"`  //String	划转 ID
+	ClientId string `json:"clientId"` //String	客户自定义 ID
+	Ccy      string `json:"ccy"`      //String	划转币种
+	Amt      string `json:"amt"`      //String	划转量
+	Type     string `json:"type"`     //String	划转类型 0：账户内划转 1：母账户转子账户(仅适用于母账户APIKey) 2：子账户转母账户(仅适用于母账户APIKey) 3：子账户转母账户(仅适用于子账户APIKey) 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户)
+	From     string `json:"from"`     //String	转出账户 6：资金账户 18：交易账户
+	To       string `json:"to"`       //String	转入账户 6：资金账户 18：交易账户
+	SubAcct  string `json:"subAcct"`  //String	子账户名称
+	State    string `json:"state"`    //String	转账状态 success：成功 pending：处理中 failed：失败
+}
