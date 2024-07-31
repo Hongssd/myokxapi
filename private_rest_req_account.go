@@ -202,6 +202,56 @@ func (api *PrivateRestAccountSetAccountLevelAPI) AcctLv(acctLv string) *PrivateR
 	return api
 }
 
+// Asset
+type PrivateRestAssetBillsAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetBillsReq
+}
+type PrivateRestAssetBillsReq struct {
+	Ccy      *string `json:"ccy"`      //String	否	币种
+	Type     *string `json:"type"`     //String	否	账单类型
+	ClientId *string `json:"clientId"` //String	否	转账或提币的客户自定义ID
+	After    *string `json:"after"`    //String	否	查询在此之前的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+	Before   *string `json:"before"`   //String	否	查询在此之后的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+	Limit    *string `json:"limit"`    //String	否	分页返回的结果集数量，最大为 100，不填默认返回 100 条
+}
+
+// String	否	币种
+func (api *PrivateRestAssetBillsAPI) Ccy(ccy string) *PrivateRestAssetBillsAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// String	否	账单类型
+func (api *PrivateRestAssetBillsAPI) Type(type_ string) *PrivateRestAssetBillsAPI {
+	api.req.Type = GetPointer(type_)
+	return api
+}
+
+// String	否	转账或提币的客户自定义ID
+func (api *PrivateRestAssetBillsAPI) ClientId(clientId string) *PrivateRestAssetBillsAPI {
+	api.req.ClientId = GetPointer(clientId)
+	return api
+}
+
+// String	否	查询在此之前的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+func (api *PrivateRestAssetBillsAPI) After(after string) *PrivateRestAssetBillsAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String	否	查询在此之后的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+func (api *PrivateRestAssetBillsAPI) Before(before string) *PrivateRestAssetBillsAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String	否	分页返回的结果集数量，最大为 100，不填默认返回 100 条
+func (api *PrivateRestAssetBillsAPI) Limit(limit string) *PrivateRestAssetBillsAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
+
 // SubAccount
 
 type PrivateRestSubAccountSetTransferOutReq struct {

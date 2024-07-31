@@ -189,6 +189,18 @@ type PrivateRestAccountSetAccountLevelResRow struct {
 	AcctLv string `json:"acctLv"` //账户
 }
 
+// Asset
+type PrivateRestAssetBillsRes []PrivateRestAssetBillsResRow
+type PrivateRestAssetBillsResRow struct {
+	BillId   string `json:"billId"`   //账单 ID
+	Ccy      string `json:"ccy"`      //账户余额币种
+	ClientId string `json:"clientId"` //转账或提币的客户自定义ID
+	BalChg   string `json:"balChg"`   //账户层面的余额变动数量
+	Bal      string `json:"bal"`      //账户层面的余额数量
+	Type     string `json:"type"`     //账单类型
+	Ts       string `json:"ts"`       //账单创建时间，Unix 时间戳的毫秒数格式，如 1597026383085
+}
+
 // SubAccount
 //subAcct	String	子账户名称
 //canTransOut	Boolean	是否可以主动转出
