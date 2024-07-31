@@ -109,6 +109,20 @@ func (api *PrivateRestAccountSetAccountLevelAPI) Do() (*OkxRestRes[PrivateRestAc
 	return okxCallAPIWithSecret[PrivateRestAccountSetAccountLevelRes](api.client.c, url, reqBody, POST)
 }
 
+// Asset
+
+// okx PrivateRestAssetBills PrivateRest接口 GET 查询最近一个月内资金账户账单流水
+func (client *PrivateRestClient) NewPrivateRestAssetBills() *PrivateRestAssetBillsAPI {
+	return &PrivateRestAssetBillsAPI{
+		client: client,
+		req:    &PrivateRestAssetBillsReq{},
+	}
+}
+func (api *PrivateRestAssetBillsAPI) Do() (*OkxRestRes[PrivateRestAssetBillsRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAssetBills])
+	return okxCallAPIWithSecret[PrivateRestAssetBillsRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
 // SubAccount
 
 // okx PrivateRestSubAccountSetTransferOut PrivateRest接口 POST 设置子账户主动转出权限

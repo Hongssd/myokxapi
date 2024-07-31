@@ -44,6 +44,7 @@ const (
 	PrivateRestAssetBalances      //获取资金账户余额
 	PrivateRestAssetTransfer      //资金划转
 	PrivateRestAssetTransferState //查询资金划转状态
+	PrivateRestAssetBills         // 查询最近一个月内资金账户账单流水
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
@@ -88,4 +89,5 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAssetBalances:      "/api/v5/asset/balances",       // GET 获取资金账户余额
 	PrivateRestAssetTransfer:      "/api/v5/asset/transfer",       // POST 资金划转
 	PrivateRestAssetTransferState: "/api/v5/asset/transfer-state", // GET 查询资金划转状态
+	PrivateRestAssetBills:         "/api/v5/asset/bills",          // 查询最近一个月内资金账户账单流水
 }
