@@ -48,3 +48,14 @@ func (api *PublicRestPublicFundingRateAPI) Do() (*OkxRestRes[PublicRestPublicFun
 	return okxCallAPI[PublicRestPublicFundingRateRes](api.client.c, url, NIL_REQBODY, GET)
 }
 
+// okx PublicRestPublicOptSummary PublicRest接口 GET 获取期权定价 查询期权详细信息
+func (client *PublicRestClient) NewPublicRestPublicOptSummary() *PublicRestPublicOptSummaryAPI {
+	return &PublicRestPublicOptSummaryAPI{
+		client: client,
+		req:    &PublicRestPublicOptSummaryReq{},
+	}
+}
+func (api *PublicRestPublicOptSummaryAPI) Do() (*OkxRestRes[PublicRestPublicOptSummaryRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestPublicOptSummary])
+	return okxCallAPI[PublicRestPublicOptSummaryRes](api.client.c, url, NIL_REQBODY, GET)
+}

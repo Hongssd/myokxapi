@@ -59,4 +59,31 @@ func (api *PublicRestPublicFundingRateAPI) InstId(instId string) *PublicRestPubl
 	return api
 }
 
+type PublicRestPublicOptSummaryReq struct {
+	Uly        *string `json:"uly"`        //String 可选 标的指数，仅适用于期权 uly与instFamily必须传一个,若传两个，以instFamily为主
+	InstFamily *string `json:"instFamily"` //String 可选 交易品种，仅适用于期权 uly与instFamily必须传一个,若传两个，以instFamily为主
+	ExpTime    *string `json:"expTime"`    //String 否 合约到期日，格式为"YYMMDD"，如 "200527"
+}
 
+type PublicRestPublicOptSummaryAPI struct {
+	client *PublicRestClient
+	req    *PublicRestPublicOptSummaryReq
+}
+
+// String 可选 标的指数，仅适用于期权 uly与instFamily必须传一个,若传两个，以instFamily为主
+func (api *PublicRestPublicOptSummaryAPI) Uly(uly string) *PublicRestPublicOptSummaryAPI {
+	api.req.Uly = GetPointer(uly)
+	return api
+}
+
+// String 可选 交易品种，仅适用于期权 uly与instFamily必须传一个,若传两个，以instFamily为主
+func (api *PublicRestPublicOptSummaryAPI) InstFamily(instFamily string) *PublicRestPublicOptSummaryAPI {
+	api.req.InstFamily = GetPointer(instFamily)
+	return api
+}
+
+// String 否 合约到期日，格式为"YYMMDD"，如 "200527"
+func (api *PublicRestPublicOptSummaryAPI) ExpTime(expTime string) *PublicRestPublicOptSummaryAPI {
+	api.req.ExpTime = GetPointer(expTime)
+	return api
+}

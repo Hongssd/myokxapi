@@ -60,3 +60,26 @@ func (r *PublicRestMarketCandlesRes) Reverse() {
 		(*r)[i], (*r)[j] = (*r)[j], (*r)[i]
 	}
 }
+
+type PublicRestPublicOptSummaryResRow struct {
+	InstType string `json:"instType"` //产品类型 OPTION：期权
+	InstId   string `json:"instId"`   //产品ID，如 BTC-USD-200103-5500-C
+	Uly      string `json:"uly"`      //标的指数
+	Delta    string `json:"delta"`    //期权价格对uly价格的敏感度
+	Gamma    string `json:"gamma"`    //delta对uly价格的敏感度
+	Vega     string `json:"vega"`     //期权价格对隐含波动率的敏感度
+	Theta    string `json:"theta"`    //期权价格对剩余期限的敏感度
+	DeltaBS  string `json:"deltaBS"`  //BS模式下期权价格对uly价格的敏感度
+	GammaBS  string `json:"gammaBS"`  //BS模式下delta对uly价格的敏感度
+	VegaBS   string `json:"vegaBS"`   //BS模式下期权价格对隐含波动率的敏感度
+	ThetaBS  string `json:"thetaBS"`  //BS模式下期权价格对剩余期限的敏感度
+	Lever    string `json:"lever"`    //杠杆倍数
+	MarkVol  string `json:"markVol"`  //标记波动率
+	BidVol   string `json:"bidVol"`   //bid波动率
+	AskVol   string `json:"askVol"`   //ask波动率
+	RealVol  string `json:"realVol"`  //已实现波动率（目前该字段暂未启用）
+	VolLv    string `json:"volLv"`    //价平期权的隐含波动率
+	FwdPx    string `json:"fwdPx"`    //远期价格
+	Ts       string `json:"ts"`       //数据更新时间，Unix时间戳的毫秒数格式，如 1597026383085
+}
+type PublicRestPublicOptSummaryRes []PublicRestPublicOptSummaryResRow
