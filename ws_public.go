@@ -157,3 +157,75 @@ func getTradesSubscribeArg(instId string) WsSubscribeArg {
 		InstId:  instId,
 	}
 }
+
+// 批量订阅期权定价
+func (ws *PublicWsStreamClient) SubscribeOptSummaryMultiple(instFamilies []string) (*Subscription[WsOptSummary], error) {
+	args := []WsSubscribeArg{}
+	for _, s := range instFamilies {
+		arg := getOptSummarySubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	if err != nil {
+		return nil, err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("SubscribeOptSummary Success: args:%v", doSub.Args)
+	sub := &Subscription[WsOptSummary]{
+		SubId:      doSub.SubId,
+		Op:         SUBSCRIBE,
+		Args:       doSub.Args,
+		resultChan: make(chan WsOptSummary, 50),
+		errChan:    make(chan error),
+		closeChan:  make(chan struct{}),
+		Ws:         &ws.WsStreamClient,
+	}
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.optSummarySubMap.Store(string(keyData), sub)
+	}
+	return sub, nil
+}
+
+func getOptSummarySubscribeArg(instFamily string) WsSubscribeArg {
+	return WsSubscribeArg{
+		Channel:    "opt-summary",
+		InstFamily: instFamily,
+	}
+}
+
+// 订阅单个期权定价
+func (ws *PublicWsStreamClient) SubscribeOptSummary(instFamily string) (*Subscription[WsOptSummary], error) {
+	return ws.SubscribeOptSummaryMultiple([]string{instFamily})
+}
+
+// 批量取消订阅期权定价
+func (ws *PublicWsStreamClient) UnSubscribeOptSummaryMultiple(instFamilies []string) (*Subscription[WsOptSummary], error) {
+	args := []WsSubscribeArg{}
+	for _, s := range instFamilies {
+		arg := getOptSummarySubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return nil, err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("UnSubscribeOptSummary Success: args:%v", doSub.Args)
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.optSummarySubMap.Delete(string(keyData))
+	}
+	return nil, nil
+}
+
+// 取消订阅单个期权定价
+func (ws *PublicWsStreamClient) UnSubscribeOptSummary(instFamily string) (*Subscription[WsOptSummary], error) {
+	return ws.UnSubscribeOptSummaryMultiple([]string{instFamily})
+}

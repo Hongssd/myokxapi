@@ -9,6 +9,7 @@ const (
 	PublicRestPublicTime                             //获取系统时间
 	PublicRestPublicMarkPrice                        //获取标记价格
 	PublicRestPublicFundingRate                      //获取永续合约当前资金费率
+	PublicRestPublicOptSummary                       //获取期权定价 查询期权详细信息
 
 	//Market
 	PublicRestMarketTickers        //获取指数行情
@@ -23,6 +24,7 @@ var PublicRestAPIMap = map[PublicRestAPI]string{
 	PublicRestPublicTime:        "/api/v5/public/time",         //GET 获取系统时间
 	PublicRestPublicMarkPrice:   "/api/v5/public/mark-price",   //GET 获取标记价格
 	PublicRestPublicFundingRate: "/api/v5/public/funding-rate", //GET 获取永续合约当前资金费率
+	PublicRestPublicOptSummary:  "/api/v5/public/opt-summary",  //GET 获取期权定价 查询期权详细信息
 
 	//Market
 	PublicRestMarketTickers:        "/api/v5/market/index-tickers",   //GET 获取指数行情
