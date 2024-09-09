@@ -51,11 +51,12 @@ type WsStreamClient struct {
 	waitOrderResult   *Subscription[WsOrderResult] //订单操作结果
 	waitOrderResultMu *sync.Mutex                  //订单操作结果锁
 
-	candleSubMap     MySyncMap[string, *Subscription[WsCandles]] //K线推送订阅频道
-	booksSubMap      MySyncMap[string, *Subscription[WsBooks]]   //深度推送订阅频道
-	tradesSubMap     MySyncMap[string, *Subscription[WsTrades]]  //成交流推送订阅频道
-	ordersSubMap     MySyncMap[string, *Subscription[WsOrders]]  //订单推送订阅频道
-	ordersAlgoSubMap MySyncMap[string, *Subscription[WsOrdersAlgo]]
+	candleSubMap     MySyncMap[string, *Subscription[WsCandles]]    //K线推送订阅频道
+	booksSubMap      MySyncMap[string, *Subscription[WsBooks]]      //深度推送订阅频道
+	tradesSubMap     MySyncMap[string, *Subscription[WsTrades]]     //成交流推送订阅频道
+	optSummarySubMap MySyncMap[string, *Subscription[WsOptSummary]] //期权定价频道
+	ordersSubMap     MySyncMap[string, *Subscription[WsOrders]]     //订单推送订阅频道
+	ordersAlgoSubMap MySyncMap[string, *Subscription[WsOrdersAlgo]] //策略委托订单频道
 
 	resultChan chan []byte
 	errChan    chan error
@@ -309,6 +310,7 @@ func (ws *WsStreamClient) Close() error {
 	ws.tradesSubMap = NewMySyncMap[string, *Subscription[WsTrades]]()
 	ws.ordersSubMap = NewMySyncMap[string, *Subscription[WsOrders]]()
 	ws.ordersAlgoSubMap = NewMySyncMap[string, *Subscription[WsOrdersAlgo]]()
+	ws.optSummarySubMap = NewMySyncMap[string, *Subscription[WsOptSummary]]()
 
 	if ws.waitSubResult != nil {
 		//给当前等待订阅结果的请求返回错误
@@ -371,6 +373,7 @@ func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
+			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
@@ -389,6 +392,7 @@ func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
+			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
@@ -407,6 +411,7 @@ func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
+			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
@@ -474,6 +479,13 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 		}
 		if sub, ok := ws.ordersAlgoSubMap.Load(key); ok {
 			ws.ordersAlgoSubMap.Delete(key)
+			if sub.closeChan != nil {
+				sub.closeChan <- struct{}{}
+				sub.closeChan = nil
+			}
+		}
+		if sub, ok := ws.optSummarySubMap.Load(key); ok {
+			ws.optSummarySubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
@@ -688,6 +700,24 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					continue
 				}
 
+				if strings.Contains(string(data), "channel\":\"opt-summary\"") {
+					optSummaryList, err := handleWsOptSummary(data)
+					if len(*optSummaryList) == 0 {
+						continue
+					}
+					arg := (*optSummaryList)[0].Args
+					keyData, _ := json.Marshal(arg)
+					if sub, ok := ws.optSummarySubMap.Load(string(keyData)); ok {
+						if err != nil {
+							sub.errChan <- err
+							continue
+						}
+						for _, optSummary := range *optSummaryList {
+							sub.resultChan <- optSummary
+						}
+					}
+					continue
+				}
 			}
 		}
 	}()
