@@ -339,7 +339,7 @@ type WsOptSummary struct {
 	Args struct {
 		Channel    string `json:"channel"`    // 频道名
 		InstFamily string `json:"instFamily"` // 交易品种
-	}
+	} `json:"args"`
 	OptSummary
 }
 
@@ -391,4 +391,47 @@ func handleWsOptSummary(data []byte) (*[]WsOptSummary, error) {
 	}
 
 	return &wsOptSummaryList, nil
+}
+
+type MarkPrice struct {
+	InstType string `json:"instType"` //产品类型
+	InstId   string `json:"instId"`   //产品ID
+	MarkPx   string `json:"markPx"`   //标记价格
+	Ts       string `json:"ts"`       //标记价格数据更新时间
+}
+
+type WsMarkPrice struct {
+	Args struct {
+		Channel string `json:"channel"` // 频道名
+		InstId  string `json:"instId"`  // 产品ID
+	}
+	MarkPrice
+}
+
+type WsMarkPriceMiddle struct {
+	Arg struct {
+		Channel string `json:"channel"` // 频道名
+		InstId  string `json:"instId"`  // 产品ID
+	} `json:"arg"`
+	Data []MarkPrice `json:"data"`
+}
+
+func handleWsMarkPrice(data []byte) (*[]WsMarkPrice, error) {
+	wsMarkPriceMiddle := WsMarkPriceMiddle{}
+	err := json.Unmarshal(data, &wsMarkPriceMiddle)
+	if err != nil {
+		return nil, err
+	}
+
+	markPrices := wsMarkPriceMiddle.Data
+	wsMarkPriceList := []WsMarkPrice{}
+	for _, markPrice := range markPrices {
+		wsMarkPrice := WsMarkPrice{
+			Args:      wsMarkPriceMiddle.Arg,
+			MarkPrice: markPrice,
+		}
+		wsMarkPriceList = append(wsMarkPriceList, wsMarkPrice)
+	}
+
+	return &wsMarkPriceList, nil
 }

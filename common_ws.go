@@ -55,6 +55,7 @@ type WsStreamClient struct {
 	booksSubMap      MySyncMap[string, *Subscription[WsBooks]]      //深度推送订阅频道
 	tradesSubMap     MySyncMap[string, *Subscription[WsTrades]]     //成交流推送订阅频道
 	optSummarySubMap MySyncMap[string, *Subscription[WsOptSummary]] //期权定价频道
+	markPriceSubMap  MySyncMap[string, *Subscription[WsMarkPrice]]  //标记价格频道
 	ordersSubMap     MySyncMap[string, *Subscription[WsOrders]]     //订单推送订阅频道
 	ordersAlgoSubMap MySyncMap[string, *Subscription[WsOrdersAlgo]] //策略委托订单频道
 
@@ -308,9 +309,10 @@ func (ws *WsStreamClient) Close() error {
 	ws.candleSubMap = NewMySyncMap[string, *Subscription[WsCandles]]()
 	ws.booksSubMap = NewMySyncMap[string, *Subscription[WsBooks]]()
 	ws.tradesSubMap = NewMySyncMap[string, *Subscription[WsTrades]]()
+	ws.optSummarySubMap = NewMySyncMap[string, *Subscription[WsOptSummary]]()
+	ws.markPriceSubMap = NewMySyncMap[string, *Subscription[WsMarkPrice]]()
 	ws.ordersSubMap = NewMySyncMap[string, *Subscription[WsOrders]]()
 	ws.ordersAlgoSubMap = NewMySyncMap[string, *Subscription[WsOrdersAlgo]]()
-	ws.optSummarySubMap = NewMySyncMap[string, *Subscription[WsOptSummary]]()
 
 	if ws.waitSubResult != nil {
 		//给当前等待订阅结果的请求返回错误
@@ -374,6 +376,7 @@ func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
 			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
+			markPriceSubMap:   NewMySyncMap[string, *Subscription[WsMarkPrice]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
@@ -393,6 +396,7 @@ func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
 			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
+			markPriceSubMap:   NewMySyncMap[string, *Subscription[WsMarkPrice]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
@@ -412,6 +416,7 @@ func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
 			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
+			markPriceSubMap:   NewMySyncMap[string, *Subscription[WsMarkPrice]](),
 			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
 			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
 			waitSubResult:     nil,
@@ -486,6 +491,13 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 		}
 		if sub, ok := ws.optSummarySubMap.Load(key); ok {
 			ws.optSummarySubMap.Delete(key)
+			if sub.closeChan != nil {
+				sub.closeChan <- struct{}{}
+				sub.closeChan = nil
+			}
+		}
+		if sub, ok := ws.markPriceSubMap.Load(key); ok {
+			ws.markPriceSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
@@ -714,6 +726,25 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						}
 						for _, optSummary := range *optSummaryList {
 							sub.resultChan <- optSummary
+						}
+					}
+					continue
+				}
+
+				if strings.Contains(string(data), "channel\":\"mark-price\"") {
+					markPriceList, err := handleWsMarkPrice(data)
+					if len(*markPriceList) == 0 {
+						continue
+					}
+					arg := (*markPriceList)[0].Args
+					keyData, _ := json.Marshal(arg)
+					if sub, ok := ws.markPriceSubMap.Load(string(keyData)); ok {
+						if err != nil {
+							sub.errChan <- err
+							continue
+						}
+						for _, markPrice := range *markPriceList {
+							sub.resultChan <- markPrice
 						}
 					}
 					continue
