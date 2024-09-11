@@ -2150,3 +2150,72 @@ func (api *PrivateRestSprdOrderPostAPI) Px(px string) *PrivateRestSprdOrderPostA
 	api.req.Px = GetPointer(px)
 	return api
 }
+
+// 金融产品链上赚币查看项目
+type PrivateRestFinanceStakingDefiOffersReq struct {
+	ProductId    *string `json:"productId"`    //String	否	项目ID
+	ProtocolType *string `json:"protocolType"` //String	否	项目类型 defi：链上赚币
+	Ccy          *string `json:"ccy"`          //String	否	投资币种，如 BTC
+}
+type PrivateRestFinanceStakingDefiOffersAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestFinanceStakingDefiOffersReq
+}
+
+// String	否	项目ID
+func (api *PrivateRestFinanceStakingDefiOffersAPI) ProductId(productId string) *PrivateRestFinanceStakingDefiOffersAPI {
+	api.req.ProductId = GetPointer(productId)
+	return api
+}
+
+// String	否	项目类型 defi：链上赚币
+func (api *PrivateRestFinanceStakingDefiOffersAPI) ProtocolType(protocolType string) *PrivateRestFinanceStakingDefiOffersAPI {
+	api.req.ProtocolType = GetPointer(protocolType)
+	return api
+}
+
+// String	否	投资币种，如 BTC
+func (api *PrivateRestFinanceStakingDefiOffersAPI) Ccy(ccy string) *PrivateRestFinanceStakingDefiOffersAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// 金融产品链上赚币申购项目
+type PrivateRestFinanceStakingDefiPurchaseInvestData struct {
+	Ccy *string `json:"ccy"` //String	是	投资币种，如 BTC
+	Amt *string `json:"amt"` //String	是	投资数量
+}
+type PrivateRestFinanceStakingDefiPurchaseReq struct {
+	ProductId  *string                                            `json:"productId"`  //String	是	项目ID
+	InvestData *[]PrivateRestFinanceStakingDefiPurchaseInvestData `json:"investData"` //Array	是	投资信息
+	Term       *string                                            `json:"term"`       //String	可选	投资期限 定期项目必须指定投资期限
+	Tag        *string                                            `json:"tag"`        //String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间
+}
+type PrivateRestFinanceStakingDefiPurchaseAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestFinanceStakingDefiPurchaseReq
+}
+
+// String	是	项目ID
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) ProductId(productId string) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.ProductId = GetPointer(productId)
+	return api
+}
+
+// Array	是	投资信息
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) InvestData(investData []PrivateRestFinanceStakingDefiPurchaseInvestData) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.InvestData = &investData
+	return api
+}
+
+// String	可选	投资期限 定期项目必须指定投资期限
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) Term(term string) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.Term = GetPointer(term)
+	return api
+}
+
+// String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) Tag(tag string) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}

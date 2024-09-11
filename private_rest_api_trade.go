@@ -440,3 +440,32 @@ func (api *PrivateRestSprdOrderPostAPI) Do() (*OkxRestRes[PrivateRestSprdOrderPo
 	}
 	return okxCallAPIWithSecret[PrivateRestSprdOrderPostRes](api.client.c, url, reqBody, POST)
 }
+
+// okx PrivateRestFinanceStakingDefiOffers PrivateRest接口 GET 金融产品链上赚币查看项目
+func (client *PrivateRestClient) NewPrivateRestFinanceStakingDefiOffers() *PrivateRestFinanceStakingDefiOffersAPI {
+	return &PrivateRestFinanceStakingDefiOffersAPI{
+		client: client,
+		req:    &PrivateRestFinanceStakingDefiOffersReq{},
+	}
+}
+func (api *PrivateRestFinanceStakingDefiOffersAPI) Do() (*OkxRestRes[PrivateRestFinanceStakingDefiOffersRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestFinanceStakingDefiOffers])
+	return okxCallAPIWithSecret[PrivateRestFinanceStakingDefiOffersRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx PrivateRestSprdOrderCancel PrivateRest接口 POST 价差交易撤单
+func (client *PrivateRestClient) NewPrivateRestFinanceStakingDefiPurchase() *PrivateRestFinanceStakingDefiPurchaseAPI {
+	return &PrivateRestFinanceStakingDefiPurchaseAPI{
+		client: client,
+		req:    &PrivateRestFinanceStakingDefiPurchaseReq{},
+	}
+}
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) Do() (*OkxRestRes[PrivateRestFinanceStakingDefiPurchaseRes], error) {
+	api.Tag(BrokerCode)
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestFinanceStakingDefiPurchase])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestFinanceStakingDefiPurchaseRes](api.client.c, url, reqBody, POST)
+}

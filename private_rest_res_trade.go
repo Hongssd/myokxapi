@@ -509,3 +509,62 @@ type PrivateRestSprdOrderPostResRow struct {
 	SMsg    string `json:"sMsg"`    //String	事件执行失败或成功时的msg
 }
 type PrivateRestSprdOrderPostRes []PrivateRestSprdOrderPostResRow
+
+// ccy	String	币种名称，如 BTC
+// productId	String	项目ID
+// protocol	String	项目名称
+// protocolType	String	项目类型
+// defi：链上赚币
+// term	String	项目期限
+// 活期为0，其他则显示定期天数
+// apy	String	预估年化
+// 如果年化为7% ，则该字段为0.07
+// earlyRedeem	Boolean	项目是否支持提前赎回
+// investData	Array	目前用户可用来投资的目标币种信息
+// > ccy	String	投资币种，如BTC
+// > bal	String	可投数量
+// > minAmt	String	最小申购量
+// > maxAmt	String	最大可申购量
+// earningData	Array	收益信息
+// > ccy	String	收益币种，如BTC
+// > earningType	String	收益类型
+// 0：预估收益
+// 1：累计发放收益
+// state	String	项目状态
+// purchasable：可申购
+// sold_out：售罄
+// stop：暂停申购
+// redeemPeriod	Array of string	赎回期，形式为 [最小赎回时间,最大赎回时间]
+// H：小时，D：天
+// 例 ["1H","24H"] 表示赎回期时1小时到24小时。
+// ["14D","14D"] 表示赎回期为14天。
+type PrivateRestFinanceStakingDefiOffersResRowInvestData struct {
+	Ccy    string `json:"ccy"`    //String	投资币种，如BTC
+	Bal    string `json:"bal"`    //String	可投数量
+	MinAmt string `json:"minAmt"` //String	最小申购量
+	MaxAmt string `json:"maxAmt"` //String	最大可申购量
+}
+type PrivateRestFinanceStakingDefiOffersResRowEarningData struct {
+	Ccy         string `json:"ccy"`         //String	收益币种，如BTC
+	EarningType string `json:"earningType"` //String	收益类型 0：预估收益 1：累计发放收益
+}
+type PrivateRestFinanceStakingDefiOffersResRow struct {
+	Ccy          string                                                 `json:"ccy"`          //String	币种名称，如 BTC
+	ProductId    string                                                 `json:"productId"`    //String	项目ID
+	Protocol     string                                                 `json:"protocol"`     //String	项目名称
+	ProtocolType string                                                 `json:"protocolType"` //String	项目类型 defi：链上赚币
+	Term         string                                                 `json:"term"`         //String	项目期限 活期为0，其他则显示定期天数
+	Apy          string                                                 `json:"apy"`          //String	预估年化 如果年化为7% ，则该字段为0.07
+	EarlyRedeem  bool                                                   `json:"earlyRedeem"`  //Boolean	项目是否支持提前赎回
+	InvestData   []PrivateRestFinanceStakingDefiOffersResRowInvestData  `json:"investData"`   //Array	目前用户可用来投资的目标币种信息
+	EarningData  []PrivateRestFinanceStakingDefiOffersResRowEarningData `json:"earningData"`  //Array	收益信息
+	State        string                                                 `json:"state"`        //String	项目状态 purchasable：可申购 sold_out：售罄 stop：暂停申购
+	RedeemPeriod []string                                               `json:"redeemPeriod"` //Array of string	赎回期，形式为 [最小赎回时间,最大赎回时间] H：小时，D：天 例 ["1H","24H"] 表示赎回期时1小时到24小时。 ["14D","14D"] 表示赎回期为14天。
+}
+type PrivateRestFinanceStakingDefiOffersRes []PrivateRestFinanceStakingDefiOffersResRow
+
+type PrivateRestFinanceStakingDefiPurchaseResRow struct {
+	OrdId string `json:"ordId"` //String	订单ID
+	Tag   string `json:"tag"`   //String	订单标签
+}
+type PrivateRestFinanceStakingDefiPurchaseRes []PrivateRestFinanceStakingDefiPurchaseResRow

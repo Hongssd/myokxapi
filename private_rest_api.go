@@ -62,6 +62,10 @@ const (
 
 	// Spread
 	PrivateRestSprdOrderPost // 价差交易下单
+
+	// Finance
+	PrivateRestFinanceStakingDefiOffers   // 金融产品链上赚币查看项目
+	PrivateRestFinanceStakingDefiPurchase // 金融产品申购项目
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
@@ -123,4 +127,8 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 
 	// Spread
 	PrivateRestSprdOrderPost: "/api/v5/sprd/order", // POST 价差交易下单
+
+	// Finance
+	PrivateRestFinanceStakingDefiOffers:   "/api/v5/finance/staking-defi/offers",   // GET 金融产品链上赚币查看项目
+	PrivateRestFinanceStakingDefiPurchase: "/api/v5/finance/staking-defi/purchase", // POST 金融产品链上赚币申购项目
 }
