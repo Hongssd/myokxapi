@@ -1929,42 +1929,99 @@ type PrivateRestRfqCreateRfqReq struct {
 	Legs                  *[]PrivateRestRfqCreateRfqLeg `json:"legs"`                  //Array of objects	是	组合交易，每次最多可以提交15组交易信息
 }
 type PrivateRestRfqCreateRfqAPI struct {
-	Client *PrivateRestClient
-	Req    *PrivateRestRfqCreateRfqReq
+	client *PrivateRestClient
+	req    *PrivateRestRfqCreateRfqReq
 }
 
 // Array of strings	是	希望收到询价的报价方列表，可通过/api/v5/rfq/counterparties/获取。
 func (api *PrivateRestRfqCreateRfqAPI) Counterparties(counterparties []string) *PrivateRestRfqCreateRfqAPI {
-	api.Req.Counterparties = &counterparties
+	api.req.Counterparties = &counterparties
 	return api
 }
 
 // Boolean	否	是否匿名询价，true表示匿名询价，false表示公开询价，默认值为 false，为true时，即使在交易执行之后，身份也不会透露给报价方。
 func (api *PrivateRestRfqCreateRfqAPI) Anonymous(anonymous bool) *PrivateRestRfqCreateRfqAPI {
-	api.Req.Anonymous = GetPointer(anonymous)
+	api.req.Anonymous = GetPointer(anonymous)
 	return api
 }
 
 // String	否	询价单自定义ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
 func (api *PrivateRestRfqCreateRfqAPI) ClRfqId(clRfqId string) *PrivateRestRfqCreateRfqAPI {
-	api.Req.ClRfqId = GetPointer(clRfqId)
+	api.req.ClRfqId = GetPointer(clRfqId)
 	return api
 }
 
 // String	否	询价单标签，与此询价单关联的大宗交易将有相同的标签。
 func (api *PrivateRestRfqCreateRfqAPI) Tag(tag string) *PrivateRestRfqCreateRfqAPI {
-	api.Req.Tag = GetPointer(tag)
+	api.req.Tag = GetPointer(tag)
 	return api
 }
 
 // Boolean	否	RFQ是否可以被部分执行，如果腿的比例和原RFQ一致。有效值为true或false。默认为false。
 func (api *PrivateRestRfqCreateRfqAPI) AllowPartialExecution(allowPartialExecution bool) *PrivateRestRfqCreateRfqAPI {
-	api.Req.AllowPartialExecution = GetPointer(allowPartialExecution)
+	api.req.AllowPartialExecution = GetPointer(allowPartialExecution)
 	return api
 }
 
 // Array of objects	是	组合交易，每次最多可以提交15组交易信息
 func (api *PrivateRestRfqCreateRfqAPI) Legs(legs []PrivateRestRfqCreateRfqLeg) *PrivateRestRfqCreateRfqAPI {
-	api.Req.Legs = &legs
+	api.req.Legs = &legs
+	return api
+}
+
+// 价差交易下单
+type PrivateRestSprdOrderPostReq struct {
+	SprdId  *string `json:"sprdId"`  //String	是	spread ID，如 BTC-USDT_BTC-USDT-SWAP
+	ClOrdId *string `json:"clOrdId"` //String	否	客户自定义订单ID字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag     *string `json:"tag"`     //String	否	订单标签字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+	Side    *string `json:"side"`    //String	是	订单方向 buy：买，sell：卖
+	OrdType *string `json:"ordType"` //String	是	订单类型 limit：限价单 post_only：只做maker单 ioc：立即成交并取消剩余
+	Sz      *string `json:"sz"`      //String	是	委托数量。反向价差的数量单位为USD，正向及混合价差为其对应baseCcy
+	Px      *string `json:"px"`      //String	是	委托价格，仅适用于limit, post_only, ioc类型的订单
+}
+type PrivateRestSprdOrderPostAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestSprdOrderPostReq
+}
+
+// String	是	spread ID，如 BTC-USDT_BTC-USDT-SWAP
+func (api *PrivateRestSprdOrderPostAPI) SprdId(sprdId string) *PrivateRestSprdOrderPostAPI {
+	api.req.SprdId = GetPointer(sprdId)
+	return api
+}
+
+// String	否	客户自定义订单ID字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestSprdOrderPostAPI) ClOrdId(clOrdId string) *PrivateRestSprdOrderPostAPI {
+	api.req.ClOrdId = GetPointer(clOrdId)
+	return api
+}
+
+// String	否	订单标签字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+func (api *PrivateRestSprdOrderPostAPI) Tag(tag string) *PrivateRestSprdOrderPostAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// String	是	订单方向 buy：买，sell：卖
+func (api *PrivateRestSprdOrderPostAPI) Side(side string) *PrivateRestSprdOrderPostAPI {
+	api.req.Side = GetPointer(side)
+	return api
+}
+
+// String	是	订单类型 limit：限价单 post_only：只做maker单 ioc：立即成交并取消剩余
+func (api *PrivateRestSprdOrderPostAPI) OrdType(ordType string) *PrivateRestSprdOrderPostAPI {
+	api.req.OrdType = GetPointer(ordType)
+	return api
+}
+
+// String	是	委托数量。反向价差的数量单位为USD，正向及混合价差为其对应baseCcy
+func (api *PrivateRestSprdOrderPostAPI) Sz(sz string) *PrivateRestSprdOrderPostAPI {
+	api.req.Sz = GetPointer(sz)
+	return api
+}
+
+// String	是	委托价格，仅适用于limit, post_only, ioc类型的订单
+func (api *PrivateRestSprdOrderPostAPI) Px(px string) *PrivateRestSprdOrderPostAPI {
+	api.req.Px = GetPointer(px)
 	return api
 }

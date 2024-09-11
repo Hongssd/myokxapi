@@ -467,3 +467,12 @@ type PrivateRestRfqCreateRfqResRow struct {
 	Legs                  []PrivateRestRfqCreateRfqLeg `json:"legs"`                  //Array of objects	组合交易，每个请求最多可放置15条腿
 }
 type PrivateRestRfqCreateRfqRes []PrivateRestRfqCreateRfqResRow
+
+type PrivateRestSprdOrderPostResRow struct {
+	OrdId   string `json:"ordId"`   //String	订单ID
+	ClOrdId string `json:"clOrdId"` //String	客户自定义订单ID
+	Tag     string `json:"tag"`     //String	订单标签
+	SCode   string `json:"sCode"`   //String	事件执行结果的code，0代表成功
+	SMsg    string `json:"sMsg"`    //String	事件执行失败或成功时的msg
+}
+type PrivateRestSprdOrderPostRes []PrivateRestSprdOrderPostResRow

@@ -56,6 +56,9 @@ const (
 	// RFQ
 	PrivateRestRfqCounterParties // 大宗交易获取报价方信息
 	PrivateRestRfqCreateRfq      // 大宗交易询价
+
+	// Spread
+	PrivateRestSprdOrderPost // 价差交易下单
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
@@ -111,4 +114,7 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	// RFQ
 	PrivateRestRfqCounterParties: "/api/v5/rfq/counterparties", // GET 获取报价方信息 查询可以参与交易的报价方信息
 	PrivateRestRfqCreateRfq:      "/api/v5/rfq/create-rfq",     // POST 大宗交易询价
+
+	// Spread
+	PrivateRestSprdOrderPost: "/api/v5/sprd/order", // POST 价差交易下单
 }

@@ -376,16 +376,33 @@ func (api *PrivateRestRfqCounterPartiesAPI) Do() (*OkxRestRes[PrivateRestRfqCoun
 // okx PrivateRestRfqCreateRfq PrivateRest接口 POST 大宗交易询价
 func (client *PrivateRestClient) NewPrivateRestRfqCreateRfq() *PrivateRestRfqCreateRfqAPI {
 	return &PrivateRestRfqCreateRfqAPI{
-		Client: client,
-		Req:    &PrivateRestRfqCreateRfqReq{},
+		client: client,
+		req:    &PrivateRestRfqCreateRfqReq{},
 	}
 }
 func (api *PrivateRestRfqCreateRfqAPI) Do() (*OkxRestRes[PrivateRestRfqCreateRfqRes], error) {
 	api.Tag(BrokerCode)
 	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestRfqCreateRfq])
-	reqBody, err := json.Marshal(api.Req)
+	reqBody, err := json.Marshal(api.req)
 	if err != nil {
 		return nil, err
 	}
-	return okxCallAPIWithSecret[PrivateRestRfqCreateRfqRes](api.Client.c, url, reqBody, POST)
+	return okxCallAPIWithSecret[PrivateRestRfqCreateRfqRes](api.client.c, url, reqBody, POST)
+}
+
+// okx PrivateRestSprdOrder PrivateRest接口 POST 价差交易下单
+func (client *PrivateRestClient) NewPrivateRestSprdOrderPost() *PrivateRestSprdOrderPostAPI {
+	return &PrivateRestSprdOrderPostAPI{
+		client: client,
+		req:    &PrivateRestSprdOrderPostReq{},
+	}
+}
+func (api *PrivateRestSprdOrderPostAPI) Do() (*OkxRestRes[PrivateRestSprdOrderPostRes], error) {
+	api.Tag(BrokerCode)
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestSprdOrderPost])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestSprdOrderPostRes](api.client.c, url, reqBody, POST)
 }
