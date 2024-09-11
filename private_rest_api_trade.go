@@ -344,6 +344,23 @@ func (api *PrivateRestAssetConvertEstimateQuoteAPI) Do() (*OkxRestRes[PrivateRes
 	return okxCallAPIWithSecret[PrivateRestAssetConvertEstimateQuoteRes](api.client.c, url, reqBody, POST)
 }
 
+// okx PrivateRestAssetConvertTrade PrivateRest接口 POST 闪兑下单 下单前需要询价
+func (client *PrivateRestClient) NewPrivateRestAssetConvertTrade() *PrivateRestAssetConvertTradeAPI {
+	return &PrivateRestAssetConvertTradeAPI{
+		client: client,
+		req:    &PrivateRestAssetConvertTradeReq{},
+	}
+}
+func (api *PrivateRestAssetConvertTradeAPI) Do() (*OkxRestRes[PrivateRestAssetConvertTradeRes], error) {
+	api.Tag(BrokerCode)
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestAssetConvertTrade])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestAssetConvertTradeRes](api.client.c, url, reqBody, POST)
+}
+
 // okx PrivateTradingBotGridOrderAlgoPost PrivateRest接口 POST 网格交易下单
 func (client *PrivateRestClient) NewPrivateTradingBotGridOrderAlgoPost() *PrivateTradingBotGridOrderAlgoPostAPI {
 	return &PrivateTradingBotGridOrderAlgoPostAPI{

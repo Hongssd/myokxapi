@@ -54,6 +54,7 @@ const (
 	PrivateRestAssetBills         // 查询最近一个月内资金账户账单流水
 	//ASSET CONVERT
 	PrivateRestAssetConvertEstimateQuote // 闪兑预估询价
+	PrivateRestAssetConvertTrade         // 闪兑下单 下单前需要询价
 
 	// RFQ
 	PrivateRestRfqCounterParties // 大宗交易获取报价方信息
@@ -114,6 +115,7 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAssetBills:         "/api/v5/asset/bills",          // 查询最近一个月内资金账户账单流水
 	// Asset Convert
 	PrivateRestAssetConvertEstimateQuote: "/api/v5/asset/convert/estimate-quote", // POST 闪兑预估询价
+	PrivateRestAssetConvertTrade:         "/api/v5/asset/convert/trade",          // POST 闪兑下单 下单前需要询价
 
 	// RFQ
 	PrivateRestRfqCounterParties: "/api/v5/rfq/counterparties", // GET 获取报价方信息 查询可以参与交易的报价方信息

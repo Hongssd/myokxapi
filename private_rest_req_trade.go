@@ -1664,6 +1664,84 @@ func (api *PrivateRestAssetConvertEstimateQuoteAPI) Tag(tag string) *PrivateRest
 	return api
 }
 
+// 闪兑下单
+// quoteId	String	是	报价ID
+// baseCcy	String	是	交易货币币种，如 BTC-USDT中的BTC
+// quoteCcy	String	是	计价货币币种，如 BTC-USDT中的USDT
+// side	String	是	交易方向
+// buy：买
+// sell：卖
+// 描述的是对于baseCcy的交易方向
+// sz	String	是	用户报价数量
+// 报价数量应不大于预估询价中的询价数量
+// szCcy	String	是	用户报价币种
+// clTReqId	String	否	用户自定义的订单标识
+// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+// tag	String	否	订单标签
+// 适用于broker用户
+type PrivateRestAssetConvertTradeReq struct {
+	QuoteId  *string `json:"quoteId"`  //String	是	报价ID
+	BaseCcy  *string `json:"baseCcy"`  //String	是	交易货币币种，如 BTC-USDT中的BTC
+	QuoteCcy *string `json:"quoteCcy"` //String	是	计价货币币种，如 BTC-USDT中的USDT
+	Side     *string `json:"side"`     //String	是	交易方向 buy：买 sell：卖 描述的是对于baseCcy的交易方向
+	Sz       *string `json:"sz"`       //String	是	用户报价数量 报价数量应不大于预估询价中的询价数量
+	SzCcy    *string `json:"szCcy"`    //String	是	用户报价币种
+	ClTReqId *string `json:"clTReqId"` //String	否	用户自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag      *string `json:"tag"`      //String	否	订单标签 适用于broker用户
+}
+type PrivateRestAssetConvertTradeAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetConvertTradeReq
+}
+
+// String	是	报价ID
+func (api *PrivateRestAssetConvertTradeAPI) QuoteId(quoteId string) *PrivateRestAssetConvertTradeAPI {
+	api.req.QuoteId = GetPointer(quoteId)
+	return api
+}
+
+// String	是	交易货币币种，如 BTC-USDT中的BTC
+func (api *PrivateRestAssetConvertTradeAPI) BaseCcy(baseCcy string) *PrivateRestAssetConvertTradeAPI {
+	api.req.BaseCcy = GetPointer(baseCcy)
+	return api
+}
+
+// String	是	计价货币币种，如 BTC-USDT中的USDT
+func (api *PrivateRestAssetConvertTradeAPI) QuoteCcy(quoteCcy string) *PrivateRestAssetConvertTradeAPI {
+	api.req.QuoteCcy = GetPointer(quoteCcy)
+	return api
+}
+
+// String	是	交易方向 buy：买 sell：卖 描述的是对于baseCcy的交易方向
+func (api *PrivateRestAssetConvertTradeAPI) Side(side string) *PrivateRestAssetConvertTradeAPI {
+	api.req.Side = GetPointer(side)
+	return api
+}
+
+// String	是	用户报价数量 报价数量应不大于预估询价中的询价数量
+func (api *PrivateRestAssetConvertTradeAPI) Sz(sz string) *PrivateRestAssetConvertTradeAPI {
+	api.req.Sz = GetPointer(sz)
+	return api
+}
+
+// String	是	用户报价币种
+func (api *PrivateRestAssetConvertTradeAPI) SzCcy(szCcy string) *PrivateRestAssetConvertTradeAPI {
+	api.req.SzCcy = GetPointer(szCcy)
+	return api
+}
+
+// String	否	用户自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestAssetConvertTradeAPI) ClTReqId(clTReqId string) *PrivateRestAssetConvertTradeAPI {
+	api.req.ClTReqId = GetPointer(clTReqId)
+	return api
+}
+
+// String	否	订单标签 适用于broker用户
+func (api *PrivateRestAssetConvertTradeAPI) Tag(tag string) *PrivateRestAssetConvertTradeAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
 // 资金划转状态查询
 type PrivateRestAssetTransferStateReq struct {
 	TransId  *string `json:"transId"`  //String	可选	划转ID

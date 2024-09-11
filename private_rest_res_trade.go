@@ -440,6 +440,22 @@ type PrivateRestAssetConvertEstimateQuoteResRow struct {
 }
 type PrivateRestAssetConvertEstimateQuoteRes []PrivateRestAssetConvertEstimateQuoteResRow
 
+type PrivateRestAssetConvertTradeResRow struct {
+	TradeId     string `json:"tradeId"`     //String	成交ID
+	QuoteId     string `json:"quoteId"`     //String	报价ID
+	ClTReqId    string `json:"clTReqId"`    //String	用户自定义的订单标识
+	State       string `json:"state"`       //String	状态 fullyFilled：交易成功 rejected：交易失败
+	InstId      string `json:"instId"`      //String	币对，如 BTC-USDT
+	BaseCcy     string `json:"baseCcy"`     //String	交易货币币种，如 BTC-USDT中BTC
+	QuoteCcy    string `json:"quoteCcy"`    //String	计价货币币种，如 BTC-USDT中USDT
+	Side        string `json:"side"`        //String	交易方向 买：buy 卖：sell
+	FillPx      string `json:"fillPx"`      //String	成交价格，单位为计价币
+	FillBaseSz  string `json:"fillBaseSz"`  //String	成交的交易币数量
+	FillQuoteSz string `json:"fillQuoteSz"` //String	成交的计价币数量
+	Ts          string `json:"ts"`          //String	闪兑交易时间，值为时间戳，Unix时间戳为毫秒数格式，如 1597026383085
+}
+type PrivateRestAssetConvertTradeRes []PrivateRestAssetConvertTradeResRow
+
 // 网格策略委托下单
 type PrivateTradingBotGridOrderAlgoPostResRow struct {
 	AlgoId      string `json:"algoId"`      //String	策略订单ID
