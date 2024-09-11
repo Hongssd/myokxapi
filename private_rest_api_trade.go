@@ -326,3 +326,20 @@ func (api *PrivateRestAssetTransferStateAPI) Do() (*OkxRestRes[PrivateRestAssetT
 	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAssetTransferState])
 	return okxCallAPIWithSecret[PrivateRestAssetTransferStateRes](api.client.c, url, NIL_REQBODY, GET)
 }
+
+// okx PrivateTradingBotGridOrderAlgoPost PrivateRest接口 POST 网格交易下单
+func (client *PrivateRestClient) NewPrivateTradingBotGridOrderAlgoPost() *PrivateTradingBotGridOrderAlgoPostAPI {
+	return &PrivateTradingBotGridOrderAlgoPostAPI{
+		client: client,
+		req:    &PrivateTradingBotGridOrderAlgoPostReq{},
+	}
+}
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Do() (*OkxRestRes[PrivateTradingBotGridOrderAlgoPostRes], error) {
+	api.Tag(BrokerCode)
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateTradingBotGridOrderAlgoPost])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateTradingBotGridOrderAlgoPostRes](api.client.c, url, reqBody, POST)
+}

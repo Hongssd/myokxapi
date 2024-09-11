@@ -422,3 +422,13 @@ type PrivateRestAssetTransferStateResRow struct {
 	SubAcct  string `json:"subAcct"`  //String	子账户名称
 	State    string `json:"state"`    //String	转账状态 success：成功 pending：处理中 failed：失败
 }
+
+// 网格策略委托下单
+type PrivateTradingBotGridOrderAlgoPostResRow struct {
+	AlgoId      string `json:"algoId"`      //String	策略订单ID
+	AlgoClOrdId string `json:"algoClOrdId"` //String	用户自定义策略ID
+	SCODE       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
+	SMsg        string `json:"sMsg"`        //String	事件执行失败时的msg
+	Tag         string `json:"tag"`         //String	订单标签
+}
+type PrivateTradingBotGridOrderAlgoPostRes []PrivateTradingBotGridOrderAlgoPostResRow

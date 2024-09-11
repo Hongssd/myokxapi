@@ -1645,3 +1645,166 @@ func (api *PrivateRestAssetTransferStateAPI) Type(t string) *PrivateRestAssetTra
 	api.req.Type = GetPointer(t)
 	return api
 }
+
+type PrivateTradingBotGridOrderAlgoTriggerParam struct {
+	TriggerAction   *string `json:"triggerAction"`   //String	是	触发行为 start：网格启动 stop：网格停止
+	TriggerStrategy *string `json:"triggerStrategy"` //String	是	触发策略 instant：立即触发 price：价格触发 rsi：rsi指标触发 默认为instant
+	DelaySeconds    *string `json:"delaySeconds"`    //String	否	延迟触发时间，单位为秒，默认为0
+	Timeframe       *string `json:"timeframe"`       //String	否	K线种类 3m, 5m, 15m, 30m (m代表分钟) 1H, 4H (H代表小时) 1D (D代表天) 该字段只在triggerStrategy为rsi时有效
+	Thold           *string `json:"thold"`           //String	否	阈值 取值[1,100]的整数 该字段只在triggerStrategy为rsi时有效
+	TriggerCond     *string `json:"triggerCond"`     //String	否	触发条件 cross_up：上穿 cross_down：下穿 above：上方 below：下方 cross：交叉 该字段只在triggerStrategy为rsi时有效
+	TimePeriod      *string `json:"timePeriod"`      //String	否	周期 14 该字段只在triggerStrategy为rsi下有效
+	TriggerPx       *string `json:"triggerPx"`       //String	否	触发价格 该字段只在triggerStrategy为price下有效
+	StopType        *string `json:"stopType"`        //String	否	策略停止类型 现货 1：卖出交易币，2：不卖出交易币 合约网格 1：停止平仓，2：停止不平仓 该字段只在triggerAction为stop时有效
+}
+type PrivateTradingBotGridOrderAlgoPostReq struct {
+	InstId             *string                                       `json:"instId"`             //String	是	产品ID，如BTC-USDT
+	AlgoOrdType        *string                                       `json:"algoOrdType"`        //String	是	策略订单类型 grid：现货网格委托 contract_grid：合约网格委托
+	MaxPx              *string                                       `json:"maxPx"`              //String	是	区间最高价格
+	MinPx              *string                                       `json:"minPx"`              //String	是	区间最低价格
+	GridNum            *string                                       `json:"gridNum"`            //String	是	网格数量
+	RunType            *string                                       `json:"runType"`            //String	否	网格类型 1：等差，2：等比 默认为等差
+	TpTriggerPx        *string                                       `json:"tpTriggerPx"`        //String	否	止盈触发价 适用于现货网格/合约网格
+	SlTriggerPx        *string                                       `json:"slTriggerPx"`        //String	否	止损触发价 适用于现货网格/合约网格
+	AlgoClOrdId        *string                                       `json:"algoClOrdId"`        //String	否	用户自定义策略ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag                *string                                       `json:"tag"`                //String	否	订单标签
+	ProfitSharingRatio *string                                       `json:"profitSharingRatio"` //String	否	带单员分润比例，仅支持固定比例分润 0,0.1,0.2,0.3
+	TriggerParams      *[]PrivateTradingBotGridOrderAlgoTriggerParam `json:"triggerParams"`      //Array of object	否	信号触发参数 适用于现货网格/合约网格
+
+	// 现货网格
+	QuoteSz *string `json:"quoteSz"` //String	可选	计价币投入数量 quoteSz和baseSz至少指定一个
+	BaseSz  *string `json:"baseSz"`  //String	可选	交易币投入数量 quoteSz和baseSz至少指定一个
+
+	// 合约网格
+	Sz        *string `json:"sz"`        //String	是	投入保证金,单位为USDT
+	Direction *string `json:"direction"` //String	是	合约网格类型 long：做多，short：做空，neutral：中性
+	Lever     *string `json:"lever"`     //String	是	杠杆倍数
+	BasePos   *bool   `json:"basePos"`   //Boolean	否	是否开底仓 默认为false 中性合约网格忽略该参数
+	TpRatio   *string `json:"tpRatio"`   //String	否	止盈比率，0.1 代表 10%
+	SlRatio   *string `json:"slRatio"`   //String	否	止损比率，0.1 代表 10%
+
+}
+type PrivateTradingBotGridOrderAlgoPostAPI struct {
+	client *PrivateRestClient
+	req    *PrivateTradingBotGridOrderAlgoPostReq
+}
+
+// String	是	产品ID，如BTC-USDT
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) InstId(instId string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String	是	策略订单类型 grid：现货网格委托 contract_grid：合约网格委托
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) AlgoOrdType(algoOrdType string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.AlgoOrdType = GetPointer(algoOrdType)
+	return api
+}
+
+// String	是	区间最高价格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) MaxPx(maxPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.MaxPx = GetPointer(maxPx)
+	return api
+}
+
+// String	是	区间最低价格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) MinPx(minPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.MinPx = GetPointer(minPx)
+	return api
+}
+
+// String	是	网格数量
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) GridNum(gridNum string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.GridNum = GetPointer(gridNum)
+	return api
+}
+
+// String	否	网格类型 1：等差，2：等比 默认为等差
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) RunType(runType string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.RunType = GetPointer(runType)
+	return api
+}
+
+// String	否	止盈触发价 适用于现货网格/合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) TpTriggerPx(tpTriggerPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.TpTriggerPx = GetPointer(tpTriggerPx)
+	return api
+}
+
+// String	否	止损触发价 适用于现货网格/合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) SlTriggerPx(slTriggerPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.SlTriggerPx = GetPointer(slTriggerPx)
+	return api
+}
+
+// String	否	用户自定义策略ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) AlgoClOrdId(algoClOrdId string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
+// String	否	订单标签
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Tag(tag string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// String	否	带单员分润比例，仅支持固定比例分润 0,0.1,0.2,0.3
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) ProfitSharingRatio(profitSharingRatio string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.ProfitSharingRatio = GetPointer(profitSharingRatio)
+	return api
+}
+
+// Array of object	否	信号触发参数 适用于现货网格/合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) TriggerParams(triggerParams []PrivateTradingBotGridOrderAlgoTriggerParam) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.TriggerParams = &triggerParams
+	return api
+}
+
+// String	可选	计价币投入数量 quoteSz和baseSz至少指定一个 现货网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) QuoteSz(quoteSz string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.QuoteSz = GetPointer(quoteSz)
+	return api
+}
+
+// String	可选	交易币投入数量 quoteSz和baseSz至少指定一个 现货网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) BaseSz(baseSz string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.BaseSz = GetPointer(baseSz)
+	return api
+}
+
+// String	是	投入保证金,单位为USDT 合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Sz(sz string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Sz = GetPointer(sz)
+	return api
+}
+
+// String	是	合约网格类型 long：做多，short：做空，neutral：中性
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Direction(direction string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Direction = GetPointer(direction)
+	return api
+}
+
+// String	是	杠杆倍数
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Lever(lever string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Lever = GetPointer(lever)
+	return api
+}
+
+// Boolean	否	是否开底仓 默认为false 中性合约网格忽略该参数
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) BasePos(basePos bool) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.BasePos = GetPointer(basePos)
+	return api
+}
+
+// String	否	止盈比率，0.1 代表 10%
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) TpRatio(tpRatio string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.TpRatio = GetPointer(tpRatio)
+	return api
+}
+
+// String	否	止损比率，0.1 代表 10%
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) SlRatio(slRatio string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.SlRatio = GetPointer(slRatio)
+	return api
+}
