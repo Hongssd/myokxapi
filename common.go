@@ -154,6 +154,13 @@ const (
 	WS_BUSINESS
 )
 
+// 经纪商代码
+var BrokerCode string
+
+func SetBrokerCode(brokerCode string) {
+	BrokerCode = brokerCode
+}
+
 // 产品类型 SPOT：币币 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION ： 期权 ANY： 全部
 type InstType string
 

@@ -33,11 +33,15 @@ func (client *PrivateRestClient) NewPrivateRestTradeOrderPost() *PrivateRestTrad
 	}
 }
 func (api *PrivateRestTradeOrderPostAPI) Do() (*OkxRestRes[PrivateRestTradeOrderPostRes], error) {
+	api.Tag(BrokerCode)
 	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestTradeOrderPost])
 	reqBody, err := json.Marshal(api.req)
 	if err != nil {
 		return nil, err
 	}
+	d, _ := json.MarshalIndent(url, "", "  ")
+	log.Info("Request URL: ", string(d))
+	log.Info("Request Body: ", string(reqBody))
 	return okxCallAPIWithSecret[PrivateRestTradeOrderPostRes](api.client.c, url, reqBody, POST)
 }
 
@@ -132,6 +136,22 @@ func (api *PrivateRestTradeAmendOrderAPI) Do() (*OkxRestRes[PrivateRestTradeAmen
 		return nil, err
 	}
 	return okxCallAPIWithSecret[PrivateRestTradeAmendOrderRes](api.client.c, url, reqBody, POST)
+}
+
+// okx PrivateRestTradeClosePostion PrivateRest接口 POST 市价仓位全平
+func (client *PrivateRestClient) NewPrivateRestTradeClosePostion() *PrivateRestTradeClosePostionAPI {
+	return &PrivateRestTradeClosePostionAPI{
+		client: client,
+		req:    &PrivateRestTradeClosePostionReq{},
+	}
+}
+func (api *PrivateRestTradeClosePostionAPI) Do() (*OkxRestRes[PrivateRestTradeClosePostionRes], error) {
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestTradeClosePostion])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateRestTradeClosePostionRes](api.client.c, url, reqBody, POST)
 }
 
 // okx PrivateRestTradeOrderAlgoPending PrivateRest接口 GET 获取未完成策略委托单列表

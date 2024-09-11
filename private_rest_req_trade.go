@@ -1114,6 +1114,7 @@ func (api *PrivateRestTradeBatchOrdersAPI) AddNewOrderReq(orderApi *PrivateRestT
 	if api.req == nil {
 		api.req = &PrivateRestTradeBatchOrdersReq{}
 	}
+	orderApi.Tag(BrokerCode)
 	*api.req = append(*api.req, *orderApi.req)
 	return api
 }
@@ -1121,6 +1122,7 @@ func (api *PrivateRestTradeBatchOrdersAPI) AddNewOrderReq(orderApi *PrivateRestT
 func (api *PrivateRestTradeBatchOrdersAPI) SetOrderList(orderApiList []PrivateRestTradeOrderPostAPI) *PrivateRestTradeBatchOrdersAPI {
 	api.req = &PrivateRestTradeBatchOrdersReq{}
 	for _, v := range orderApiList {
+		v.Tag(BrokerCode)
 		*api.req = append(*api.req, *v.req)
 	}
 	return api
@@ -1261,6 +1263,63 @@ func (api *PrivateRestTradeOrderHistoryAPI) End(end string) *PrivateRestTradeOrd
 // String 否 返回结果的数量，最大为100，默认100条
 func (api *PrivateRestTradeOrderHistoryAPI) Limit(limit string) *PrivateRestTradeOrderHistoryAPI {
 	api.req.Limit = GetPointer(limit)
+	return api
+}
+
+type PrivateRestTradeClosePostionReq struct {
+	InstId  *string `json:"instId"`  //String	是	产品ID
+	PosSide *string `json:"posSide"` //String	可选	持仓方向
+	MgnMode *string `json:"mgnMode"` //String	是	保证金模式 cross：全仓 ； isolated：逐仓
+	Ccy     *string `json:"ccy"`     //String	可选	保证金币种，现货和合约模式下的全仓币币杠杆平仓必填
+	AutoCxl *bool   `json:"autoCxl"` //Boolean	否	当市价全平时，平仓单是否需要自动撤销,默认为false. false：不自动撤单 true：自动撤单
+	ClOrdId *string `json:"clOrdId"` //String	否	客户自定义ID
+	Tag     *string `json:"tag"`     //String	否	订单标签
+}
+
+type PrivateRestTradeClosePostionAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeClosePostionReq
+}
+
+// String 是 产品ID
+func (api *PrivateRestTradeClosePostionAPI) InstId(instId string) *PrivateRestTradeClosePostionAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 可选 持仓方向
+func (api *PrivateRestTradeClosePostionAPI) PosSide(posSide string) *PrivateRestTradeClosePostionAPI {
+	api.req.PosSide = GetPointer(posSide)
+	return api
+}
+
+// String 是 保证金模式 cross：全仓 ； isolated：逐仓
+func (api *PrivateRestTradeClosePostionAPI) MgnMode(mgnMode string) *PrivateRestTradeClosePostionAPI {
+	api.req.MgnMode = GetPointer(mgnMode)
+	return api
+}
+
+// String 可选 保证金币种，现货和合约模式下的全仓币币杠杆平仓必填
+func (api *PrivateRestTradeClosePostionAPI) Ccy(ccy string) *PrivateRestTradeClosePostionAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// Boolean 否 当市价全平时，平仓单是否需要自动撤销,默认为false. false：不自动撤单 true：自动撤单
+func (api *PrivateRestTradeClosePostionAPI) AutoCxl(autoCxl bool) *PrivateRestTradeClosePostionAPI {
+	api.req.AutoCxl = GetPointer(autoCxl)
+	return api
+}
+
+// String 否 客户自定义ID
+func (api *PrivateRestTradeClosePostionAPI) ClOrdId(clOrdId string) *PrivateRestTradeClosePostionAPI {
+	api.req.ClOrdId = GetPointer(clOrdId)
+	return api
+}
+
+// String 否 订单标签
+func (api *PrivateRestTradeClosePostionAPI) Tag(tag string) *PrivateRestTradeClosePostionAPI {
+	api.req.Tag = GetPointer(tag)
 	return api
 }
 

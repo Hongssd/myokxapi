@@ -318,6 +318,14 @@ type PrivateRestTradeCancelBatchOrdersRes []PrivateRestTradeCancelOrderResRow
 
 type PrivateRestTradeAmendBatchOrdersRes []PrivateRestTradeAmendOrderResRow
 
+type PrivateRestTradeClosePostionResRow struct {
+	InstId  string `json:"instId"`  //String	产品ID
+	PosSide string `json:"posSide"` //String	持仓方向
+	ClOrdId string `json:"clOrdId"` //String	客户自定义ID
+	Tag     string `json:"tag"`     //String	订单标签
+}
+type PrivateRestTradeClosePostionRes []PrivateRestTradeClosePostionResRow
+
 type PrivateRestTradeOrderHistoryRes []PrivateRestTradeOrderGetResRow
 type PrivateRestTradeOrderHistoryArchiveRes []PrivateRestTradeOrderGetResRow
 

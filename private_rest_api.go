@@ -36,6 +36,8 @@ const (
 	PrivateRestTradeOrderHistory        //获取历史订单记录（近七天）
 	PrivateRestTradeOrderHistoryArchive //获取历史订单记录（近三个月）
 
+	PrivateRestTradeClosePostion //市价仓位全平 市价平掉指定交易产品的持仓
+
 	PrivateRestTradeFills        //获取成交明细（近三天）
 	PrivateRestTradeFillsHistory //获取成交明细（近三个月）
 
@@ -83,6 +85,8 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 
 	PrivateRestTradeFills:        "/api/v5/trade/fills",         //GET 获取成交明细（近三天）
 	PrivateRestTradeFillsHistory: "/api/v5/trade/fills-history", //GET 获取成交明细（近三个月）
+
+	PrivateRestTradeClosePostion: "/api/v5/trade/close-position", //POST 市价仓位全平 市价平掉指定交易产品的持仓
 
 	// Asset
 	PrivateRestAssetCurrencies:    "/api/v5/asset/currencies",     // GET 获取币种列表
