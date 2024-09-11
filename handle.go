@@ -21,7 +21,7 @@ type OkxRestRes[T any] struct {
 
 func handlerCommonRest[T any](data []byte) (*OkxRestRes[T], error) {
 	res := &OkxRestRes[T]{}
-	// log.Warn(string(data))
+	//log.Warn(string(data))
 	err := json.Unmarshal(data, &res)
 	if err != nil {
 		log.Error("rest返回值获取失败", err)

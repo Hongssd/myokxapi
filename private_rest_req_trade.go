@@ -1809,36 +1809,12 @@ func (api *PrivateTradingBotGridOrderAlgoPostAPI) SlRatio(slRatio string) *Priva
 	return api
 }
 
-// stgyName	String	是	策略自定义名称，不超过40个字符
-// recurringList	Array of object	是	定投信息
-// > ccy	String	是	定投币种，如 BTC
-// > ratio	String	是	定投币种资产占比，如 "0.2"代表占比20%
-// period	String	是	周期类型
-// monthly：月
-// weekly：周
-// daily：日
-// hourly：小时
-// recurringDay	String	可选	投资日
-// 当周期类型为monthly，则取值范围是 [1,28] 的整数
-// 当周期类型为weekly，则取值范围是 [1,7] 的整数
-// 当周期类型为daily/hourly，该参数可不填。
-// recurringHour	String	可选	小时级别定投的间隔
-// 1/4/8/12
-// 如：1代表每隔1个小时定投
-// 当周期类型选择hourly，该字段必填。
-// recurringTime	String	是	投资时间，取值范围是 [0,23] 的整数
-// 当周期类型选择hourly代表首次定投发生的时间
-// timeZone	String	是	时区（UTC），取值范围是 [-12,14] 的整数
-// 如 8表示UTC+8（东8区），北京时间
-// amt	String	是	每期投入数量
-// investmentCcy	String	是	投入数量单位，只能是USDT/USDC
-// tdMode	String	是	交易模式
-// 跨币种保证金模式/组合保证金模式下选择 cross：全仓
-// 现货模式/现货和合约模式下选择 cash：非保证金
-// algoClOrdId	String	否	客户自定义订单ID
-// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
-// tag	String	否	订单标签
-// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+type PrivateRestRfqCounterPartiesReq struct{}
+type PrivateRestRfqCounterPartiesAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestRfqCounterPartiesReq
+}
+
 type PrivateTradingBotRecurringOrderAlgoPostRecurring struct {
 	Ccy   *string `json:"ccy"`   //String	是	定投币种，如 BTC
 	Ratio *string `json:"ratio"` //String	是	定投币种资产占比，如 "0.2"代表占比20%
@@ -1931,5 +1907,64 @@ func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) AlgoClOrdId(algoClOrdId s
 // String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
 func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Tag(tag string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
 	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// 大宗交易询价
+type PrivateRestRfqCreateRfqLeg struct {
+	InstId  *string `json:"instId"`  //String	是	产品ID
+	TdMode  *string `json:"tdMode"`  //String	否	交易模式 保证金模式：cross全仓 isolated逐仓 非保证金模式：cash非保证金. 如未提供，tdMode 将继承系统设置的默认值： 现货和合约模式 & 现货: cash 现货和合约模式和跨币种保证金模式下买入期权： isolated 其他情况: cross
+	Ccy     *string `json:"ccy"`     //String	否	保证金币种，仅适用于现货和合约模式下的全仓杠杆订单 在其他情况下该参数将被忽略。
+	Sz      *string `json:"sz"`      //String	是	委托数量
+	Side    *string `json:"side"`    //String	是	询价单方向
+	PosSide *string `json:"posSide"` //String	否	持仓方向 买卖模式下默认为net。在开平仓模式下仅可选择long或short。 如未指定，则处于开平仓模式下的用户始终会开新仓位。 仅适用交割、永续。
+	TgtCcy  *string `json:"tgtCcy"`  //String	否	委托数量的类型 定义sz属性的单位。仅适用于 instType=SPOT。有效值为base_ccy和quote_ccy。未指定时，默认为base_ccy。
+}
+type PrivateRestRfqCreateRfqReq struct {
+	Counterparties        *[]string                     `json:"counterparties"`        //Array of strings	是	希望收到询价的报价方列表，可通过/api/v5/rfq/counterparties/获取。
+	Anonymous             *bool                         `json:"anonymous"`             //Boolean	否	是否匿名询价，true表示匿名询价，false表示公开询价，默认值为 false，为true时，即使在交易执行之后，身份也不会透露给报价方。
+	ClRfqId               *string                       `json:"clRfqId"`               //String	否	询价单自定义ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag                   *string                       `json:"tag"`                   //String	否	询价单标签，与此询价单关联的大宗交易将有相同的标签。
+	AllowPartialExecution *bool                         `json:"allowPartialExecution"` //Boolean	否	RFQ是否可以被部分执行，如果腿的比例和原RFQ一致。有效值为true或false。默认为false。
+	Legs                  *[]PrivateRestRfqCreateRfqLeg `json:"legs"`                  //Array of objects	是	组合交易，每次最多可以提交15组交易信息
+}
+type PrivateRestRfqCreateRfqAPI struct {
+	Client *PrivateRestClient
+	Req    *PrivateRestRfqCreateRfqReq
+}
+
+// Array of strings	是	希望收到询价的报价方列表，可通过/api/v5/rfq/counterparties/获取。
+func (api *PrivateRestRfqCreateRfqAPI) Counterparties(counterparties []string) *PrivateRestRfqCreateRfqAPI {
+	api.Req.Counterparties = &counterparties
+	return api
+}
+
+// Boolean	否	是否匿名询价，true表示匿名询价，false表示公开询价，默认值为 false，为true时，即使在交易执行之后，身份也不会透露给报价方。
+func (api *PrivateRestRfqCreateRfqAPI) Anonymous(anonymous bool) *PrivateRestRfqCreateRfqAPI {
+	api.Req.Anonymous = GetPointer(anonymous)
+	return api
+}
+
+// String	否	询价单自定义ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestRfqCreateRfqAPI) ClRfqId(clRfqId string) *PrivateRestRfqCreateRfqAPI {
+	api.Req.ClRfqId = GetPointer(clRfqId)
+	return api
+}
+
+// String	否	询价单标签，与此询价单关联的大宗交易将有相同的标签。
+func (api *PrivateRestRfqCreateRfqAPI) Tag(tag string) *PrivateRestRfqCreateRfqAPI {
+	api.Req.Tag = GetPointer(tag)
+	return api
+}
+
+// Boolean	否	RFQ是否可以被部分执行，如果腿的比例和原RFQ一致。有效值为true或false。默认为false。
+func (api *PrivateRestRfqCreateRfqAPI) AllowPartialExecution(allowPartialExecution bool) *PrivateRestRfqCreateRfqAPI {
+	api.Req.AllowPartialExecution = GetPointer(allowPartialExecution)
+	return api
+}
+
+// Array of objects	是	组合交易，每次最多可以提交15组交易信息
+func (api *PrivateRestRfqCreateRfqAPI) Legs(legs []PrivateRestRfqCreateRfqLeg) *PrivateRestRfqCreateRfqAPI {
+	api.Req.Legs = &legs
 	return api
 }

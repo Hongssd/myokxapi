@@ -445,3 +445,25 @@ type PrivateTradingBotRecurringOrderAlgoPostResRow struct {
 	SMsg        string `json:"sMsg"`        //String	事件执行失败时的msg
 }
 type PrivateTradingBotRecurringOrderAlgoPostRes []PrivateTradingBotRecurringOrderAlgoPostResRow
+
+type PrivateRestRfqCounterPartiesResRow struct {
+	TraderName string `json:"traderName"` //String	报价方名称
+	TraderCode string `json:"traderCode"` //String	报价方唯一标识代码，公开可见；报价和询价的相关接口都使用该代码代表报价方。
+	Type       string `json:"type"`       //String	报价方类型。LP指通过API连接的自动做市商。
+}
+type PrivateRestRfqCounterPartiesRes []PrivateRestRfqCounterPartiesResRow
+
+type PrivateRestRfqCreateRfqResRow struct {
+	CTime                 string                       `json:"cTime"`                 //String	询价单创建时间，Unix时间戳的毫秒数格式。
+	UTime                 string                       `json:"uTime"`                 //String	询价单状态更新时间，Unix时间戳的毫秒数格式。
+	State                 string                       `json:"state"`                 //String	询价单的状态
+	Counterparties        []string                     `json:"counterparties"`        //Array of strings	报价方列表
+	ValidUntil            string                       `json:"validUntil"`            //String	询价单的过期时间，Unix时间戳的毫秒数格式。
+	ClRfqId               string                       `json:"clRfqId"`               //String	询价单自定义ID，为客户端敏感信息，不会公开，对报价方返回""。
+	Tag                   string                       `json:"tag"`                   //String	RFQ标签，与此RFQ关联的大宗交易将有相同的标签。
+	AllowPartialExecution bool                         `json:"allowPartialExecution"` //Boolean	RFQ是否可以被部分执行，如果腿的比例和原RFQ一致。有效值为true或false。未指定时，默认为false。
+	TraderCode            string                       `json:"traderCode"`            //String	询价方唯一标识代码。
+	RfqId                 string                       `json:"rfqId"`                 //String	询价单ID
+	Legs                  []PrivateRestRfqCreateRfqLeg `json:"legs"`                  //Array of objects	组合交易，每个请求最多可放置15条腿
+}
+type PrivateRestRfqCreateRfqRes []PrivateRestRfqCreateRfqResRow
