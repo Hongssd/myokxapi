@@ -35,14 +35,16 @@ const (
 	PrivateRestTradeAmendBatchOrders    //批量修改订单
 	PrivateRestTradeOrderHistory        //获取历史订单记录（近七天）
 	PrivateRestTradeOrderHistoryArchive //获取历史订单记录（近三个月）
+	PrivateRestTradeFills               //获取成交明细（近三天）
+	PrivateRestTradeFillsHistory        //获取成交明细（近三个月）
 
 	PrivateRestTradeClosePostion //市价仓位全平 市价平掉指定交易产品的持仓
 
 	// Grid
 	PrivateTradingBotGridOrderAlgoPost // 网格交易下单
 
-	PrivateRestTradeFills        //获取成交明细（近三天）
-	PrivateRestTradeFillsHistory //获取成交明细（近三个月）
+	// Recurring
+	PrivateTradingBotRecurringOrderAlgoPost // 定投策略委托下单
 
 	//Asset
 	PrivateRestAssetCurrencies    //获取币种列表
@@ -85,14 +87,15 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestTradeAmendBatchOrders:    "/api/v5/trade/amend-batch-orders",     //POST 批量修改订单
 	PrivateRestTradeOrderHistory:        "/api/v5/trade/orders-history",         //GET 获取历史订单记录（近七天）
 	PrivateRestTradeOrderHistoryArchive: "/api/v5/trade/orders-history-archive", //GET 获取历史订单记录（近三个月）
+	PrivateRestTradeFills:               "/api/v5/trade/fills",                  //GET 获取成交明细（近三天）
+	PrivateRestTradeFillsHistory:        "/api/v5/trade/fills-history",          //GET 获取成交明细（近三个月）
+
+	PrivateRestTradeClosePostion: "/api/v5/trade/close-position", //POST 市价仓位全平 市价平掉指定交易产品的持仓
 
 	// Grid
 	PrivateTradingBotGridOrderAlgoPost: "/api/v5/tradingBot/grid/order-algo", //POST 网格交易下单
-
-	PrivateRestTradeFills:        "/api/v5/trade/fills",         //GET 获取成交明细（近三天）
-	PrivateRestTradeFillsHistory: "/api/v5/trade/fills-history", //GET 获取成交明细（近三个月）
-
-	PrivateRestTradeClosePostion: "/api/v5/trade/close-position", //POST 市价仓位全平 市价平掉指定交易产品的持仓
+	// Recurring
+	PrivateTradingBotRecurringOrderAlgoPost: "/api/v5/tradingBot/recurring/order-algo", //POST 定投策略委托下单
 
 	// Asset
 	PrivateRestAssetCurrencies:    "/api/v5/asset/currencies",     // GET 获取币种列表

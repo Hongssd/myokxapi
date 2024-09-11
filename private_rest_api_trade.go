@@ -343,3 +343,20 @@ func (api *PrivateTradingBotGridOrderAlgoPostAPI) Do() (*OkxRestRes[PrivateTradi
 	}
 	return okxCallAPIWithSecret[PrivateTradingBotGridOrderAlgoPostRes](api.client.c, url, reqBody, POST)
 }
+
+// okx PrivateTradingBotRecurringOrderAlgoPost PrivateRest接口 POST 定投策略委托下单
+func (client *PrivateRestClient) NewPrivateTradingBotRecurringOrderAlgoPost() *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	return &PrivateTradingBotRecurringOrderAlgoPostAPI{
+		client: client,
+		req:    &PrivateTradingBotRecurringOrderAlgoPostReq{},
+	}
+}
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Do() (*OkxRestRes[PrivateTradingBotRecurringOrderAlgoPostRes], error) {
+	api.Tag(BrokerCode)
+	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateTradingBotRecurringOrderAlgoPost])
+	reqBody, err := json.Marshal(api.req)
+	if err != nil {
+		return nil, err
+	}
+	return okxCallAPIWithSecret[PrivateTradingBotRecurringOrderAlgoPostRes](api.client.c, url, reqBody, POST)
+}

@@ -1808,3 +1808,128 @@ func (api *PrivateTradingBotGridOrderAlgoPostAPI) SlRatio(slRatio string) *Priva
 	api.req.SlRatio = GetPointer(slRatio)
 	return api
 }
+
+// stgyName	String	是	策略自定义名称，不超过40个字符
+// recurringList	Array of object	是	定投信息
+// > ccy	String	是	定投币种，如 BTC
+// > ratio	String	是	定投币种资产占比，如 "0.2"代表占比20%
+// period	String	是	周期类型
+// monthly：月
+// weekly：周
+// daily：日
+// hourly：小时
+// recurringDay	String	可选	投资日
+// 当周期类型为monthly，则取值范围是 [1,28] 的整数
+// 当周期类型为weekly，则取值范围是 [1,7] 的整数
+// 当周期类型为daily/hourly，该参数可不填。
+// recurringHour	String	可选	小时级别定投的间隔
+// 1/4/8/12
+// 如：1代表每隔1个小时定投
+// 当周期类型选择hourly，该字段必填。
+// recurringTime	String	是	投资时间，取值范围是 [0,23] 的整数
+// 当周期类型选择hourly代表首次定投发生的时间
+// timeZone	String	是	时区（UTC），取值范围是 [-12,14] 的整数
+// 如 8表示UTC+8（东8区），北京时间
+// amt	String	是	每期投入数量
+// investmentCcy	String	是	投入数量单位，只能是USDT/USDC
+// tdMode	String	是	交易模式
+// 跨币种保证金模式/组合保证金模式下选择 cross：全仓
+// 现货模式/现货和合约模式下选择 cash：非保证金
+// algoClOrdId	String	否	客户自定义订单ID
+// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+// tag	String	否	订单标签
+// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+type PrivateTradingBotRecurringOrderAlgoPostRecurring struct {
+	Ccy   *string `json:"ccy"`   //String	是	定投币种，如 BTC
+	Ratio *string `json:"ratio"` //String	是	定投币种资产占比，如 "0.2"代表占比20%
+}
+type PrivateTradingBotRecurringOrderAlgoPostReq struct {
+	StgyName      *string                                             `json:"stgyName"`      //String	是	策略自定义名称，不超过40个字符
+	RecurringList *[]PrivateTradingBotRecurringOrderAlgoPostRecurring `json:"recurringList"` //Array of object	是	定投信息
+	Period        *string                                             `json:"period"`        //String	是	周期类型 monthly：月 weekly：周 daily：日 hourly：小时
+	RecurringDay  *string                                             `json:"recurringDay"`  //String	可选	投资日 当周期类型为monthly，则取值范围是 [1,28] 的整数 当周期类型为weekly，则取值范围是 [1,7] 的整数 当周期类型为daily/hourly，该参数可不填。
+	RecurringHour *string                                             `json:"recurringHour"` //String	可选	小时级别定投的间隔 1/4/8/12 如：1代表每隔1个小时定投 当周期类型选择hourly，该字段必填。
+	RecurringTime *string                                             `json:"recurringTime"` //String	是	投资时间，取值范围是 [0,23] 的整数 当周期类型选择hourly代表首次定投发生的时间
+	TimeZone      *string                                             `json:"timeZone"`      //String	是	时区（UTC），取值范围是 [-12,14] 的整数 如 8表示UTC+8（东8区），北京时间
+	Amt           *string                                             `json:"amt"`           //String	是	每期投入数量
+	InvestmentCcy *string                                             `json:"investmentCcy"` //String	是	投入数量单位，只能是USDT/USDC
+	TdMode        *string                                             `json:"tdMode"`        //String	是	交易模式 跨币种保证金模式/组合保证金模式下选择 cross：全仓 现货模式/现货和合约模式下选择 cash：非保证金
+	AlgoClOrdId   *string                                             `json:"algoClOrdId"`   //String	否	客户自定义订单ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag           *string                                             `json:"tag"`           //String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+}
+type PrivateTradingBotRecurringOrderAlgoPostAPI struct {
+	client *PrivateRestClient
+	req    *PrivateTradingBotRecurringOrderAlgoPostReq
+}
+
+// String	是	策略自定义名称，不超过40个字符
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) StgyName(stgyName string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.StgyName = GetPointer(stgyName)
+	return api
+}
+
+// Array of object	是	定投信息
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringList(recurringList []PrivateTradingBotRecurringOrderAlgoPostRecurring) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringList = &recurringList
+	return api
+}
+
+// String	是	周期类型 monthly：月 weekly：周 daily：日 hourly：小时
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Period(period string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.Period = GetPointer(period)
+	return api
+}
+
+// String	可选	投资日 当周期类型为monthly，则取值范围是 [1,28] 的整数 当周期类型为weekly，则取值范围是 [1,7] 的整数 当周期类型为daily/hourly，该参数可不填。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringDay(recurringDay string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringDay = GetPointer(recurringDay)
+	return api
+}
+
+// String	可选	小时级别定投的间隔 1/4/8/12 如：1代表每隔1个小时定投 当周期类型选择hourly，该字段必填。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringHour(recurringHour string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringHour = GetPointer(recurringHour)
+	return api
+}
+
+// String	是	投资时间，取值范围是 [0,23] 的整数 当周期类型选择hourly代表首次定投发生的时间
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringTime(recurringTime string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringTime = GetPointer(recurringTime)
+	return api
+}
+
+// String	是	时区（UTC），取值范围是 [-12,14] 的整数 如 8表示UTC+8（东8区），北京时间
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) TimeZone(timeZone string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.TimeZone = GetPointer(timeZone)
+	return api
+}
+
+// String	是	每期投入数量
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Amt(amt string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.Amt = GetPointer(amt)
+	return api
+}
+
+// String	是	投入数量单位，只能是USDT/USDC
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) InvestmentCcy(investmentCcy string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.InvestmentCcy = GetPointer(investmentCcy)
+	return api
+}
+
+// String	是	交易模式 跨币种保证金模式/组合保证金模式下选择 cross：全仓 现货模式/现货和合约模式下选择 cash：非保证金
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) TdMode(tdMode string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.TdMode = GetPointer(tdMode)
+	return api
+}
+
+// String	否	客户自定义订单ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) AlgoClOrdId(algoClOrdId string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
+// String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Tag(tag string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}

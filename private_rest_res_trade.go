@@ -427,8 +427,21 @@ type PrivateRestAssetTransferStateResRow struct {
 type PrivateTradingBotGridOrderAlgoPostResRow struct {
 	AlgoId      string `json:"algoId"`      //String	策略订单ID
 	AlgoClOrdId string `json:"algoClOrdId"` //String	用户自定义策略ID
-	SCODE       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
+	SCode       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
 	SMsg        string `json:"sMsg"`        //String	事件执行失败时的msg
 	Tag         string `json:"tag"`         //String	订单标签
 }
 type PrivateTradingBotGridOrderAlgoPostRes []PrivateTradingBotGridOrderAlgoPostResRow
+
+// 定投策略委托下单
+// algoId	String	策略订单ID
+// algoClOrdId	String	客户自定义订单ID
+// sCode	String	事件执行结果的code，0代表成功
+// sMsg	String	事件执行失败时的msg
+type PrivateTradingBotRecurringOrderAlgoPostResRow struct {
+	AlgoId      string `json:"algoId"`      //String	策略订单ID
+	AlgoClOrdId string `json:"algoClOrdId"` //String	客户自定义订单ID
+	SCode       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
+	SMsg        string `json:"sMsg"`        //String	事件执行失败时的msg
+}
+type PrivateTradingBotRecurringOrderAlgoPostRes []PrivateTradingBotRecurringOrderAlgoPostResRow
