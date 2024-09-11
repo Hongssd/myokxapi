@@ -39,9 +39,6 @@ func (api *PrivateRestTradeOrderPostAPI) Do() (*OkxRestRes[PrivateRestTradeOrder
 	if err != nil {
 		return nil, err
 	}
-	d, _ := json.MarshalIndent(url, "", "  ")
-	log.Info("Request URL: ", string(d))
-	log.Info("Request Body: ", string(reqBody))
 	return okxCallAPIWithSecret[PrivateRestTradeOrderPostRes](api.client.c, url, reqBody, POST)
 }
 
@@ -53,6 +50,7 @@ func (client *PrivateRestClient) NewPrivateRestTradeOrderAlgoPost() *PrivateRest
 	}
 }
 func (api *PrivateRestTradeOrderAlgoPostAPI) Do() (*OkxRestRes[PrivateRestTradeOrderAlgoPostRes], error) {
+	api.Tag(BrokerCode)
 	url := okxHandlerRequestAPIWithoutPathQueryParam(REST, PrivateRestAPIMap[PrivateRestTradeOrderAlgoPost])
 	reqBody, err := json.Marshal(api.req)
 	if err != nil {
