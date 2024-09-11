@@ -52,6 +52,8 @@ const (
 	PrivateRestAssetTransfer      //资金划转
 	PrivateRestAssetTransferState //查询资金划转状态
 	PrivateRestAssetBills         // 查询最近一个月内资金账户账单流水
+	//ASSET CONVERT
+	PrivateRestAssetConvertEstimateQuote // 闪兑预估询价
 
 	// RFQ
 	PrivateRestRfqCounterParties // 大宗交易获取报价方信息
@@ -110,6 +112,8 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAssetTransfer:      "/api/v5/asset/transfer",       // POST 资金划转
 	PrivateRestAssetTransferState: "/api/v5/asset/transfer-state", // GET 查询资金划转状态
 	PrivateRestAssetBills:         "/api/v5/asset/bills",          // 查询最近一个月内资金账户账单流水
+	// Asset Convert
+	PrivateRestAssetConvertEstimateQuote: "/api/v5/asset/convert/estimate-quote", // POST 闪兑预估询价
 
 	// RFQ
 	PrivateRestRfqCounterParties: "/api/v5/rfq/counterparties", // GET 获取报价方信息 查询可以参与交易的报价方信息

@@ -423,6 +423,23 @@ type PrivateRestAssetTransferStateResRow struct {
 	State    string `json:"state"`    //String	转账状态 success：成功 pending：处理中 failed：失败
 }
 
+type PrivateRestAssetConvertEstimateQuoteResRow struct {
+	QuoteTime string `json:"quoteTime"` //String	生成报价时间，Unix时间戳的毫秒数格式
+	TtlMs     string `json:"ttlMs"`     //String	报价有效期，单位为毫秒
+	ClQReqId  string `json:"clQReqId"`  //String	客户端自定义的订单标识
+	QuoteId   string `json:"quoteId"`   //String	报价ID
+	BaseCcy   string `json:"baseCcy"`   //String	交易货币币种，如 BTC-USDT 中BTC
+	QuoteCcy  string `json:"quoteCcy"`  //String	计价货币币种，如 BTC-USDT 中USDT
+	Side      string `json:"side"`      //String	交易方向 买：buy 卖：sell
+	OrigRfqSz string `json:"origRfqSz"` //String	原始报价的数量
+	RfqSz     string `json:"rfqSz"`     //String	实际报价的数量
+	RfqSzCcy  string `json:"rfqSzCcy"`  //String	报价的币种
+	CnvtPx    string `json:"cnvtPx"`    //String	闪兑价格，单位为计价币
+	BaseSz    string `json:"baseSz"`    //String	闪兑交易币数量
+	QuoteSz   string `json:"quoteSz"`   //String	闪兑计价币数量
+}
+type PrivateRestAssetConvertEstimateQuoteRes []PrivateRestAssetConvertEstimateQuoteResRow
+
 // 网格策略委托下单
 type PrivateTradingBotGridOrderAlgoPostResRow struct {
 	AlgoId      string `json:"algoId"`      //String	策略订单ID

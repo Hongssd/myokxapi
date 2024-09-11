@@ -1607,17 +1607,64 @@ func (api *PrivateRestAssetTransferAPI) ClientId(clientId string) *PrivateRestAs
 	return api
 }
 
+// 闪兑预估询价
+type PrivateRestAssetConvertEstimateQuoteReq struct {
+	BaseCcy  *string `json:"baseCcy"`  //String	是	交易货币币种，如 BTC-USDT中的BTC
+	QuoteCcy *string `json:"quoteCcy"` //String	是	计价货币币种，如 BTC-USDT中的USDT
+	Side     *string `json:"side"`     //String	是	交易方向 买：buy 卖：sell 描述的是对于baseCcy的交易方向
+	RfqSz    *string `json:"rfqSz"`    //String	是	询价数量
+	RfqSzCcy *string `json:"rfqSzCcy"` //String	是	询价币种
+	ClQReqId *string `json:"clQReqId"` //String	否	客户端自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag      *string `json:"tag"`      //String	否	订单标签 适用于broker用户
+}
+type PrivateRestAssetConvertEstimateQuoteAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetConvertEstimateQuoteReq
+}
+
+// String	是	交易货币币种，如 BTC-USDT中的BTC
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) BaseCcy(baseCcy string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.BaseCcy = GetPointer(baseCcy)
+	return api
+}
+
+// String	是	计价货币币种，如 BTC-USDT中的USDT
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) QuoteCcy(quoteCcy string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.QuoteCcy = GetPointer(quoteCcy)
+	return api
+}
+
+// String	是	交易方向 买：buy 卖：sell 描述的是对于baseCcy的交易方向
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) Side(side string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.Side = GetPointer(side)
+	return api
+}
+
+// String	是	询价数量
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) RfqSz(rfqSz string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.RfqSz = GetPointer(rfqSz)
+	return api
+}
+
+// String	是	询价币种
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) RfqSzCcy(rfqSzCcy string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.RfqSzCcy = GetPointer(rfqSzCcy)
+	return api
+}
+
+// String	否	客户端自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) ClQReqId(clQReqId string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.ClQReqId = GetPointer(clQReqId)
+	return api
+}
+
+// String	否	订单标签 适用于broker用户
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) Tag(tag string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
 // 资金划转状态查询
-// transId	String	可选	划转ID
-// transId和clientId必须传一个，若传两个，以transId为主
-// clientId	String	可选	客户自定义ID
-// type	String	否	划转类型
-// 0：账户内划转
-// 1：母账户转子账户(仅适用于母账户APIKey)
-// 2：子账户转母账户(仅适用于母账户APIKey)
-// 3：子账户转母账户(仅适用于子账户APIKey)
-// 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户)
-// 默认是0
 type PrivateRestAssetTransferStateReq struct {
 	TransId  *string `json:"transId"`  //String	可选	划转ID
 	ClientId *string `json:"clientId"` //String	可选	客户自定义ID
