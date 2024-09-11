@@ -229,3 +229,70 @@ func (ws *PublicWsStreamClient) UnSubscribeOptSummaryMultiple(instFamilies []str
 func (ws *PublicWsStreamClient) UnSubscribeOptSummary(instFamily string) (*Subscription[WsOptSummary], error) {
 	return ws.UnSubscribeOptSummaryMultiple([]string{instFamily})
 }
+
+func getMarkPriceSubscribeArg(instId string) WsSubscribeArg {
+	return WsSubscribeArg{
+		Channel: "mark-price",
+		InstId:  instId,
+	}
+}
+
+// 批量订阅标记价格
+func (ws *PublicWsStreamClient) SubscribeMarkPriceMultiple(instIds []string) (*Subscription[WsMarkPrice], error) {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getMarkPriceSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	if err != nil {
+		return nil, err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("SubscribeMarkPrice Success: args:%v", doSub.Args)
+	sub := &Subscription[WsMarkPrice]{
+		SubId:      doSub.SubId,
+		Op:         SUBSCRIBE,
+		Args:       doSub.Args,
+		resultChan: make(chan WsMarkPrice, 50),
+		errChan:    make(chan error),
+		closeChan:  make(chan struct{}),
+		Ws:         &ws.WsStreamClient,
+	}
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.markPriceSubMap.Store(string(keyData), sub)
+	}
+	return sub, nil
+}
+
+// 订阅单个标记价格
+func (ws *PublicWsStreamClient) SubscribeMarkPrice(instId string) (*Subscription[WsMarkPrice], error) {
+	return ws.SubscribeMarkPriceMultiple([]string{instId})
+}
+
+// 批量取消订阅标记价格
+func (ws *PublicWsStreamClient) UnSubscribeMarkPriceMultiple(instIds []string) (*Subscription[WsMarkPrice], error) {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getMarkPriceSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return nil, err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("UnSubscribeMarkPrice Success: args:%v", doSub.Args)
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.markPriceSubMap.Delete(string(keyData))
+	}
+	return nil, nil
+}

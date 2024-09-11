@@ -318,6 +318,14 @@ type PrivateRestTradeCancelBatchOrdersRes []PrivateRestTradeCancelOrderResRow
 
 type PrivateRestTradeAmendBatchOrdersRes []PrivateRestTradeAmendOrderResRow
 
+type PrivateRestTradeClosePostionResRow struct {
+	InstId  string `json:"instId"`  //String	产品ID
+	PosSide string `json:"posSide"` //String	持仓方向
+	ClOrdId string `json:"clOrdId"` //String	客户自定义ID
+	Tag     string `json:"tag"`     //String	订单标签
+}
+type PrivateRestTradeClosePostionRes []PrivateRestTradeClosePostionResRow
+
 type PrivateRestTradeOrderHistoryRes []PrivateRestTradeOrderGetResRow
 type PrivateRestTradeOrderHistoryArchiveRes []PrivateRestTradeOrderGetResRow
 
@@ -414,3 +422,149 @@ type PrivateRestAssetTransferStateResRow struct {
 	SubAcct  string `json:"subAcct"`  //String	子账户名称
 	State    string `json:"state"`    //String	转账状态 success：成功 pending：处理中 failed：失败
 }
+
+type PrivateRestAssetConvertEstimateQuoteResRow struct {
+	QuoteTime string `json:"quoteTime"` //String	生成报价时间，Unix时间戳的毫秒数格式
+	TtlMs     string `json:"ttlMs"`     //String	报价有效期，单位为毫秒
+	ClQReqId  string `json:"clQReqId"`  //String	客户端自定义的订单标识
+	QuoteId   string `json:"quoteId"`   //String	报价ID
+	BaseCcy   string `json:"baseCcy"`   //String	交易货币币种，如 BTC-USDT 中BTC
+	QuoteCcy  string `json:"quoteCcy"`  //String	计价货币币种，如 BTC-USDT 中USDT
+	Side      string `json:"side"`      //String	交易方向 买：buy 卖：sell
+	OrigRfqSz string `json:"origRfqSz"` //String	原始报价的数量
+	RfqSz     string `json:"rfqSz"`     //String	实际报价的数量
+	RfqSzCcy  string `json:"rfqSzCcy"`  //String	报价的币种
+	CnvtPx    string `json:"cnvtPx"`    //String	闪兑价格，单位为计价币
+	BaseSz    string `json:"baseSz"`    //String	闪兑交易币数量
+	QuoteSz   string `json:"quoteSz"`   //String	闪兑计价币数量
+}
+type PrivateRestAssetConvertEstimateQuoteRes []PrivateRestAssetConvertEstimateQuoteResRow
+
+type PrivateRestAssetConvertTradeResRow struct {
+	TradeId     string `json:"tradeId"`     //String	成交ID
+	QuoteId     string `json:"quoteId"`     //String	报价ID
+	ClTReqId    string `json:"clTReqId"`    //String	用户自定义的订单标识
+	State       string `json:"state"`       //String	状态 fullyFilled：交易成功 rejected：交易失败
+	InstId      string `json:"instId"`      //String	币对，如 BTC-USDT
+	BaseCcy     string `json:"baseCcy"`     //String	交易货币币种，如 BTC-USDT中BTC
+	QuoteCcy    string `json:"quoteCcy"`    //String	计价货币币种，如 BTC-USDT中USDT
+	Side        string `json:"side"`        //String	交易方向 买：buy 卖：sell
+	FillPx      string `json:"fillPx"`      //String	成交价格，单位为计价币
+	FillBaseSz  string `json:"fillBaseSz"`  //String	成交的交易币数量
+	FillQuoteSz string `json:"fillQuoteSz"` //String	成交的计价币数量
+	Ts          string `json:"ts"`          //String	闪兑交易时间，值为时间戳，Unix时间戳为毫秒数格式，如 1597026383085
+}
+type PrivateRestAssetConvertTradeRes []PrivateRestAssetConvertTradeResRow
+
+// 网格策略委托下单
+type PrivateTradingBotGridOrderAlgoPostResRow struct {
+	AlgoId      string `json:"algoId"`      //String	策略订单ID
+	AlgoClOrdId string `json:"algoClOrdId"` //String	用户自定义策略ID
+	SCode       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
+	SMsg        string `json:"sMsg"`        //String	事件执行失败时的msg
+	Tag         string `json:"tag"`         //String	订单标签
+}
+type PrivateTradingBotGridOrderAlgoPostRes []PrivateTradingBotGridOrderAlgoPostResRow
+
+// 定投策略委托下单
+// algoId	String	策略订单ID
+// algoClOrdId	String	客户自定义订单ID
+// sCode	String	事件执行结果的code，0代表成功
+// sMsg	String	事件执行失败时的msg
+type PrivateTradingBotRecurringOrderAlgoPostResRow struct {
+	AlgoId      string `json:"algoId"`      //String	策略订单ID
+	AlgoClOrdId string `json:"algoClOrdId"` //String	客户自定义订单ID
+	SCode       string `json:"sCode"`       //String	事件执行结果的code，0代表成功
+	SMsg        string `json:"sMsg"`        //String	事件执行失败时的msg
+}
+type PrivateTradingBotRecurringOrderAlgoPostRes []PrivateTradingBotRecurringOrderAlgoPostResRow
+
+type PrivateRestRfqCounterPartiesResRow struct {
+	TraderName string `json:"traderName"` //String	报价方名称
+	TraderCode string `json:"traderCode"` //String	报价方唯一标识代码，公开可见；报价和询价的相关接口都使用该代码代表报价方。
+	Type       string `json:"type"`       //String	报价方类型。LP指通过API连接的自动做市商。
+}
+type PrivateRestRfqCounterPartiesRes []PrivateRestRfqCounterPartiesResRow
+
+type PrivateRestRfqCreateRfqResRow struct {
+	CTime                 string                       `json:"cTime"`                 //String	询价单创建时间，Unix时间戳的毫秒数格式。
+	UTime                 string                       `json:"uTime"`                 //String	询价单状态更新时间，Unix时间戳的毫秒数格式。
+	State                 string                       `json:"state"`                 //String	询价单的状态
+	Counterparties        []string                     `json:"counterparties"`        //Array of strings	报价方列表
+	ValidUntil            string                       `json:"validUntil"`            //String	询价单的过期时间，Unix时间戳的毫秒数格式。
+	ClRfqId               string                       `json:"clRfqId"`               //String	询价单自定义ID，为客户端敏感信息，不会公开，对报价方返回""。
+	Tag                   string                       `json:"tag"`                   //String	RFQ标签，与此RFQ关联的大宗交易将有相同的标签。
+	AllowPartialExecution bool                         `json:"allowPartialExecution"` //Boolean	RFQ是否可以被部分执行，如果腿的比例和原RFQ一致。有效值为true或false。未指定时，默认为false。
+	TraderCode            string                       `json:"traderCode"`            //String	询价方唯一标识代码。
+	RfqId                 string                       `json:"rfqId"`                 //String	询价单ID
+	Legs                  []PrivateRestRfqCreateRfqLeg `json:"legs"`                  //Array of objects	组合交易，每个请求最多可放置15条腿
+}
+type PrivateRestRfqCreateRfqRes []PrivateRestRfqCreateRfqResRow
+
+type PrivateRestSprdOrderPostResRow struct {
+	OrdId   string `json:"ordId"`   //String	订单ID
+	ClOrdId string `json:"clOrdId"` //String	客户自定义订单ID
+	Tag     string `json:"tag"`     //String	订单标签
+	SCode   string `json:"sCode"`   //String	事件执行结果的code，0代表成功
+	SMsg    string `json:"sMsg"`    //String	事件执行失败或成功时的msg
+}
+type PrivateRestSprdOrderPostRes []PrivateRestSprdOrderPostResRow
+
+// ccy	String	币种名称，如 BTC
+// productId	String	项目ID
+// protocol	String	项目名称
+// protocolType	String	项目类型
+// defi：链上赚币
+// term	String	项目期限
+// 活期为0，其他则显示定期天数
+// apy	String	预估年化
+// 如果年化为7% ，则该字段为0.07
+// earlyRedeem	Boolean	项目是否支持提前赎回
+// investData	Array	目前用户可用来投资的目标币种信息
+// > ccy	String	投资币种，如BTC
+// > bal	String	可投数量
+// > minAmt	String	最小申购量
+// > maxAmt	String	最大可申购量
+// earningData	Array	收益信息
+// > ccy	String	收益币种，如BTC
+// > earningType	String	收益类型
+// 0：预估收益
+// 1：累计发放收益
+// state	String	项目状态
+// purchasable：可申购
+// sold_out：售罄
+// stop：暂停申购
+// redeemPeriod	Array of string	赎回期，形式为 [最小赎回时间,最大赎回时间]
+// H：小时，D：天
+// 例 ["1H","24H"] 表示赎回期时1小时到24小时。
+// ["14D","14D"] 表示赎回期为14天。
+type PrivateRestFinanceStakingDefiOffersResRowInvestData struct {
+	Ccy    string `json:"ccy"`    //String	投资币种，如BTC
+	Bal    string `json:"bal"`    //String	可投数量
+	MinAmt string `json:"minAmt"` //String	最小申购量
+	MaxAmt string `json:"maxAmt"` //String	最大可申购量
+}
+type PrivateRestFinanceStakingDefiOffersResRowEarningData struct {
+	Ccy         string `json:"ccy"`         //String	收益币种，如BTC
+	EarningType string `json:"earningType"` //String	收益类型 0：预估收益 1：累计发放收益
+}
+type PrivateRestFinanceStakingDefiOffersResRow struct {
+	Ccy          string                                                 `json:"ccy"`          //String	币种名称，如 BTC
+	ProductId    string                                                 `json:"productId"`    //String	项目ID
+	Protocol     string                                                 `json:"protocol"`     //String	项目名称
+	ProtocolType string                                                 `json:"protocolType"` //String	项目类型 defi：链上赚币
+	Term         string                                                 `json:"term"`         //String	项目期限 活期为0，其他则显示定期天数
+	Apy          string                                                 `json:"apy"`          //String	预估年化 如果年化为7% ，则该字段为0.07
+	EarlyRedeem  bool                                                   `json:"earlyRedeem"`  //Boolean	项目是否支持提前赎回
+	InvestData   []PrivateRestFinanceStakingDefiOffersResRowInvestData  `json:"investData"`   //Array	目前用户可用来投资的目标币种信息
+	EarningData  []PrivateRestFinanceStakingDefiOffersResRowEarningData `json:"earningData"`  //Array	收益信息
+	State        string                                                 `json:"state"`        //String	项目状态 purchasable：可申购 sold_out：售罄 stop：暂停申购
+	RedeemPeriod []string                                               `json:"redeemPeriod"` //Array of string	赎回期，形式为 [最小赎回时间,最大赎回时间] H：小时，D：天 例 ["1H","24H"] 表示赎回期时1小时到24小时。 ["14D","14D"] 表示赎回期为14天。
+}
+type PrivateRestFinanceStakingDefiOffersRes []PrivateRestFinanceStakingDefiOffersResRow
+
+type PrivateRestFinanceStakingDefiPurchaseResRow struct {
+	OrdId string `json:"ordId"` //String	订单ID
+	Tag   string `json:"tag"`   //String	订单标签
+}
+type PrivateRestFinanceStakingDefiPurchaseRes []PrivateRestFinanceStakingDefiPurchaseResRow

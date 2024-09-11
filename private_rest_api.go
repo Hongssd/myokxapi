@@ -35,9 +35,16 @@ const (
 	PrivateRestTradeAmendBatchOrders    //批量修改订单
 	PrivateRestTradeOrderHistory        //获取历史订单记录（近七天）
 	PrivateRestTradeOrderHistoryArchive //获取历史订单记录（近三个月）
+	PrivateRestTradeFills               //获取成交明细（近三天）
+	PrivateRestTradeFillsHistory        //获取成交明细（近三个月）
 
-	PrivateRestTradeFills        //获取成交明细（近三天）
-	PrivateRestTradeFillsHistory //获取成交明细（近三个月）
+	PrivateRestTradeClosePostion //市价仓位全平 市价平掉指定交易产品的持仓
+
+	// Grid
+	PrivateTradingBotGridOrderAlgoPost // 网格交易下单
+
+	// Recurring
+	PrivateTradingBotRecurringOrderAlgoPost // 定投策略委托下单
 
 	//Asset
 	PrivateRestAssetCurrencies    //获取币种列表
@@ -45,6 +52,20 @@ const (
 	PrivateRestAssetTransfer      //资金划转
 	PrivateRestAssetTransferState //查询资金划转状态
 	PrivateRestAssetBills         // 查询最近一个月内资金账户账单流水
+	//ASSET CONVERT
+	PrivateRestAssetConvertEstimateQuote // 闪兑预估询价
+	PrivateRestAssetConvertTrade         // 闪兑下单 下单前需要询价
+
+	// RFQ
+	PrivateRestRfqCounterParties // 大宗交易获取报价方信息
+	PrivateRestRfqCreateRfq      // 大宗交易询价
+
+	// Spread
+	PrivateRestSprdOrderPost // 价差交易下单
+
+	// Finance
+	PrivateRestFinanceStakingDefiOffers   // 金融产品链上赚币查看项目
+	PrivateRestFinanceStakingDefiPurchase // 金融产品申购项目
 )
 
 var PrivateRestAPIMap = map[PrivateRestAPI]string{
@@ -80,9 +101,15 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestTradeAmendBatchOrders:    "/api/v5/trade/amend-batch-orders",     //POST 批量修改订单
 	PrivateRestTradeOrderHistory:        "/api/v5/trade/orders-history",         //GET 获取历史订单记录（近七天）
 	PrivateRestTradeOrderHistoryArchive: "/api/v5/trade/orders-history-archive", //GET 获取历史订单记录（近三个月）
+	PrivateRestTradeFills:               "/api/v5/trade/fills",                  //GET 获取成交明细（近三天）
+	PrivateRestTradeFillsHistory:        "/api/v5/trade/fills-history",          //GET 获取成交明细（近三个月）
 
-	PrivateRestTradeFills:        "/api/v5/trade/fills",         //GET 获取成交明细（近三天）
-	PrivateRestTradeFillsHistory: "/api/v5/trade/fills-history", //GET 获取成交明细（近三个月）
+	PrivateRestTradeClosePostion: "/api/v5/trade/close-position", //POST 市价仓位全平 市价平掉指定交易产品的持仓
+
+	// Grid
+	PrivateTradingBotGridOrderAlgoPost: "/api/v5/tradingBot/grid/order-algo", //POST 网格交易下单
+	// Recurring
+	PrivateTradingBotRecurringOrderAlgoPost: "/api/v5/tradingBot/recurring/order-algo", //POST 定投策略委托下单
 
 	// Asset
 	PrivateRestAssetCurrencies:    "/api/v5/asset/currencies",     // GET 获取币种列表
@@ -90,4 +117,18 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAssetTransfer:      "/api/v5/asset/transfer",       // POST 资金划转
 	PrivateRestAssetTransferState: "/api/v5/asset/transfer-state", // GET 查询资金划转状态
 	PrivateRestAssetBills:         "/api/v5/asset/bills",          // 查询最近一个月内资金账户账单流水
+	// Asset Convert
+	PrivateRestAssetConvertEstimateQuote: "/api/v5/asset/convert/estimate-quote", // POST 闪兑预估询价
+	PrivateRestAssetConvertTrade:         "/api/v5/asset/convert/trade",          // POST 闪兑下单 下单前需要询价
+
+	// RFQ
+	PrivateRestRfqCounterParties: "/api/v5/rfq/counterparties", // GET 获取报价方信息 查询可以参与交易的报价方信息
+	PrivateRestRfqCreateRfq:      "/api/v5/rfq/create-rfq",     // POST 大宗交易询价
+
+	// Spread
+	PrivateRestSprdOrderPost: "/api/v5/sprd/order", // POST 价差交易下单
+
+	// Finance
+	PrivateRestFinanceStakingDefiOffers:   "/api/v5/finance/staking-defi/offers",   // GET 金融产品链上赚币查看项目
+	PrivateRestFinanceStakingDefiPurchase: "/api/v5/finance/staking-defi/purchase", // POST 金融产品链上赚币申购项目
 }

@@ -1114,6 +1114,7 @@ func (api *PrivateRestTradeBatchOrdersAPI) AddNewOrderReq(orderApi *PrivateRestT
 	if api.req == nil {
 		api.req = &PrivateRestTradeBatchOrdersReq{}
 	}
+	orderApi.Tag(BrokerCode)
 	*api.req = append(*api.req, *orderApi.req)
 	return api
 }
@@ -1121,6 +1122,7 @@ func (api *PrivateRestTradeBatchOrdersAPI) AddNewOrderReq(orderApi *PrivateRestT
 func (api *PrivateRestTradeBatchOrdersAPI) SetOrderList(orderApiList []PrivateRestTradeOrderPostAPI) *PrivateRestTradeBatchOrdersAPI {
 	api.req = &PrivateRestTradeBatchOrdersReq{}
 	for _, v := range orderApiList {
+		v.Tag(BrokerCode)
 		*api.req = append(*api.req, *v.req)
 	}
 	return api
@@ -1261,6 +1263,63 @@ func (api *PrivateRestTradeOrderHistoryAPI) End(end string) *PrivateRestTradeOrd
 // String 否 返回结果的数量，最大为100，默认100条
 func (api *PrivateRestTradeOrderHistoryAPI) Limit(limit string) *PrivateRestTradeOrderHistoryAPI {
 	api.req.Limit = GetPointer(limit)
+	return api
+}
+
+type PrivateRestTradeClosePostionReq struct {
+	InstId  *string `json:"instId"`  //String	是	产品ID
+	PosSide *string `json:"posSide"` //String	可选	持仓方向
+	MgnMode *string `json:"mgnMode"` //String	是	保证金模式 cross：全仓 ； isolated：逐仓
+	Ccy     *string `json:"ccy"`     //String	可选	保证金币种，现货和合约模式下的全仓币币杠杆平仓必填
+	AutoCxl *bool   `json:"autoCxl"` //Boolean	否	当市价全平时，平仓单是否需要自动撤销,默认为false. false：不自动撤单 true：自动撤单
+	ClOrdId *string `json:"clOrdId"` //String	否	客户自定义ID
+	Tag     *string `json:"tag"`     //String	否	订单标签
+}
+
+type PrivateRestTradeClosePostionAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestTradeClosePostionReq
+}
+
+// String 是 产品ID
+func (api *PrivateRestTradeClosePostionAPI) InstId(instId string) *PrivateRestTradeClosePostionAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 可选 持仓方向
+func (api *PrivateRestTradeClosePostionAPI) PosSide(posSide string) *PrivateRestTradeClosePostionAPI {
+	api.req.PosSide = GetPointer(posSide)
+	return api
+}
+
+// String 是 保证金模式 cross：全仓 ； isolated：逐仓
+func (api *PrivateRestTradeClosePostionAPI) MgnMode(mgnMode string) *PrivateRestTradeClosePostionAPI {
+	api.req.MgnMode = GetPointer(mgnMode)
+	return api
+}
+
+// String 可选 保证金币种，现货和合约模式下的全仓币币杠杆平仓必填
+func (api *PrivateRestTradeClosePostionAPI) Ccy(ccy string) *PrivateRestTradeClosePostionAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// Boolean 否 当市价全平时，平仓单是否需要自动撤销,默认为false. false：不自动撤单 true：自动撤单
+func (api *PrivateRestTradeClosePostionAPI) AutoCxl(autoCxl bool) *PrivateRestTradeClosePostionAPI {
+	api.req.AutoCxl = GetPointer(autoCxl)
+	return api
+}
+
+// String 否 客户自定义ID
+func (api *PrivateRestTradeClosePostionAPI) ClOrdId(clOrdId string) *PrivateRestTradeClosePostionAPI {
+	api.req.ClOrdId = GetPointer(clOrdId)
+	return api
+}
+
+// String 否 订单标签
+func (api *PrivateRestTradeClosePostionAPI) Tag(tag string) *PrivateRestTradeClosePostionAPI {
+	api.req.Tag = GetPointer(tag)
 	return api
 }
 
@@ -1548,17 +1607,142 @@ func (api *PrivateRestAssetTransferAPI) ClientId(clientId string) *PrivateRestAs
 	return api
 }
 
+// 闪兑预估询价
+type PrivateRestAssetConvertEstimateQuoteReq struct {
+	BaseCcy  *string `json:"baseCcy"`  //String	是	交易货币币种，如 BTC-USDT中的BTC
+	QuoteCcy *string `json:"quoteCcy"` //String	是	计价货币币种，如 BTC-USDT中的USDT
+	Side     *string `json:"side"`     //String	是	交易方向 买：buy 卖：sell 描述的是对于baseCcy的交易方向
+	RfqSz    *string `json:"rfqSz"`    //String	是	询价数量
+	RfqSzCcy *string `json:"rfqSzCcy"` //String	是	询价币种
+	ClQReqId *string `json:"clQReqId"` //String	否	客户端自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag      *string `json:"tag"`      //String	否	订单标签 适用于broker用户
+}
+type PrivateRestAssetConvertEstimateQuoteAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetConvertEstimateQuoteReq
+}
+
+// String	是	交易货币币种，如 BTC-USDT中的BTC
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) BaseCcy(baseCcy string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.BaseCcy = GetPointer(baseCcy)
+	return api
+}
+
+// String	是	计价货币币种，如 BTC-USDT中的USDT
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) QuoteCcy(quoteCcy string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.QuoteCcy = GetPointer(quoteCcy)
+	return api
+}
+
+// String	是	交易方向 买：buy 卖：sell 描述的是对于baseCcy的交易方向
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) Side(side string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.Side = GetPointer(side)
+	return api
+}
+
+// String	是	询价数量
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) RfqSz(rfqSz string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.RfqSz = GetPointer(rfqSz)
+	return api
+}
+
+// String	是	询价币种
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) RfqSzCcy(rfqSzCcy string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.RfqSzCcy = GetPointer(rfqSzCcy)
+	return api
+}
+
+// String	否	客户端自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) ClQReqId(clQReqId string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.ClQReqId = GetPointer(clQReqId)
+	return api
+}
+
+// String	否	订单标签 适用于broker用户
+func (api *PrivateRestAssetConvertEstimateQuoteAPI) Tag(tag string) *PrivateRestAssetConvertEstimateQuoteAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// 闪兑下单
+// quoteId	String	是	报价ID
+// baseCcy	String	是	交易货币币种，如 BTC-USDT中的BTC
+// quoteCcy	String	是	计价货币币种，如 BTC-USDT中的USDT
+// side	String	是	交易方向
+// buy：买
+// sell：卖
+// 描述的是对于baseCcy的交易方向
+// sz	String	是	用户报价数量
+// 报价数量应不大于预估询价中的询价数量
+// szCcy	String	是	用户报价币种
+// clTReqId	String	否	用户自定义的订单标识
+// 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+// tag	String	否	订单标签
+// 适用于broker用户
+type PrivateRestAssetConvertTradeReq struct {
+	QuoteId  *string `json:"quoteId"`  //String	是	报价ID
+	BaseCcy  *string `json:"baseCcy"`  //String	是	交易货币币种，如 BTC-USDT中的BTC
+	QuoteCcy *string `json:"quoteCcy"` //String	是	计价货币币种，如 BTC-USDT中的USDT
+	Side     *string `json:"side"`     //String	是	交易方向 buy：买 sell：卖 描述的是对于baseCcy的交易方向
+	Sz       *string `json:"sz"`       //String	是	用户报价数量 报价数量应不大于预估询价中的询价数量
+	SzCcy    *string `json:"szCcy"`    //String	是	用户报价币种
+	ClTReqId *string `json:"clTReqId"` //String	否	用户自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag      *string `json:"tag"`      //String	否	订单标签 适用于broker用户
+}
+type PrivateRestAssetConvertTradeAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAssetConvertTradeReq
+}
+
+// String	是	报价ID
+func (api *PrivateRestAssetConvertTradeAPI) QuoteId(quoteId string) *PrivateRestAssetConvertTradeAPI {
+	api.req.QuoteId = GetPointer(quoteId)
+	return api
+}
+
+// String	是	交易货币币种，如 BTC-USDT中的BTC
+func (api *PrivateRestAssetConvertTradeAPI) BaseCcy(baseCcy string) *PrivateRestAssetConvertTradeAPI {
+	api.req.BaseCcy = GetPointer(baseCcy)
+	return api
+}
+
+// String	是	计价货币币种，如 BTC-USDT中的USDT
+func (api *PrivateRestAssetConvertTradeAPI) QuoteCcy(quoteCcy string) *PrivateRestAssetConvertTradeAPI {
+	api.req.QuoteCcy = GetPointer(quoteCcy)
+	return api
+}
+
+// String	是	交易方向 buy：买 sell：卖 描述的是对于baseCcy的交易方向
+func (api *PrivateRestAssetConvertTradeAPI) Side(side string) *PrivateRestAssetConvertTradeAPI {
+	api.req.Side = GetPointer(side)
+	return api
+}
+
+// String	是	用户报价数量 报价数量应不大于预估询价中的询价数量
+func (api *PrivateRestAssetConvertTradeAPI) Sz(sz string) *PrivateRestAssetConvertTradeAPI {
+	api.req.Sz = GetPointer(sz)
+	return api
+}
+
+// String	是	用户报价币种
+func (api *PrivateRestAssetConvertTradeAPI) SzCcy(szCcy string) *PrivateRestAssetConvertTradeAPI {
+	api.req.SzCcy = GetPointer(szCcy)
+	return api
+}
+
+// String	否	用户自定义的订单标识 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestAssetConvertTradeAPI) ClTReqId(clTReqId string) *PrivateRestAssetConvertTradeAPI {
+	api.req.ClTReqId = GetPointer(clTReqId)
+	return api
+}
+
+// String	否	订单标签 适用于broker用户
+func (api *PrivateRestAssetConvertTradeAPI) Tag(tag string) *PrivateRestAssetConvertTradeAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
 // 资金划转状态查询
-// transId	String	可选	划转ID
-// transId和clientId必须传一个，若传两个，以transId为主
-// clientId	String	可选	客户自定义ID
-// type	String	否	划转类型
-// 0：账户内划转
-// 1：母账户转子账户(仅适用于母账户APIKey)
-// 2：子账户转母账户(仅适用于母账户APIKey)
-// 3：子账户转母账户(仅适用于子账户APIKey)
-// 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户)
-// 默认是0
 type PrivateRestAssetTransferStateReq struct {
 	TransId  *string `json:"transId"`  //String	可选	划转ID
 	ClientId *string `json:"clientId"` //String	可选	客户自定义ID
@@ -1584,5 +1768,454 @@ func (api *PrivateRestAssetTransferStateAPI) ClientId(clientId string) *PrivateR
 // String	否	划转类型 0：账户内划转 1：母账户转子账户(仅适用于母账户APIKey) 2：子账户转母账户(仅适用于母账户APIKey) 3：子账户转母账户(仅适用于子账户APIKey) 4：子账户转子账户(仅适用于子账户APIKey，且目标账户需要是同一母账户下的其他子账户) 默认是0
 func (api *PrivateRestAssetTransferStateAPI) Type(t string) *PrivateRestAssetTransferStateAPI {
 	api.req.Type = GetPointer(t)
+	return api
+}
+
+type PrivateTradingBotGridOrderAlgoTriggerParam struct {
+	TriggerAction   *string `json:"triggerAction"`   //String	是	触发行为 start：网格启动 stop：网格停止
+	TriggerStrategy *string `json:"triggerStrategy"` //String	是	触发策略 instant：立即触发 price：价格触发 rsi：rsi指标触发 默认为instant
+	DelaySeconds    *string `json:"delaySeconds"`    //String	否	延迟触发时间，单位为秒，默认为0
+	Timeframe       *string `json:"timeframe"`       //String	否	K线种类 3m, 5m, 15m, 30m (m代表分钟) 1H, 4H (H代表小时) 1D (D代表天) 该字段只在triggerStrategy为rsi时有效
+	Thold           *string `json:"thold"`           //String	否	阈值 取值[1,100]的整数 该字段只在triggerStrategy为rsi时有效
+	TriggerCond     *string `json:"triggerCond"`     //String	否	触发条件 cross_up：上穿 cross_down：下穿 above：上方 below：下方 cross：交叉 该字段只在triggerStrategy为rsi时有效
+	TimePeriod      *string `json:"timePeriod"`      //String	否	周期 14 该字段只在triggerStrategy为rsi下有效
+	TriggerPx       *string `json:"triggerPx"`       //String	否	触发价格 该字段只在triggerStrategy为price下有效
+	StopType        *string `json:"stopType"`        //String	否	策略停止类型 现货 1：卖出交易币，2：不卖出交易币 合约网格 1：停止平仓，2：停止不平仓 该字段只在triggerAction为stop时有效
+}
+type PrivateTradingBotGridOrderAlgoPostReq struct {
+	InstId             *string                                       `json:"instId"`             //String	是	产品ID，如BTC-USDT
+	AlgoOrdType        *string                                       `json:"algoOrdType"`        //String	是	策略订单类型 grid：现货网格委托 contract_grid：合约网格委托
+	MaxPx              *string                                       `json:"maxPx"`              //String	是	区间最高价格
+	MinPx              *string                                       `json:"minPx"`              //String	是	区间最低价格
+	GridNum            *string                                       `json:"gridNum"`            //String	是	网格数量
+	RunType            *string                                       `json:"runType"`            //String	否	网格类型 1：等差，2：等比 默认为等差
+	TpTriggerPx        *string                                       `json:"tpTriggerPx"`        //String	否	止盈触发价 适用于现货网格/合约网格
+	SlTriggerPx        *string                                       `json:"slTriggerPx"`        //String	否	止损触发价 适用于现货网格/合约网格
+	AlgoClOrdId        *string                                       `json:"algoClOrdId"`        //String	否	用户自定义策略ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag                *string                                       `json:"tag"`                //String	否	订单标签
+	ProfitSharingRatio *string                                       `json:"profitSharingRatio"` //String	否	带单员分润比例，仅支持固定比例分润 0,0.1,0.2,0.3
+	TriggerParams      *[]PrivateTradingBotGridOrderAlgoTriggerParam `json:"triggerParams"`      //Array of object	否	信号触发参数 适用于现货网格/合约网格
+
+	// 现货网格
+	QuoteSz *string `json:"quoteSz"` //String	可选	计价币投入数量 quoteSz和baseSz至少指定一个
+	BaseSz  *string `json:"baseSz"`  //String	可选	交易币投入数量 quoteSz和baseSz至少指定一个
+
+	// 合约网格
+	Sz        *string `json:"sz"`        //String	是	投入保证金,单位为USDT
+	Direction *string `json:"direction"` //String	是	合约网格类型 long：做多，short：做空，neutral：中性
+	Lever     *string `json:"lever"`     //String	是	杠杆倍数
+	BasePos   *bool   `json:"basePos"`   //Boolean	否	是否开底仓 默认为false 中性合约网格忽略该参数
+	TpRatio   *string `json:"tpRatio"`   //String	否	止盈比率，0.1 代表 10%
+	SlRatio   *string `json:"slRatio"`   //String	否	止损比率，0.1 代表 10%
+
+}
+type PrivateTradingBotGridOrderAlgoPostAPI struct {
+	client *PrivateRestClient
+	req    *PrivateTradingBotGridOrderAlgoPostReq
+}
+
+// String	是	产品ID，如BTC-USDT
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) InstId(instId string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String	是	策略订单类型 grid：现货网格委托 contract_grid：合约网格委托
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) AlgoOrdType(algoOrdType string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.AlgoOrdType = GetPointer(algoOrdType)
+	return api
+}
+
+// String	是	区间最高价格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) MaxPx(maxPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.MaxPx = GetPointer(maxPx)
+	return api
+}
+
+// String	是	区间最低价格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) MinPx(minPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.MinPx = GetPointer(minPx)
+	return api
+}
+
+// String	是	网格数量
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) GridNum(gridNum string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.GridNum = GetPointer(gridNum)
+	return api
+}
+
+// String	否	网格类型 1：等差，2：等比 默认为等差
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) RunType(runType string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.RunType = GetPointer(runType)
+	return api
+}
+
+// String	否	止盈触发价 适用于现货网格/合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) TpTriggerPx(tpTriggerPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.TpTriggerPx = GetPointer(tpTriggerPx)
+	return api
+}
+
+// String	否	止损触发价 适用于现货网格/合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) SlTriggerPx(slTriggerPx string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.SlTriggerPx = GetPointer(slTriggerPx)
+	return api
+}
+
+// String	否	用户自定义策略ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) AlgoClOrdId(algoClOrdId string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
+// String	否	订单标签
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Tag(tag string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// String	否	带单员分润比例，仅支持固定比例分润 0,0.1,0.2,0.3
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) ProfitSharingRatio(profitSharingRatio string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.ProfitSharingRatio = GetPointer(profitSharingRatio)
+	return api
+}
+
+// Array of object	否	信号触发参数 适用于现货网格/合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) TriggerParams(triggerParams []PrivateTradingBotGridOrderAlgoTriggerParam) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.TriggerParams = &triggerParams
+	return api
+}
+
+// String	可选	计价币投入数量 quoteSz和baseSz至少指定一个 现货网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) QuoteSz(quoteSz string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.QuoteSz = GetPointer(quoteSz)
+	return api
+}
+
+// String	可选	交易币投入数量 quoteSz和baseSz至少指定一个 现货网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) BaseSz(baseSz string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.BaseSz = GetPointer(baseSz)
+	return api
+}
+
+// String	是	投入保证金,单位为USDT 合约网格
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Sz(sz string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Sz = GetPointer(sz)
+	return api
+}
+
+// String	是	合约网格类型 long：做多，short：做空，neutral：中性
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Direction(direction string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Direction = GetPointer(direction)
+	return api
+}
+
+// String	是	杠杆倍数
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) Lever(lever string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.Lever = GetPointer(lever)
+	return api
+}
+
+// Boolean	否	是否开底仓 默认为false 中性合约网格忽略该参数
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) BasePos(basePos bool) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.BasePos = GetPointer(basePos)
+	return api
+}
+
+// String	否	止盈比率，0.1 代表 10%
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) TpRatio(tpRatio string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.TpRatio = GetPointer(tpRatio)
+	return api
+}
+
+// String	否	止损比率，0.1 代表 10%
+func (api *PrivateTradingBotGridOrderAlgoPostAPI) SlRatio(slRatio string) *PrivateTradingBotGridOrderAlgoPostAPI {
+	api.req.SlRatio = GetPointer(slRatio)
+	return api
+}
+
+type PrivateRestRfqCounterPartiesReq struct{}
+type PrivateRestRfqCounterPartiesAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestRfqCounterPartiesReq
+}
+
+type PrivateTradingBotRecurringOrderAlgoPostRecurring struct {
+	Ccy   *string `json:"ccy"`   //String	是	定投币种，如 BTC
+	Ratio *string `json:"ratio"` //String	是	定投币种资产占比，如 "0.2"代表占比20%
+}
+type PrivateTradingBotRecurringOrderAlgoPostReq struct {
+	StgyName      *string                                             `json:"stgyName"`      //String	是	策略自定义名称，不超过40个字符
+	RecurringList *[]PrivateTradingBotRecurringOrderAlgoPostRecurring `json:"recurringList"` //Array of object	是	定投信息
+	Period        *string                                             `json:"period"`        //String	是	周期类型 monthly：月 weekly：周 daily：日 hourly：小时
+	RecurringDay  *string                                             `json:"recurringDay"`  //String	可选	投资日 当周期类型为monthly，则取值范围是 [1,28] 的整数 当周期类型为weekly，则取值范围是 [1,7] 的整数 当周期类型为daily/hourly，该参数可不填。
+	RecurringHour *string                                             `json:"recurringHour"` //String	可选	小时级别定投的间隔 1/4/8/12 如：1代表每隔1个小时定投 当周期类型选择hourly，该字段必填。
+	RecurringTime *string                                             `json:"recurringTime"` //String	是	投资时间，取值范围是 [0,23] 的整数 当周期类型选择hourly代表首次定投发生的时间
+	TimeZone      *string                                             `json:"timeZone"`      //String	是	时区（UTC），取值范围是 [-12,14] 的整数 如 8表示UTC+8（东8区），北京时间
+	Amt           *string                                             `json:"amt"`           //String	是	每期投入数量
+	InvestmentCcy *string                                             `json:"investmentCcy"` //String	是	投入数量单位，只能是USDT/USDC
+	TdMode        *string                                             `json:"tdMode"`        //String	是	交易模式 跨币种保证金模式/组合保证金模式下选择 cross：全仓 现货模式/现货和合约模式下选择 cash：非保证金
+	AlgoClOrdId   *string                                             `json:"algoClOrdId"`   //String	否	客户自定义订单ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag           *string                                             `json:"tag"`           //String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+}
+type PrivateTradingBotRecurringOrderAlgoPostAPI struct {
+	client *PrivateRestClient
+	req    *PrivateTradingBotRecurringOrderAlgoPostReq
+}
+
+// String	是	策略自定义名称，不超过40个字符
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) StgyName(stgyName string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.StgyName = GetPointer(stgyName)
+	return api
+}
+
+// Array of object	是	定投信息
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringList(recurringList []PrivateTradingBotRecurringOrderAlgoPostRecurring) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringList = &recurringList
+	return api
+}
+
+// String	是	周期类型 monthly：月 weekly：周 daily：日 hourly：小时
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Period(period string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.Period = GetPointer(period)
+	return api
+}
+
+// String	可选	投资日 当周期类型为monthly，则取值范围是 [1,28] 的整数 当周期类型为weekly，则取值范围是 [1,7] 的整数 当周期类型为daily/hourly，该参数可不填。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringDay(recurringDay string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringDay = GetPointer(recurringDay)
+	return api
+}
+
+// String	可选	小时级别定投的间隔 1/4/8/12 如：1代表每隔1个小时定投 当周期类型选择hourly，该字段必填。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringHour(recurringHour string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringHour = GetPointer(recurringHour)
+	return api
+}
+
+// String	是	投资时间，取值范围是 [0,23] 的整数 当周期类型选择hourly代表首次定投发生的时间
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) RecurringTime(recurringTime string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.RecurringTime = GetPointer(recurringTime)
+	return api
+}
+
+// String	是	时区（UTC），取值范围是 [-12,14] 的整数 如 8表示UTC+8（东8区），北京时间
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) TimeZone(timeZone string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.TimeZone = GetPointer(timeZone)
+	return api
+}
+
+// String	是	每期投入数量
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Amt(amt string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.Amt = GetPointer(amt)
+	return api
+}
+
+// String	是	投入数量单位，只能是USDT/USDC
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) InvestmentCcy(investmentCcy string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.InvestmentCcy = GetPointer(investmentCcy)
+	return api
+}
+
+// String	是	交易模式 跨币种保证金模式/组合保证金模式下选择 cross：全仓 现货模式/现货和合约模式下选择 cash：非保证金
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) TdMode(tdMode string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.TdMode = GetPointer(tdMode)
+	return api
+}
+
+// String	否	客户自定义订单ID 字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) AlgoClOrdId(algoClOrdId string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.AlgoClOrdId = GetPointer(algoClOrdId)
+	return api
+}
+
+// String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+func (api *PrivateTradingBotRecurringOrderAlgoPostAPI) Tag(tag string) *PrivateTradingBotRecurringOrderAlgoPostAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// 大宗交易询价
+type PrivateRestRfqCreateRfqLeg struct {
+	InstId  *string `json:"instId"`  //String	是	产品ID
+	TdMode  *string `json:"tdMode"`  //String	否	交易模式 保证金模式：cross全仓 isolated逐仓 非保证金模式：cash非保证金. 如未提供，tdMode 将继承系统设置的默认值： 现货和合约模式 & 现货: cash 现货和合约模式和跨币种保证金模式下买入期权： isolated 其他情况: cross
+	Ccy     *string `json:"ccy"`     //String	否	保证金币种，仅适用于现货和合约模式下的全仓杠杆订单 在其他情况下该参数将被忽略。
+	Sz      *string `json:"sz"`      //String	是	委托数量
+	Side    *string `json:"side"`    //String	是	询价单方向
+	PosSide *string `json:"posSide"` //String	否	持仓方向 买卖模式下默认为net。在开平仓模式下仅可选择long或short。 如未指定，则处于开平仓模式下的用户始终会开新仓位。 仅适用交割、永续。
+	TgtCcy  *string `json:"tgtCcy"`  //String	否	委托数量的类型 定义sz属性的单位。仅适用于 instType=SPOT。有效值为base_ccy和quote_ccy。未指定时，默认为base_ccy。
+}
+type PrivateRestRfqCreateRfqReq struct {
+	Counterparties        *[]string                     `json:"counterparties"`        //Array of strings	是	希望收到询价的报价方列表，可通过/api/v5/rfq/counterparties/获取。
+	Anonymous             *bool                         `json:"anonymous"`             //Boolean	否	是否匿名询价，true表示匿名询价，false表示公开询价，默认值为 false，为true时，即使在交易执行之后，身份也不会透露给报价方。
+	ClRfqId               *string                       `json:"clRfqId"`               //String	否	询价单自定义ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag                   *string                       `json:"tag"`                   //String	否	询价单标签，与此询价单关联的大宗交易将有相同的标签。
+	AllowPartialExecution *bool                         `json:"allowPartialExecution"` //Boolean	否	RFQ是否可以被部分执行，如果腿的比例和原RFQ一致。有效值为true或false。默认为false。
+	Legs                  *[]PrivateRestRfqCreateRfqLeg `json:"legs"`                  //Array of objects	是	组合交易，每次最多可以提交15组交易信息
+}
+type PrivateRestRfqCreateRfqAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestRfqCreateRfqReq
+}
+
+// Array of strings	是	希望收到询价的报价方列表，可通过/api/v5/rfq/counterparties/获取。
+func (api *PrivateRestRfqCreateRfqAPI) Counterparties(counterparties []string) *PrivateRestRfqCreateRfqAPI {
+	api.req.Counterparties = &counterparties
+	return api
+}
+
+// Boolean	否	是否匿名询价，true表示匿名询价，false表示公开询价，默认值为 false，为true时，即使在交易执行之后，身份也不会透露给报价方。
+func (api *PrivateRestRfqCreateRfqAPI) Anonymous(anonymous bool) *PrivateRestRfqCreateRfqAPI {
+	api.req.Anonymous = GetPointer(anonymous)
+	return api
+}
+
+// String	否	询价单自定义ID，字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestRfqCreateRfqAPI) ClRfqId(clRfqId string) *PrivateRestRfqCreateRfqAPI {
+	api.req.ClRfqId = GetPointer(clRfqId)
+	return api
+}
+
+// String	否	询价单标签，与此询价单关联的大宗交易将有相同的标签。
+func (api *PrivateRestRfqCreateRfqAPI) Tag(tag string) *PrivateRestRfqCreateRfqAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// Boolean	否	RFQ是否可以被部分执行，如果腿的比例和原RFQ一致。有效值为true或false。默认为false。
+func (api *PrivateRestRfqCreateRfqAPI) AllowPartialExecution(allowPartialExecution bool) *PrivateRestRfqCreateRfqAPI {
+	api.req.AllowPartialExecution = GetPointer(allowPartialExecution)
+	return api
+}
+
+// Array of objects	是	组合交易，每次最多可以提交15组交易信息
+func (api *PrivateRestRfqCreateRfqAPI) Legs(legs []PrivateRestRfqCreateRfqLeg) *PrivateRestRfqCreateRfqAPI {
+	api.req.Legs = &legs
+	return api
+}
+
+// 价差交易下单
+type PrivateRestSprdOrderPostReq struct {
+	SprdId  *string `json:"sprdId"`  //String	是	spread ID，如 BTC-USDT_BTC-USDT-SWAP
+	ClOrdId *string `json:"clOrdId"` //String	否	客户自定义订单ID字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+	Tag     *string `json:"tag"`     //String	否	订单标签字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+	Side    *string `json:"side"`    //String	是	订单方向 buy：买，sell：卖
+	OrdType *string `json:"ordType"` //String	是	订单类型 limit：限价单 post_only：只做maker单 ioc：立即成交并取消剩余
+	Sz      *string `json:"sz"`      //String	是	委托数量。反向价差的数量单位为USD，正向及混合价差为其对应baseCcy
+	Px      *string `json:"px"`      //String	是	委托价格，仅适用于limit, post_only, ioc类型的订单
+}
+type PrivateRestSprdOrderPostAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestSprdOrderPostReq
+}
+
+// String	是	spread ID，如 BTC-USDT_BTC-USDT-SWAP
+func (api *PrivateRestSprdOrderPostAPI) SprdId(sprdId string) *PrivateRestSprdOrderPostAPI {
+	api.req.SprdId = GetPointer(sprdId)
+	return api
+}
+
+// String	否	客户自定义订单ID字母（区分大小写）与数字的组合，可以是纯字母、纯数字且长度要在1-32位之间。
+func (api *PrivateRestSprdOrderPostAPI) ClOrdId(clOrdId string) *PrivateRestSprdOrderPostAPI {
+	api.req.ClOrdId = GetPointer(clOrdId)
+	return api
+}
+
+// String	否	订单标签字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间。
+func (api *PrivateRestSprdOrderPostAPI) Tag(tag string) *PrivateRestSprdOrderPostAPI {
+	api.req.Tag = GetPointer(tag)
+	return api
+}
+
+// String	是	订单方向 buy：买，sell：卖
+func (api *PrivateRestSprdOrderPostAPI) Side(side string) *PrivateRestSprdOrderPostAPI {
+	api.req.Side = GetPointer(side)
+	return api
+}
+
+// String	是	订单类型 limit：限价单 post_only：只做maker单 ioc：立即成交并取消剩余
+func (api *PrivateRestSprdOrderPostAPI) OrdType(ordType string) *PrivateRestSprdOrderPostAPI {
+	api.req.OrdType = GetPointer(ordType)
+	return api
+}
+
+// String	是	委托数量。反向价差的数量单位为USD，正向及混合价差为其对应baseCcy
+func (api *PrivateRestSprdOrderPostAPI) Sz(sz string) *PrivateRestSprdOrderPostAPI {
+	api.req.Sz = GetPointer(sz)
+	return api
+}
+
+// String	是	委托价格，仅适用于limit, post_only, ioc类型的订单
+func (api *PrivateRestSprdOrderPostAPI) Px(px string) *PrivateRestSprdOrderPostAPI {
+	api.req.Px = GetPointer(px)
+	return api
+}
+
+// 金融产品链上赚币查看项目
+type PrivateRestFinanceStakingDefiOffersReq struct {
+	ProductId    *string `json:"productId"`    //String	否	项目ID
+	ProtocolType *string `json:"protocolType"` //String	否	项目类型 defi：链上赚币
+	Ccy          *string `json:"ccy"`          //String	否	投资币种，如 BTC
+}
+type PrivateRestFinanceStakingDefiOffersAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestFinanceStakingDefiOffersReq
+}
+
+// String	否	项目ID
+func (api *PrivateRestFinanceStakingDefiOffersAPI) ProductId(productId string) *PrivateRestFinanceStakingDefiOffersAPI {
+	api.req.ProductId = GetPointer(productId)
+	return api
+}
+
+// String	否	项目类型 defi：链上赚币
+func (api *PrivateRestFinanceStakingDefiOffersAPI) ProtocolType(protocolType string) *PrivateRestFinanceStakingDefiOffersAPI {
+	api.req.ProtocolType = GetPointer(protocolType)
+	return api
+}
+
+// String	否	投资币种，如 BTC
+func (api *PrivateRestFinanceStakingDefiOffersAPI) Ccy(ccy string) *PrivateRestFinanceStakingDefiOffersAPI {
+	api.req.Ccy = GetPointer(ccy)
+	return api
+}
+
+// 金融产品链上赚币申购项目
+type PrivateRestFinanceStakingDefiPurchaseInvestData struct {
+	Ccy *string `json:"ccy"` //String	是	投资币种，如 BTC
+	Amt *string `json:"amt"` //String	是	投资数量
+}
+type PrivateRestFinanceStakingDefiPurchaseReq struct {
+	ProductId  *string                                            `json:"productId"`  //String	是	项目ID
+	InvestData *[]PrivateRestFinanceStakingDefiPurchaseInvestData `json:"investData"` //Array	是	投资信息
+	Term       *string                                            `json:"term"`       //String	可选	投资期限 定期项目必须指定投资期限
+	Tag        *string                                            `json:"tag"`        //String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间
+}
+type PrivateRestFinanceStakingDefiPurchaseAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestFinanceStakingDefiPurchaseReq
+}
+
+// String	是	项目ID
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) ProductId(productId string) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.ProductId = GetPointer(productId)
+	return api
+}
+
+// Array	是	投资信息
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) InvestData(investData []PrivateRestFinanceStakingDefiPurchaseInvestData) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.InvestData = &investData
+	return api
+}
+
+// String	可选	投资期限 定期项目必须指定投资期限
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) Term(term string) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.Term = GetPointer(term)
+	return api
+}
+
+// String	否	订单标签 字母（区分大小写）与数字的组合，可以是纯字母、纯数字，且长度在1-16位之间
+func (api *PrivateRestFinanceStakingDefiPurchaseAPI) Tag(tag string) *PrivateRestFinanceStakingDefiPurchaseAPI {
+	api.req.Tag = GetPointer(tag)
 	return api
 }
