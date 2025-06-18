@@ -2,15 +2,12 @@ package myokxapi
 
 import (
 	"bytes"
-	"compress/gzip"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
-	"io"
 	"sync"
 	"time"
 
-	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -46,6 +43,12 @@ func SetLogger(logger *logrus.Logger) {
 	log = logger
 }
 
+var httpTimeout = 100 * time.Second
+
+func SetHttpTimeout(timeout time.Duration) {
+	httpTimeout = timeout
+}
+
 func GetPointer[T any](v T) *T {
 	return &v
 }
@@ -54,57 +57,6 @@ func HmacSha256(secret, data string) []byte {
 	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(data))
 	return h.Sum(nil)
-}
-
-// Request 发送请求
-func Request(url string, reqBody []byte, method string, isGzip bool) ([]byte, error) {
-	return RequestWithHeader(url, reqBody, method, map[string]string{}, isGzip)
-}
-
-func RequestWithHeader(url string, reqBody []byte, method string, headerMap map[string]string, isGzip bool) ([]byte, error) {
-	req, err := http.NewRequest(method, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	for k, v := range headerMap {
-		req.Header.Set(k, v)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	//ok模拟盘额外参数
-	if NowNetType == TEST_NET {
-		req.Header.Set("x-simulated-trading", "1")
-	}
-
-	client := &http.Client{}
-	if isGzip { // 请求 header 添加 gzip
-		req.Header.Add("Content-Encoding", "gzip")
-		req.Header.Add("Accept-Encoding", "gzip")
-	}
-
-	log.Debug("reqURL: ", req.URL.String())
-	if len(reqBody) > 0 {
-		log.Debug("reqBody: ", string(reqBody))
-		req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body := resp.Body
-	if resp.Header.Get("Content-Encoding") == "gzip" {
-		body, err = gzip.NewReader(resp.Body)
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-	}
-	data, err := io.ReadAll(body)
-	// log.Debug(string(data))
-	return data, err
 }
 
 type MyOkx struct {
