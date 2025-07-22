@@ -51,13 +51,15 @@ type WsStreamClient struct {
 	waitOrderResult   *Subscription[WsOrderResult] //订单操作结果
 	waitOrderResultMu *sync.Mutex                  //订单操作结果锁
 
-	candleSubMap     MySyncMap[string, *Subscription[WsCandles]]    //K线推送订阅频道
-	booksSubMap      MySyncMap[string, *Subscription[WsBooks]]      //深度推送订阅频道
-	tradesSubMap     MySyncMap[string, *Subscription[WsTrades]]     //成交流推送订阅频道
-	optSummarySubMap MySyncMap[string, *Subscription[WsOptSummary]] //期权定价频道
-	markPriceSubMap  MySyncMap[string, *Subscription[WsMarkPrice]]  //标记价格频道
-	ordersSubMap     MySyncMap[string, *Subscription[WsOrders]]     //订单推送订阅频道
-	ordersAlgoSubMap MySyncMap[string, *Subscription[WsOrdersAlgo]] //策略委托订单频道
+	candleSubMap       MySyncMap[string, *Subscription[WsCandles]]      //K线推送订阅频道
+	booksSubMap        MySyncMap[string, *Subscription[WsBooks]]        //深度推送订阅频道
+	tradesSubMap       MySyncMap[string, *Subscription[WsTrades]]       //成交流推送订阅频道
+	optSummarySubMap   MySyncMap[string, *Subscription[WsOptSummary]]   //期权定价频道
+	markPriceSubMap    MySyncMap[string, *Subscription[WsMarkPrice]]    //标记价格频道
+	indexTickersSubMap MySyncMap[string, *Subscription[WsIndexTickers]] //指数行情频道
+	tickersSubMap      MySyncMap[string, *Subscription[WsTickers]]      //ticker行情频道
+	ordersSubMap       MySyncMap[string, *Subscription[WsOrders]]       //订单推送订阅频道
+	ordersAlgoSubMap   MySyncMap[string, *Subscription[WsOrdersAlgo]]   //策略委托订单频道
 
 	resultChan chan []byte
 	errChan    chan error
@@ -311,6 +313,8 @@ func (ws *WsStreamClient) Close() error {
 	ws.tradesSubMap = NewMySyncMap[string, *Subscription[WsTrades]]()
 	ws.optSummarySubMap = NewMySyncMap[string, *Subscription[WsOptSummary]]()
 	ws.markPriceSubMap = NewMySyncMap[string, *Subscription[WsMarkPrice]]()
+	ws.indexTickersSubMap = NewMySyncMap[string, *Subscription[WsIndexTickers]]()
+	ws.tickersSubMap = NewMySyncMap[string, *Subscription[WsTickers]]()
 	ws.ordersSubMap = NewMySyncMap[string, *Subscription[WsOrders]]()
 	ws.ordersAlgoSubMap = NewMySyncMap[string, *Subscription[WsOrdersAlgo]]()
 
@@ -370,60 +374,66 @@ type BusinessWsStreamClient struct {
 func (*MyOkx) NewPublicWsStreamClient() *PublicWsStreamClient {
 	return &PublicWsStreamClient{
 		WsStreamClient: WsStreamClient{
-			apiType:           WS_PUBLIC,
-			commonSubMap:      NewMySyncMap[string, *Subscription[WsActionResult]](),
-			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
-			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
-			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
-			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
-			markPriceSubMap:   NewMySyncMap[string, *Subscription[WsMarkPrice]](),
-			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
-			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
-			waitSubResult:     nil,
-			waitSubResultMu:   &sync.Mutex{},
-			waitOrderResult:   nil,
-			waitOrderResultMu: &sync.Mutex{},
-			reSubscribeMu:     &sync.Mutex{},
+			apiType:            WS_PUBLIC,
+			commonSubMap:       NewMySyncMap[string, *Subscription[WsActionResult]](),
+			candleSubMap:       NewMySyncMap[string, *Subscription[WsCandles]](),
+			booksSubMap:        NewMySyncMap[string, *Subscription[WsBooks]](),
+			tradesSubMap:       NewMySyncMap[string, *Subscription[WsTrades]](),
+			optSummarySubMap:   NewMySyncMap[string, *Subscription[WsOptSummary]](),
+			markPriceSubMap:    NewMySyncMap[string, *Subscription[WsMarkPrice]](),
+			indexTickersSubMap: NewMySyncMap[string, *Subscription[WsIndexTickers]](),
+			tickersSubMap:      NewMySyncMap[string, *Subscription[WsTickers]](),
+			ordersSubMap:       NewMySyncMap[string, *Subscription[WsOrders]](),
+			ordersAlgoSubMap:   NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
+			waitSubResult:      nil,
+			waitSubResultMu:    &sync.Mutex{},
+			waitOrderResult:    nil,
+			waitOrderResultMu:  &sync.Mutex{},
+			reSubscribeMu:      &sync.Mutex{},
 		},
 	}
 }
 func (*MyOkx) NewPrivateWsStreamClient() *PrivateWsStreamClient {
 	return &PrivateWsStreamClient{
 		WsStreamClient: WsStreamClient{
-			apiType:           WS_PRIVATE,
-			commonSubMap:      NewMySyncMap[string, *Subscription[WsActionResult]](),
-			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
-			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
-			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
-			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
-			markPriceSubMap:   NewMySyncMap[string, *Subscription[WsMarkPrice]](),
-			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
-			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
-			waitSubResult:     nil,
-			waitSubResultMu:   &sync.Mutex{},
-			waitOrderResult:   nil,
-			waitOrderResultMu: &sync.Mutex{},
-			reSubscribeMu:     &sync.Mutex{},
+			apiType:            WS_PRIVATE,
+			commonSubMap:       NewMySyncMap[string, *Subscription[WsActionResult]](),
+			candleSubMap:       NewMySyncMap[string, *Subscription[WsCandles]](),
+			booksSubMap:        NewMySyncMap[string, *Subscription[WsBooks]](),
+			tradesSubMap:       NewMySyncMap[string, *Subscription[WsTrades]](),
+			optSummarySubMap:   NewMySyncMap[string, *Subscription[WsOptSummary]](),
+			markPriceSubMap:    NewMySyncMap[string, *Subscription[WsMarkPrice]](),
+			indexTickersSubMap: NewMySyncMap[string, *Subscription[WsIndexTickers]](),
+			tickersSubMap:      NewMySyncMap[string, *Subscription[WsTickers]](),
+			ordersSubMap:       NewMySyncMap[string, *Subscription[WsOrders]](),
+			ordersAlgoSubMap:   NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
+			waitSubResult:      nil,
+			waitSubResultMu:    &sync.Mutex{},
+			waitOrderResult:    nil,
+			waitOrderResultMu:  &sync.Mutex{},
+			reSubscribeMu:      &sync.Mutex{},
 		},
 	}
 }
 func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 	return &BusinessWsStreamClient{
 		WsStreamClient: WsStreamClient{
-			apiType:           WS_BUSINESS,
-			commonSubMap:      NewMySyncMap[string, *Subscription[WsActionResult]](),
-			candleSubMap:      NewMySyncMap[string, *Subscription[WsCandles]](),
-			booksSubMap:       NewMySyncMap[string, *Subscription[WsBooks]](),
-			tradesSubMap:      NewMySyncMap[string, *Subscription[WsTrades]](),
-			optSummarySubMap:  NewMySyncMap[string, *Subscription[WsOptSummary]](),
-			markPriceSubMap:   NewMySyncMap[string, *Subscription[WsMarkPrice]](),
-			ordersSubMap:      NewMySyncMap[string, *Subscription[WsOrders]](),
-			ordersAlgoSubMap:  NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
-			waitSubResult:     nil,
-			waitSubResultMu:   &sync.Mutex{},
-			waitOrderResult:   nil,
-			waitOrderResultMu: &sync.Mutex{},
-			reSubscribeMu:     &sync.Mutex{},
+			apiType:            WS_BUSINESS,
+			commonSubMap:       NewMySyncMap[string, *Subscription[WsActionResult]](),
+			candleSubMap:       NewMySyncMap[string, *Subscription[WsCandles]](),
+			booksSubMap:        NewMySyncMap[string, *Subscription[WsBooks]](),
+			tradesSubMap:       NewMySyncMap[string, *Subscription[WsTrades]](),
+			optSummarySubMap:   NewMySyncMap[string, *Subscription[WsOptSummary]](),
+			markPriceSubMap:    NewMySyncMap[string, *Subscription[WsMarkPrice]](),
+			indexTickersSubMap: NewMySyncMap[string, *Subscription[WsIndexTickers]](),
+			tickersSubMap:      NewMySyncMap[string, *Subscription[WsTickers]](),
+			ordersSubMap:       NewMySyncMap[string, *Subscription[WsOrders]](),
+			ordersAlgoSubMap:   NewMySyncMap[string, *Subscription[WsOrdersAlgo]](),
+			waitSubResult:      nil,
+			waitSubResultMu:    &sync.Mutex{},
+			waitOrderResult:    nil,
+			waitOrderResultMu:  &sync.Mutex{},
+			reSubscribeMu:      &sync.Mutex{},
 		},
 	}
 }
@@ -498,6 +508,20 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 		}
 		if sub, ok := ws.markPriceSubMap.Load(key); ok {
 			ws.markPriceSubMap.Delete(key)
+			if sub.closeChan != nil {
+				sub.closeChan <- struct{}{}
+				sub.closeChan = nil
+			}
+		}
+		if sub, ok := ws.indexTickersSubMap.Load(key); ok {
+			ws.indexTickersSubMap.Delete(key)
+			if sub.closeChan != nil {
+				sub.closeChan <- struct{}{}
+				sub.closeChan = nil
+			}
+		}
+		if sub, ok := ws.tickersSubMap.Load(key); ok {
+			ws.tickersSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
@@ -745,6 +769,44 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 						}
 						for _, markPrice := range *markPriceList {
 							sub.resultChan <- markPrice
+						}
+					}
+					continue
+				}
+
+				if strings.Contains(string(data), "channel\":\"index-tickers\"") {
+					indexTickersList, err := handleWsIndexTickers(data)
+					if len(*indexTickersList) == 0 {
+						continue
+					}
+					arg := (*indexTickersList)[0].Args
+					keyData, _ := json.Marshal(arg)
+					if sub, ok := ws.indexTickersSubMap.Load(string(keyData)); ok {
+						if err != nil {
+							sub.errChan <- err
+							continue
+						}
+						for _, indexTickers := range *indexTickersList {
+							sub.resultChan <- indexTickers
+						}
+					}
+					continue
+				}
+
+				if strings.Contains(string(data), "channel\":\"tickers\"") {
+					tickersList, err := handleWsTickers(data)
+					if len(*tickersList) == 0 {
+						continue
+					}
+					arg := (*tickersList)[0].Args
+					keyData, _ := json.Marshal(arg)
+					if sub, ok := ws.tickersSubMap.Load(string(keyData)); ok {
+						if err != nil {
+							sub.errChan <- err
+							continue
+						}
+						for _, tickers := range *tickersList {
+							sub.resultChan <- tickers
 						}
 					}
 					continue

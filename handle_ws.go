@@ -435,3 +435,113 @@ func handleWsMarkPrice(data []byte) (*[]WsMarkPrice, error) {
 
 	return &wsMarkPriceList, nil
 }
+
+// 指数行情基础数据结构
+type IndexTickers struct {
+	InstId  string `json:"instId"`  //指数，以USD、USDT、BTC、USDC 为计价货币的指数，如 BTC-USDT
+	IdxPx   string `json:"idxPx"`   //最新指数价格
+	High24h string `json:"high24h"` //24小时指数最高价格
+	Low24h  string `json:"low24h"`  //24小时指数最低价格
+	Open24h string `json:"open24h"` //24小时开盘价
+	SodUtc0 string `json:"sodUtc0"` //UTC 0 时开盘价
+	SodUtc8 string `json:"sodUtc8"` //UTC+8 时开盘价
+	Ts      string `json:"ts"`      //指数价格更新时间，Unix时间戳的毫秒数格式
+}
+
+// WebSocket 指数行情数据结构
+type WsIndexTickers struct {
+	Args struct {
+		Channel string `json:"channel"` // 频道名
+		InstId  string `json:"instId"`  // 指数ID
+	}
+	IndexTickers
+}
+
+// 指数行情中间处理结构
+type WsIndexTickersMiddle struct {
+	Arg struct {
+		Channel string `json:"channel"` // 频道名
+		InstId  string `json:"instId"`  // 指数ID
+	} `json:"arg"`
+	Data []IndexTickers `json:"data"`
+}
+
+// 处理指数行情 WebSocket 数据
+func handleWsIndexTickers(data []byte) (*[]WsIndexTickers, error) {
+	wsIndexTickersMiddle := WsIndexTickersMiddle{}
+	err := json.Unmarshal(data, &wsIndexTickersMiddle)
+	if err != nil {
+		return nil, err
+	}
+
+	indexTickersList := wsIndexTickersMiddle.Data
+	wsIndexTickersList := []WsIndexTickers{}
+	for _, indexTickers := range indexTickersList {
+		wsIndexTickers := WsIndexTickers{
+			Args:         wsIndexTickersMiddle.Arg,
+			IndexTickers: indexTickers,
+		}
+		wsIndexTickersList = append(wsIndexTickersList, wsIndexTickers)
+	}
+
+	return &wsIndexTickersList, nil
+}
+
+// ticker 行情基础数据结构
+type Tickers struct {
+	InstType  string `json:"instType"`  //产品类型
+	InstId    string `json:"instId"`    //产品ID
+	Last      string `json:"last"`      //最新成交价
+	LastSz    string `json:"lastSz"`    //最新成交的数量，0 代表没有成交量
+	AskPx     string `json:"askPx"`     //卖一价
+	AskSz     string `json:"askSz"`     //卖一价对应的量
+	BidPx     string `json:"bidPx"`     //买一价
+	BidSz     string `json:"bidSz"`     //买一价对应的数量
+	Open24h   string `json:"open24h"`   //24小时开盘价
+	High24h   string `json:"high24h"`   //24小时最高价
+	Low24h    string `json:"low24h"`    //24小时最低价
+	VolCcy24h string `json:"volCcy24h"` //24小时成交量，以币为单位
+	Vol24h    string `json:"vol24h"`    //24小时成交量，以张为单位
+	SodUtc0   string `json:"sodUtc0"`   //UTC+0 时开盘价
+	SodUtc8   string `json:"sodUtc8"`   //UTC+8 时开盘价
+	Ts        string `json:"ts"`        //数据产生时间，Unix时间戳的毫秒数格式
+}
+
+// WebSocket ticker 行情数据结构
+type WsTickers struct {
+	Args struct {
+		Channel string `json:"channel"` // 频道名
+		InstId  string `json:"instId"`  // 产品ID
+	}
+	Tickers
+}
+
+// ticker 行情中间处理结构
+type WsTickersMiddle struct {
+	Arg struct {
+		Channel string `json:"channel"` // 频道名
+		InstId  string `json:"instId"`  // 产品ID
+	} `json:"arg"`
+	Data []Tickers `json:"data"`
+}
+
+// 处理 ticker 行情 WebSocket 数据
+func handleWsTickers(data []byte) (*[]WsTickers, error) {
+	wsTickersMiddle := WsTickersMiddle{}
+	err := json.Unmarshal(data, &wsTickersMiddle)
+	if err != nil {
+		return nil, err
+	}
+
+	tickersList := wsTickersMiddle.Data
+	wsTickersList := []WsTickers{}
+	for _, tickers := range tickersList {
+		wsTickers := WsTickers{
+			Args:    wsTickersMiddle.Arg,
+			Tickers: tickers,
+		}
+		wsTickersList = append(wsTickersList, wsTickers)
+	}
+
+	return &wsTickersList, nil
+}

@@ -296,3 +296,147 @@ func (ws *PublicWsStreamClient) UnSubscribeMarkPriceMultiple(instIds []string) (
 	}
 	return nil, nil
 }
+
+// 批量订阅指数行情
+func (ws *PublicWsStreamClient) SubscribeIndexTickersMultiple(instIds []string) (*Subscription[WsIndexTickers], error) {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getIndexTickersSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	if err != nil {
+		return nil, err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("SubscribeIndexTickers Success: args:%v", doSub.Args)
+	sub := &Subscription[WsIndexTickers]{
+		SubId:      doSub.SubId,
+		Op:         SUBSCRIBE,
+		Args:       doSub.Args,
+		resultChan: make(chan WsIndexTickers, 50),
+		errChan:    make(chan error),
+		closeChan:  make(chan struct{}),
+		Ws:         &ws.WsStreamClient,
+	}
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.indexTickersSubMap.Store(string(keyData), sub)
+	}
+	return sub, nil
+}
+
+// 订阅单个指数行情
+func (ws *PublicWsStreamClient) SubscribeIndexTickers(instId string) (*Subscription[WsIndexTickers], error) {
+	return ws.SubscribeIndexTickersMultiple([]string{instId})
+}
+
+// 批量取消订阅指数行情
+func (ws *PublicWsStreamClient) UnSubscribeIndexTickersMultiple(instIds []string) error {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getIndexTickersSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return err
+	}
+	log.Infof("UnSubscribeIndexTickers Success: args:%v", doSub.Args)
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.indexTickersSubMap.Delete(string(keyData))
+	}
+	return nil
+}
+
+// 取消订阅单个指数行情
+func (ws *PublicWsStreamClient) UnSubscribeIndexTickers(instId string) error {
+	return ws.UnSubscribeIndexTickersMultiple([]string{instId})
+}
+
+func getIndexTickersSubscribeArg(instId string) WsSubscribeArg {
+	return WsSubscribeArg{
+		Channel: "index-tickers",
+		InstId:  instId,
+	}
+}
+
+// 批量订阅 ticker 行情
+func (ws *PublicWsStreamClient) SubscribeTickersMultiple(instIds []string) (*Subscription[WsTickers], error) {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getTickersSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	if err != nil {
+		return nil, err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("SubscribeTickers Success: args:%v", doSub.Args)
+	sub := &Subscription[WsTickers]{
+		SubId:      doSub.SubId,
+		Op:         SUBSCRIBE,
+		Args:       doSub.Args,
+		resultChan: make(chan WsTickers, 50),
+		errChan:    make(chan error),
+		closeChan:  make(chan struct{}),
+		Ws:         &ws.WsStreamClient,
+	}
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.tickersSubMap.Store(string(keyData), sub)
+	}
+	return sub, nil
+}
+
+// 订阅单个 ticker 行情
+func (ws *PublicWsStreamClient) SubscribeTickers(instId string) (*Subscription[WsTickers], error) {
+	return ws.SubscribeTickersMultiple([]string{instId})
+}
+
+// 批量取消订阅 ticker 行情
+func (ws *PublicWsStreamClient) UnSubscribeTickersMultiple(instIds []string) error {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getTickersSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return err
+	}
+	log.Infof("UnSubscribeTickers Success: args:%v", doSub.Args)
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.tickersSubMap.Delete(string(keyData))
+	}
+	return nil
+}
+
+// 取消订阅单个 ticker 行情
+func (ws *PublicWsStreamClient) UnSubscribeTickers(instId string) error {
+	return ws.UnSubscribeTickersMultiple([]string{instId})
+}
+
+func getTickersSubscribeArg(instId string) WsSubscribeArg {
+	return WsSubscribeArg{
+		Channel: "tickers",
+		InstId:  instId,
+	}
+}
