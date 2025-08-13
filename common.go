@@ -63,11 +63,12 @@ type MyOkx struct {
 }
 
 const (
-	OKX_API_HTTP          = "www.okx.com"
-	OKX_API_WEBSOCKET     = "ws.okx.com:8443"
-	OKX_API_HTTP_AWS      = "aws.okx.com"
-	OKX_API_WEBSOCKET_AWS = "wsaws.okx.com:8443"
-	IS_GZIP               = true
+	OKX_API_HTTP              = "www.okx.com"
+	OKX_API_WEBSOCKET         = "ws.okx.com:8443"
+	OKX_API_HTTP_AWS          = "aws.okx.com"
+	OKX_API_WEBSOCKET_AWS     = "wsaws.okx.com:8443"
+	OKX_API_WEBSOCKET_TESTNET = "wspap.okx.com:8443"
+	IS_GZIP                   = true
 )
 
 type ServerType int

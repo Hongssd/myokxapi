@@ -980,7 +980,8 @@ func handlerWsStreamRequestApi(apiType APIType) string {
 
 	query := ""
 	if NowNetType == TEST_NET {
-		query = "brokerId=9999"
+		// query = "brokerId=9999"
+		host = OKX_API_WEBSOCKET_TESTNET
 	}
 	u := url.URL{
 		Scheme:   "wss",
