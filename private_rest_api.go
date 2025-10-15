@@ -4,15 +4,15 @@ type PrivateRestAPI int
 
 const (
 	//Account
-	PrivateRestAccountBalance         PrivateRestAPI = iota //查看账户余额
-	PrivateRestAccountPosition                              //查看持仓信息
-	PrivateRestAccountConfig                                //查看账户配置
-	PrivateRestAccountTradeFee                              //查看账户手续费费率
-	PrivateRestAccountLeverageInfo                          //获取杠杆倍数
-	PrivateRestAccountSetLeverage                           //设置杠杆倍数
-	PrivateRestAccountSetPositionMode                       //设置持仓模式
-	PrivateRestAccountSetAccountLevel                       //设置账户模式
-
+	PrivateRestAccountBalance          PrivateRestAPI = iota //查看账户余额
+	PrivateRestAccountPosition                               //查看持仓信息
+	PrivateRestAccountConfig                                 //查看账户配置
+	PrivateRestAccountTradeFee                               //查看账户手续费费率
+	PrivateRestAccountLeverageInfo                           //获取杠杆倍数
+	PrivateRestAccountSetLeverage                            //设置杠杆倍数
+	PrivateRestAccountSetPositionMode                        //设置持仓模式
+	PrivateRestAccountSetAccountLevel                        //设置账户模式
+	PrivateRestAccountPositionsHistory                       //查看持仓历史
 	//SubAccount
 	PrivateRestSubAccountSetTransferOut //设置子账户主动转出权限
 
@@ -78,6 +78,7 @@ var PrivateRestAPIMap = map[PrivateRestAPI]string{
 	PrivateRestAccountSetLeverage:     "/api/v5/account/set-leverage",      //POST 设置杠杆倍数
 	PrivateRestAccountSetPositionMode: "/api/v5/account/set-position-mode", //POST 设置持仓模式
 	PrivateRestAccountSetAccountLevel: "/api/v5/account/set-account-level", //POST 设置账户模式
+	PrivateRestAccountPositionsHistory: "/api/v5/account/positions-history", //GET 查看持仓历史
 
 	//SubAccount
 	PrivateRestSubAccountSetTransferOut: "/api/v5/users/subaccount/set-transfer-out", // 设置子账户主动转出权限

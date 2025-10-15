@@ -189,6 +189,84 @@ type PrivateRestAccountSetAccountLevelResRow struct {
 	AcctLv string `json:"acctLv"` //账户
 }
 
+// 返回参数
+// 参数名	类型	描述
+// instType	String	产品类型
+// instId	String	交易产品ID
+// mgnMode	String	保证金模式
+// cross：全仓
+// isolated：逐仓
+// type	String	最近一次平仓的类型
+// 1：部分平仓
+// 2：完全平仓
+// 3：强平
+// 4：强减
+// 5：ADL自动减仓
+// 状态叠加时，以最新的平仓类型为准状态为准。
+// cTime	String	仓位创建时间
+// uTime	String	仓位更新时间
+// openAvgPx	String	开仓均价
+// 会随结算周期变化，特别是在交割合约全仓模式下，结算时开仓均价会更新为结算价格，同时新增头寸也会改变开仓均价。
+// nonSettleAvgPx	String	未结算均价
+// 不受结算影响的加权开仓价格，仅在新增头寸时更新，和开仓均价的主要区别在于是否受到结算影响。
+// 仅适用于全仓交割
+// closeAvgPx	String	平仓均价
+// posId	String	仓位ID
+// openMaxPos	String	最大持仓量
+// closeTotalPos	String	累计平仓量
+// realizedPnl	String	已实现收益
+// 仅适用于交割/永续/期权
+// realizedPnl=pnl+fee+fundingFee+liqPenalty+settledPnl
+// settledPnl	String	已实现收益
+// 仅适用于全仓交割
+// pnlRatio	String	已实现收益率
+// fee	String	累计手续费金额
+// 正数代表平台返佣，负数代表平台扣除。
+// fundingFee	String	累计资金费用
+// liqPenalty	String	累计爆仓罚金，有值时为负数。
+// pnl	String	已实现收益(不包括手续费)
+// posSide	String	持仓模式方向
+// long：开平仓模式开多
+// short：开平仓模式开空
+// net：买卖模式
+// lever	String	杠杆倍数
+// direction	String	持仓方向
+// long：多
+// short：空
+// 仅适用于 杠杆/交割/永续/期权
+// triggerPx	String	触发标记价格
+// type 为3,4,5时有值；为1, 2 时为空
+// uly	String	标的指数
+// ccy	String	占用保证金的币种
+type PrivateRestAccountPositionsHistoryRes []PrivateRestAccountPositionsHistoryResRow
+type PrivateRestAccountPositionsHistoryResRow struct {
+	InstType       string `json:"instType"`       //产品类型
+	InstId         string `json:"instId"`         //交易产品ID
+	MgnMode        string `json:"mgnMode"`        //保证金模式
+	Type           string `json:"type"`           //最近一次平仓的类型
+	CTime          string `json:"cTime"`          //仓位创建时间
+	UTime          string `json:"uTime"`          //仓位更新时间
+	OpenAvgPx      string `json:"openAvgPx"`      //开仓均价
+	NonSettleAvgPx string `json:"nonSettleAvgPx"` //未结算均价
+	CloseAvgPx     string `json:"closeAvgPx"`     //平仓均价
+	PosId          string `json:"posId"`          //仓位ID
+	OpenMaxPos     string `json:"openMaxPos"`     //最大持仓量
+	CloseTotalPos  string `json:"closeTotalPos"`  //累计平仓量
+	RealizedPnl    string `json:"realizedPnl"`    //已实现收益
+	SettledPnl     string `json:"settledPnl"`     //已实现收益
+	PnlRatio       string `json:"pnlRatio"`       //已实现收益率
+	Fee            string `json:"fee"`            //累计手续费金额
+	FundingFee     string `json:"fundingFee"`     //累计资金费用
+	LiqPenalty     string `json:"liqPenalty"`     //累计爆仓罚金，有值时为负数。
+	Pnl            string `json:"pnl"`            //已实现收益(不包括手续费)
+	PosSide        string `json:"posSide"`        //持仓模式方向
+	Lever          string `json:"lever"`          //杠杆倍数
+	Direction      string `json:"direction"`      //持仓方向
+	TriggerPx      string `json:"triggerPx"`      //触发标记价格
+	Uly            string `json:"uly"`            //标的指数
+	Ccy            string `json:"ccy"`            //占用保证金的币种
+}
+
 // Asset
 type PrivateRestAssetBillsRes []PrivateRestAssetBillsResRow
 type PrivateRestAssetBillsResRow struct {

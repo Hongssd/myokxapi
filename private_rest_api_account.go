@@ -109,6 +109,18 @@ func (api *PrivateRestAccountSetAccountLevelAPI) Do() (*OkxRestRes[PrivateRestAc
 	return okxCallAPIWithSecret[PrivateRestAccountSetAccountLevelRes](api.client.c, url, reqBody, POST)
 }
 
+// okx PrivateRestAccountPositionsHistory PrivateRest接口 GET 查看持仓历史
+func (client *PrivateRestClient) NewPrivateRestAccountPositionsHistory() *PrivateRestAccountPositionsHistoryAPI {
+	return &PrivateRestAccountPositionsHistoryAPI{
+		client: client,
+		req:    &PrivateRestAccountPositionsHistoryReq{},
+	}
+}
+func (api *PrivateRestAccountPositionsHistoryAPI) Do() (*OkxRestRes[PrivateRestAccountPositionsHistoryRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PrivateRestAPIMap[PrivateRestAccountPositionsHistory])
+	return okxCallAPIWithSecret[PrivateRestAccountPositionsHistoryRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
 // Asset
 
 // okx PrivateRestAssetBills PrivateRest接口 GET 查询最近一个月内资金账户账单流水

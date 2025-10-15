@@ -202,6 +202,86 @@ func (api *PrivateRestAccountSetAccountLevelAPI) AcctLv(acctLv string) *PrivateR
 	return api
 }
 
+// instType	String	否	产品类型
+// MARGIN：币币杠杆
+// SWAP：永续合约
+// FUTURES：交割合约
+// OPTION：期权
+// instId	String	否	交易产品ID，如：BTC-USD-SWAP
+// mgnMode	String	否	保证金模式
+// cross：全仓，isolated：逐仓
+// type	String	否	最近一次平仓的类型
+// 1：部分平仓;2：完全平仓;3：强平;4：强减; 5：ADL自动减仓 - 仓位未完全平仓; 6：ADL自动减仓 - 仓位完全平仓
+// 状态叠加时，以最新的平仓类型为准状态为准。
+// posId	String	否	持仓ID。存在有效期的属性，自最近一次完全平仓算起，满30天 posId 会失效，之后的仓位，会使用新的 posId。
+// after	String	否	查询仓位更新 (uTime) 之前的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+// before	String	否	查询仓位更新 (uTime) 之后的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+// limit	String	否	分页返回结果的数量，最大为100，默认100条，uTime 相同的记录均会在当前请求中全部返回
+
+type PrivateRestAccountPositionsHistoryReq struct {
+	InstType *string `json:"instType"` //String	否	产品类型 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+	InstId   *string `json:"instId"`   //String	否	交易产品ID，如：BTC-USD-SWAP
+	MgnMode  *string `json:"mgnMode"`  //String	否	保证金模式 cross：全仓，isolated：逐仓
+	Type     *string `json:"type"`     //String	否	最近一次平仓的类型
+	PosId    *string `json:"posId"`    //String	否	持仓ID。存在有效期的属性，自最近一次完全平仓算起，满30天 posId 会失效，之后的仓位，会使用新的 posId。
+	After    *string `json:"after"`    //String	否	查询仓位更新 (uTime) 之前的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+	Before   *string `json:"before"`   //String	否	查询仓位更新 (uTime) 之后的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+	Limit    *string `json:"limit"`    //String	否	分页返回结果的数量，最大为100，默认100条，uTime 相同的记录均会在当前请求中全部返回
+}
+
+type PrivateRestAccountPositionsHistoryAPI struct {
+	client *PrivateRestClient
+	req    *PrivateRestAccountPositionsHistoryReq
+}
+
+// String	否	产品类型 MARGIN：币币杠杆 SWAP：永续合约 FUTURES：交割合约 OPTION：期权
+func (api *PrivateRestAccountPositionsHistoryAPI) InstType(instType string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.InstType = GetPointer(instType)
+	return api
+}
+
+// String	否	交易产品ID，如：BTC-USD-SWAP
+func (api *PrivateRestAccountPositionsHistoryAPI) InstId(instId string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String	否	保证金模式 cross：全仓，isolated：逐仓
+func (api *PrivateRestAccountPositionsHistoryAPI) MgnMode(mgnMode string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.MgnMode = GetPointer(mgnMode)
+	return api
+}
+
+// String	否	最近一次平仓的类型
+func (api *PrivateRestAccountPositionsHistoryAPI) Type(type_ string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.Type = GetPointer(type_)
+	return api
+}
+
+// String	否	持仓ID。存在有效期的属性，自最近一次完全平仓算起，满30天 posId 会失效，之后的仓位，会使用新的 posId。
+func (api *PrivateRestAccountPositionsHistoryAPI) PosId(posId string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.PosId = GetPointer(posId)
+	return api
+}
+
+// String	否	查询仓位更新 (uTime) 之前的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+func (api *PrivateRestAccountPositionsHistoryAPI) After(after string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String	否	查询仓位更新 (uTime) 之后的内容，值为时间戳，Unix 时间戳为毫秒数格式，如 1597026383085
+func (api *PrivateRestAccountPositionsHistoryAPI) Before(before string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String	否	分页返回结果的数量，最大为100，默认100条，uTime 相同的记录均会在当前请求中全部返回
+func (api *PrivateRestAccountPositionsHistoryAPI) Limit(limit string) *PrivateRestAccountPositionsHistoryAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
+
 // Asset
 type PrivateRestAssetBillsAPI struct {
 	client *PrivateRestClient
