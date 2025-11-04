@@ -2,7 +2,9 @@ package myokxapi
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -946,7 +948,21 @@ func (ws *WsStreamClient) Login(client *RestClient) error {
 
 // 标准订阅方法
 func wsStreamServe(api string, resultChan chan []byte, errChan chan error) (*websocket.Conn, error) {
-	c, _, err := websocket.DefaultDialer.Dial(api, nil)
+	dialer := websocket.DefaultDialer
+	if WsUseProxy {
+		proxy, _ := getBestProxyAndWeight()
+		if proxy == nil {
+			return nil, errors.New("no proxy available")
+		}
+		proxyUrl, err := url.Parse(proxy.ProxyUrl)
+		if err != nil {
+			return nil, err
+		}
+		dialer = &websocket.Dialer{
+			Proxy: http.ProxyURL(proxyUrl),
+		}
+	}
+	c, _, err := dialer.Dial(api, nil)
 	if err != nil {
 		return nil, err
 	}
