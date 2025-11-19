@@ -991,6 +991,13 @@ func handlerWsStreamRequestApi(apiType APIType) string {
 		host = OKX_API_WEBSOCKET
 	case AWS:
 		host = OKX_API_WEBSOCKET_AWS
+	case COLO:
+		switch apiType {
+		case WS_PRIVATE, WS_PUBLIC:
+			host = OKX_API_WEBSOCKET_COLO_PUBLIC_AND_PRIVATE
+		case WS_BUSINESS:
+			host = OKX_API_WEBSOCKET_COLO_BUSINESS
+		}
 	default:
 	}
 
