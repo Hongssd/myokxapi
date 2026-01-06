@@ -170,3 +170,25 @@ func (api *PublicRestMarketHistoryCandlesAPI) Limit(limit int) *PublicRestMarket
 	api.req.Limit = GetPointer(limit)
 	return api
 }
+
+type PublicRestMarketTradesAPI struct {
+	client *PublicRestClient
+	req    *PublicRestMarketTradesReq
+}
+
+type PublicRestMarketTradesReq struct {
+	InstId *string `json:"instId"` //String	是	产品ID，如 BTC-USDT
+	Limit  *int    `json:"limit"`  //String	否	分页返回的结果集数量，最大为500，不填默认返回100条
+}
+
+// String 是 产品ID，如 BTC-USDT
+func (api *PublicRestMarketTradesAPI) InstId(instId string) *PublicRestMarketTradesAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 分页返回的结果集数量，最大为500，不填默认返回100条
+func (api *PublicRestMarketTradesAPI) Limit(limit int) *PublicRestMarketTradesAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
