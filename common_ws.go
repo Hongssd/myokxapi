@@ -56,6 +56,7 @@ type WsStreamClient struct {
 	candleSubMap       MySyncMap[string, *Subscription[WsCandles]]      //K线推送订阅频道
 	booksSubMap        MySyncMap[string, *Subscription[WsBooks]]        //深度推送订阅频道
 	tradesSubMap       MySyncMap[string, *Subscription[WsTrades]]       //成交流推送订阅频道
+	allTradesSubMap    MySyncMap[string, *Subscription[WsAllTrades]]    //全部成交流推送订阅频道
 	optSummarySubMap   MySyncMap[string, *Subscription[WsOptSummary]]   //期权定价频道
 	markPriceSubMap    MySyncMap[string, *Subscription[WsMarkPrice]]    //标记价格频道
 	indexTickersSubMap MySyncMap[string, *Subscription[WsIndexTickers]] //指数行情频道
@@ -313,6 +314,7 @@ func (ws *WsStreamClient) Close() error {
 	ws.candleSubMap = NewMySyncMap[string, *Subscription[WsCandles]]()
 	ws.booksSubMap = NewMySyncMap[string, *Subscription[WsBooks]]()
 	ws.tradesSubMap = NewMySyncMap[string, *Subscription[WsTrades]]()
+	ws.allTradesSubMap = NewMySyncMap[string, *Subscription[WsAllTrades]]()
 	ws.optSummarySubMap = NewMySyncMap[string, *Subscription[WsOptSummary]]()
 	ws.markPriceSubMap = NewMySyncMap[string, *Subscription[WsMarkPrice]]()
 	ws.indexTickersSubMap = NewMySyncMap[string, *Subscription[WsIndexTickers]]()
@@ -425,6 +427,7 @@ func (*MyOkx) NewBusinessWsStreamClient() *BusinessWsStreamClient {
 			candleSubMap:       NewMySyncMap[string, *Subscription[WsCandles]](),
 			booksSubMap:        NewMySyncMap[string, *Subscription[WsBooks]](),
 			tradesSubMap:       NewMySyncMap[string, *Subscription[WsTrades]](),
+			allTradesSubMap:    NewMySyncMap[string, *Subscription[WsAllTrades]](),
 			optSummarySubMap:   NewMySyncMap[string, *Subscription[WsOptSummary]](),
 			markPriceSubMap:    NewMySyncMap[string, *Subscription[WsMarkPrice]](),
 			indexTickersSubMap: NewMySyncMap[string, *Subscription[WsIndexTickers]](),
@@ -482,6 +485,13 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 		}
 		if sub, ok := ws.tradesSubMap.Load(key); ok {
 			ws.tradesSubMap.Delete(key)
+			if sub.closeChan != nil {
+				sub.closeChan <- struct{}{}
+				sub.closeChan = nil
+			}
+		}
+		if sub, ok := ws.allTradesSubMap.Load(key); ok {
+			ws.allTradesSubMap.Delete(key)
 			if sub.closeChan != nil {
 				sub.closeChan <- struct{}{}
 				sub.closeChan = nil
@@ -678,6 +688,19 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 							continue
 						}
 						sub.resultChan <- *b
+					}
+					continue
+				}
+				if strings.Contains(string(data), "trades-all") {
+					t, err := handleWsAllTrades(data)
+					arg := t.WsSubscribeArg
+					keyData, _ := json.Marshal(arg)
+					if sub, ok := ws.allTradesSubMap.Load(string(keyData)); ok {
+						if err != nil {
+							sub.errChan <- err
+							continue
+						}
+						sub.resultChan <- *t
 					}
 					continue
 				}

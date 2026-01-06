@@ -138,3 +138,47 @@ func (ws *BusinessWsStreamClient) UnSubscribeCandleMultiple(instId []string, int
 	}
 	return nil
 }
+
+// 订阅全部交易频道 如: ["BTC-USDT","ETH-USDT"]
+func (ws *BusinessWsStreamClient) SubscribeAllTrades(instIds []string) (*Subscription[WsAllTrades], error) {
+	return ws.SubscribeAllTradesMultiple(instIds)
+}
+
+func getAllTradesSubscribeArg(instId string) WsSubscribeArg {
+	return WsSubscribeArg{
+		Channel: "trades-all",
+		InstId:  instId,
+	}
+}
+
+// 批量订阅全部交易频道
+func (ws *BusinessWsStreamClient) SubscribeAllTradesMultiple(instIds []string) (*Subscription[WsAllTrades], error) {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getAllTradesSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, SUBSCRIBE, args)
+	if err != nil {
+		return nil, err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof("SubscribeAllTrades Success: args:%v", doSub.Args)
+	sub := &Subscription[WsAllTrades]{
+		SubId:      doSub.SubId,
+		Op:         SUBSCRIBE,
+		Args:       doSub.Args,
+		resultChan: make(chan WsAllTrades, 50),
+		errChan:    make(chan error),
+		closeChan:  make(chan struct{}),
+		Ws:         &ws.WsStreamClient,
+	}
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.allTradesSubMap.Store(string(keyData), sub)
+	}
+	return sub, nil
+}
