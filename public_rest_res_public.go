@@ -83,14 +83,3 @@ type PublicRestPublicOptSummaryResRow struct {
 	Ts       string `json:"ts"`       //数据更新时间，Unix时间戳的毫秒数格式，如 1597026383085
 }
 type PublicRestPublicOptSummaryRes []PublicRestPublicOptSummaryResRow
-
-type PublicRestMarketTradesResRow struct {
-	InstId  string `json:"instId"`  //产品ID
-	TradeId string `json:"tradeId"` //成交ID
-	Px      string `json:"px"`      //成交价格
-	Sz      string `json:"sz"`      //成交数量
-	Side    string `json:"side"`    //成交方向，buy sell
-	Source  string `json:"source"`  //订单来源 0：普通订单 1：流动性增强计划订单
-	Ts      string `json:"ts"`      //成交时间，Unix时间戳的毫秒数格式，如 1597026383085
-}
-type PublicRestMarketTradesRes []PublicRestMarketTradesResRow

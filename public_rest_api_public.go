@@ -60,14 +60,3 @@ func (api *PublicRestPublicOptSummaryAPI) Do() (*OkxRestRes[PublicRestPublicOptS
 	return okxCallAPI[PublicRestPublicOptSummaryRes](api.client.c, url, NIL_REQBODY, GET)
 }
 
-// okx PublicRestMarketTrades PublicRest接口 GET 获取交易产品公共成交数据
-func (client *PublicRestClient) NewPublicRestMarketTrades() *PublicRestMarketTradesAPI {
-	return &PublicRestMarketTradesAPI{
-		client: client,
-		req:    &PublicRestMarketTradesReq{},
-	}
-}
-func (api *PublicRestMarketTradesAPI) Do() (*OkxRestRes[PublicRestMarketTradesRes], error) {
-	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestMarketTrades])
-	return okxCallAPI[PublicRestMarketTradesRes](api.client.c, url, NIL_REQBODY, GET)
-}

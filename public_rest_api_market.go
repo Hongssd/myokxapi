@@ -75,3 +75,27 @@ func (api *PublicRestMarketHistoryCandlesAPI) Do() (*OkxRestRes[PublicRestMarket
 	}
 	return res2, nil
 }
+
+// okx PublicRestMarketTrades PublicRest接口 GET 获取交易产品公共成交数据
+func (client *PublicRestClient) NewPublicRestMarketTrades() *PublicRestMarketTradesAPI {
+	return &PublicRestMarketTradesAPI{
+		client: client,
+		req:    &PublicRestMarketTradesReq{},
+	}
+}
+func (api *PublicRestMarketTradesAPI) Do() (*OkxRestRes[PublicRestMarketTradesRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestMarketTrades])
+	return okxCallAPI[PublicRestMarketTradesRes](api.client.c, url, NIL_REQBODY, GET)
+}
+
+// okx MarketHistoryTrades PublicRest接口 GET 获取交易产品公共历史成交数据 可以分页获取最近3个月的数据。
+func (client *PublicRestClient) NewPublicRestMarketHistoryTrades() *PublicRestMarketHistoryTradesAPI {
+	return &PublicRestMarketHistoryTradesAPI{
+		client: client,
+		req:    &PublicRestMarketHistoryTradesReq{},
+	}
+}
+func (api *PublicRestMarketHistoryTradesAPI) Do() (*OkxRestRes[PublicRestMarketHistoryTradesRes], error) {
+	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestMarketHistoryTrades])
+	return okxCallAPI[PublicRestMarketHistoryTradesRes](api.client.c, url, NIL_REQBODY, GET)
+}
