@@ -182,3 +182,31 @@ func (ws *BusinessWsStreamClient) SubscribeAllTradesMultiple(instIds []string) (
 	}
 	return sub, nil
 }
+
+// 取消订阅全部交易频道
+func (ws *BusinessWsStreamClient) UnSubscribeAllTrades(instId string) error {
+	return ws.UnSubscribeAllTradesMultiple([]string{instId})
+}
+
+// 取消订阅全部交易频道
+func (ws *BusinessWsStreamClient) UnSubscribeAllTradesMultiple(instIds []string) error {
+	args := []WsSubscribeArg{}
+	for _, s := range instIds {
+		arg := getAllTradesSubscribeArg(s)
+		args = append(args, arg)
+	}
+	doSub, err := subscribe[WsActionResult](&ws.WsStreamClient, UNSUBSCRIBE, args)
+	if err != nil {
+		return err
+	}
+	err = ws.catchSubscribeResult(doSub)
+	if err != nil {
+		return err
+	}
+	log.Infof("UnSubscribeAllTrades Success: args:%v", doSub.Args)
+	for _, arg := range args {
+		keyData, _ := json.Marshal(&arg)
+		ws.allTradesSubMap.Delete(string(keyData))
+	}
+	return nil
+}
