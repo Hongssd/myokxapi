@@ -545,3 +545,49 @@ func handleWsTickers(data []byte) (*[]WsTickers, error) {
 
 	return &wsTickersList, nil
 }
+
+type AllTrades struct {
+	InstId  string `json:"instId"`  //产品ID，如 BTC-USD-180216
+	TradeId string `json:"tradeId"` //聚合的多笔交易中最新一笔交易的成交ID
+	Px      string `json:"px"`      //成交价格
+	Sz      string `json:"sz"`      //成交数量
+	Side    string `json:"side"`    //成交方向，buy sell
+	Source  string `json:"source"`  //订单来源 0：普通订单 1：流动性增强计划订单
+	Ts      string `json:"ts"`      //成交时间，Unix时间戳的毫秒数格式，如 1597026383085
+}
+
+type WsAllTradesMiddle struct {
+	Arg  WsSubscribeArg `json:"arg"`
+	Data []AllTrades    `json:"data"`
+}
+
+type WsAllTrades struct {
+	WsSubscribeArg //订阅信息
+	AllTrades      []AllTrades
+}
+
+func handleWsAllTrades(data []byte) (*WsAllTrades, error) {
+
+	wsAllTradesMiddle := WsAllTradesMiddle{}
+	err := json.Unmarshal(data, &wsAllTradesMiddle)
+	if err != nil {
+		return nil, err
+	}
+	allTrades := wsAllTradesMiddle.Data
+	for _, trade := range allTrades {
+		allTrades = append(allTrades, AllTrades{
+			InstId:  trade.InstId,
+			TradeId: trade.TradeId,
+			Px:      trade.Px,
+			Sz:      trade.Sz,
+			Side:    trade.Side,
+			Source:  trade.Source,
+			Ts:      trade.Ts,
+		})
+	}
+	wsAllTrades := WsAllTrades{
+		WsSubscribeArg: wsAllTradesMiddle.Arg,
+		AllTrades:      allTrades,
+	}
+	return &wsAllTrades, nil
+}

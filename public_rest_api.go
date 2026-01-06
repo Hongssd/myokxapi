@@ -16,6 +16,8 @@ const (
 	PublicRestMarketBooks          // 获取产品轻量深度
 	PublicRestMarketCandles        // 获取K线数据 最近1440条
 	PublicRestMarketHistoryCandles // 获取K线数据 最近几年 1sK线为最近3个月
+	PublicRestMarketTrades         // 获取交易产品公共成交数据
+	PublicRestMarketHistoryTrades  // 获取交易产品公共历史成交数据 可以分页获取最近3个月的数据。
 )
 
 var PublicRestAPIMap = map[PublicRestAPI]string{
@@ -31,5 +33,6 @@ var PublicRestAPIMap = map[PublicRestAPI]string{
 	PublicRestMarketBooks:          "/api/v5/market/books",           //GET 获取产品轻量深度
 	PublicRestMarketCandles:        "/api/v5/market/candles",         //GET 获取K线数据
 	PublicRestMarketHistoryCandles: "/api/v5/market/history-candles", //GET 获取K线数据
-
+	PublicRestMarketTrades:         "/api/v5/market/trades",          //GET 获取交易产品公共成交数据
+	PublicRestMarketHistoryTrades:  "/api/v5/market/history-trades",  //GET 获取交易产品公共历史成交数据 可以分页获取最近3个月的数据。
 }

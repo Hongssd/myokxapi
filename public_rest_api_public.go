@@ -59,3 +59,4 @@ func (api *PublicRestPublicOptSummaryAPI) Do() (*OkxRestRes[PublicRestPublicOptS
 	url := okxHandlerRequestAPIWithPathQueryParam(REST, api.req, PublicRestAPIMap[PublicRestPublicOptSummary])
 	return okxCallAPI[PublicRestPublicOptSummaryRes](api.client.c, url, NIL_REQBODY, GET)
 }
+

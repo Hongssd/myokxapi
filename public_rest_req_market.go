@@ -170,3 +170,68 @@ func (api *PublicRestMarketHistoryCandlesAPI) Limit(limit int) *PublicRestMarket
 	api.req.Limit = GetPointer(limit)
 	return api
 }
+
+type PublicRestMarketTradesAPI struct {
+	client *PublicRestClient
+	req    *PublicRestMarketTradesReq
+}
+
+type PublicRestMarketTradesReq struct {
+	InstId *string `json:"instId"` //String	是	产品ID，如 BTC-USDT
+	Limit  *int    `json:"limit"`  //String	否	分页返回的结果集数量，最大为500，不填默认返回100条
+}
+
+// String 是 产品ID，如 BTC-USDT
+func (api *PublicRestMarketTradesAPI) InstId(instId string) *PublicRestMarketTradesAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 分页返回的结果集数量，最大为500，不填默认返回100条
+func (api *PublicRestMarketTradesAPI) Limit(limit int) *PublicRestMarketTradesAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
+
+type PublicRestMarketHistoryTradesAPI struct {
+	client *PublicRestClient
+	req    *PublicRestMarketHistoryTradesReq
+}
+
+type PublicRestMarketHistoryTradesReq struct {
+	InstId *string `json:"instId"` //String	是	产品ID，如 BTC-USDT
+	Type   *string `json:"type"`   //String	否	分页类型 1：tradeId 分页 2：时间戳分页
+	After  *string `json:"after"`  //String	否	请求此 ID 或 ts 之前的分页内容，传的值为对应接口的 tradeId 或 ts
+	Before *string `json:"before"` //String	否	请求此ID之后（更新的数据）的分页内容，传的值为对应接口的 tradeId。
+	Limit  *int    `json:"limit"`  //String	否	分页返回的结果集数量，最大为100，不填默认返回100条
+}
+
+// String 是 产品ID，如 BTC-USDT
+func (api *PublicRestMarketHistoryTradesAPI) InstId(instId string) *PublicRestMarketHistoryTradesAPI {
+	api.req.InstId = GetPointer(instId)
+	return api
+}
+
+// String 否 分页类型 1：tradeId 分页 2：时间戳分页
+func (api *PublicRestMarketHistoryTradesAPI) Type(t string) *PublicRestMarketHistoryTradesAPI {
+	api.req.Type = GetPointer(t)
+	return api
+}
+
+// String 否 请求此 ID 或 ts 之前的分页内容，传的值为对应接口的 tradeId 或 ts
+func (api *PublicRestMarketHistoryTradesAPI) After(after string) *PublicRestMarketHistoryTradesAPI {
+	api.req.After = GetPointer(after)
+	return api
+}
+
+// String 否 请求此ID之后（更新的数据）的分页内容，传的值为对应接口的 tradeId。
+func (api *PublicRestMarketHistoryTradesAPI) Before(before string) *PublicRestMarketHistoryTradesAPI {
+	api.req.Before = GetPointer(before)
+	return api
+}
+
+// String 否 分页返回的结果集数量，最大为100，不填默认返回100条
+func (api *PublicRestMarketHistoryTradesAPI) Limit(limit int) *PublicRestMarketHistoryTradesAPI {
+	api.req.Limit = GetPointer(limit)
+	return api
+}
