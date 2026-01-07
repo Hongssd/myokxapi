@@ -574,17 +574,6 @@ func handleWsAllTrades(data []byte) (*WsAllTrades, error) {
 		return nil, err
 	}
 	allTrades := wsAllTradesMiddle.Data
-	for _, trade := range allTrades {
-		allTrades = append(allTrades, AllTrades{
-			InstId:  trade.InstId,
-			TradeId: trade.TradeId,
-			Px:      trade.Px,
-			Sz:      trade.Sz,
-			Side:    trade.Side,
-			Source:  trade.Source,
-			Ts:      trade.Ts,
-		})
-	}
 	wsAllTrades := WsAllTrades{
 		WsSubscribeArg: wsAllTradesMiddle.Arg,
 		AllTrades:      allTrades,
