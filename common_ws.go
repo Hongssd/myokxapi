@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/bwmarrin/snowflake"
@@ -34,9 +35,22 @@ const (
 )
 
 var (
+	// WebsocketTimeout is the text ping interval. The connection is closed (and then
+	// reconnected) after 3*WebsocketTimeout without any text frame, pong included.
 	WebsocketTimeout        = time.Second * 10
 	WebsocketKeepalive      = true
 	SUBSCRIBE_INTERVAL_TIME = 500 * time.Millisecond //订阅间隔
+
+	// WsActionTimeout bounds the wait for a login/subscribe/order ack, so a lost ack
+	// cannot hold the action lock forever.
+	WsActionTimeout = 10 * time.Second
+	// wsWriteTimeout keeps a stuck socket from holding the write lock.
+	wsWriteTimeout = 10 * time.Second
+	// wsPushSendTimeout bounds a push hand-off to a stalled consumer. Without it one
+	// full consumer channel would stop all reads on the connection.
+	wsPushSendTimeout = 5 * time.Second
+	// wsResubscribeMaxAttempts is the retry count of the post-reconnect resubscribe.
+	wsResubscribeMaxAttempts = 5
 )
 
 // 数据流订阅基础客户端
@@ -70,6 +84,10 @@ type WsStreamClient struct {
 
 	reSubscribeMu      *sync.Mutex
 	AutoReConnectTimes int //自动重连次数
+
+	writeMu      sync.Mutex   // gorilla/websocket allows a single concurrent writer
+	lastMsgNano  atomic.Int64 // last text frame read from the current connection
+	reconnectGen atomic.Int64 // a newer reconnect cancels the older relogin/resubscribe
 }
 
 // 登陆请求相关
@@ -172,7 +190,6 @@ func (ws *WsStreamClient) login(op string, arg WsLoginArg) (*Subscription[WsActi
 	if ws.waitSubResult != nil {
 		return nil, fmt.Errorf("websocket is busy")
 	}
-	ws.waitSubResultMu.Lock()
 	loginReq := WsLoginReq{
 		Op:   op,
 		Args: []WsLoginArg{arg},
@@ -181,27 +198,32 @@ func (ws *WsStreamClient) login(op string, arg WsLoginArg) (*Subscription[WsActi
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("send msg: %s", string(data))
-	err = ws.conn.WriteMessage(websocket.TextMessage, data)
-	if err != nil {
-		return nil, err
-	}
 	node, err := snowflake.NewNode(2)
 	if err != nil {
 		return nil, err
 	}
 	id := node.Generate().Int64()
-	ws.lastLogin = &loginReq
 	result := &Subscription[WsActionResult]{
 		SubId:        id,
 		Op:           op,
 		Args:         []WsSubscribeArg{},
 		resultChan:   make(chan WsActionResult, 50),
-		errChan:      make(chan error),
+		errChan:      make(chan error, 1),
 		closeChan:    make(chan struct{}),
 		Ws:           ws,
 		subResultMap: map[string]bool{},
 	}
+
+	ws.waitSubResultMu.Lock()
+	// Register the waiter before the write so a fast ack is not dropped.
+	ws.waitSubResult = result
+	log.Debugf("send msg: %s", string(data))
+	if err := ws.writeText(data); err != nil {
+		ws.waitSubResult = nil
+		ws.waitSubResultMu.Unlock()
+		return nil, err
+	}
+	ws.lastLogin = &loginReq
 
 	return result, nil
 }
@@ -213,8 +235,6 @@ func orderAction[T any](ws *PrivateWsStreamClient, op string, reqId string, args
 	if ws.waitOrderResult != nil {
 		return nil, fmt.Errorf("websocket is busy")
 	}
-	ws.waitOrderResultMu.Lock()
-
 	orderReq := WsOrderArg[T]{
 		Id:      reqId,
 		Op:      op,
@@ -225,12 +245,6 @@ func orderAction[T any](ws *PrivateWsStreamClient, op string, reqId string, args
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("send msg: %s", string(data))
-	err = ws.conn.WriteMessage(websocket.TextMessage, data)
-	if err != nil {
-		return nil, err
-	}
-
 	node, err := snowflake.NewNode(2)
 	if err != nil {
 		return nil, err
@@ -241,10 +255,19 @@ func orderAction[T any](ws *PrivateWsStreamClient, op string, reqId string, args
 		Op:           op,
 		Args:         []WsSubscribeArg{},
 		resultChan:   make(chan WsOrderResult, 50),
-		errChan:      make(chan error),
+		errChan:      make(chan error, 1),
 		closeChan:    make(chan struct{}),
 		Ws:           &ws.WsStreamClient,
 		subResultMap: map[string]bool{},
+	}
+
+	ws.waitOrderResultMu.Lock()
+	ws.waitOrderResult = resultSub
+	log.Debugf("send msg: %s", string(data))
+	if err := ws.writeText(data); err != nil {
+		ws.waitOrderResult = nil
+		ws.waitOrderResultMu.Unlock()
+		return nil, err
 	}
 
 	return ws.CatchOrderReuslt(resultSub)
@@ -258,8 +281,6 @@ func subscribe[T any](ws *WsStreamClient, op string, args []WsSubscribeArg) (*Su
 		return nil, fmt.Errorf("websocket is busy")
 	}
 
-	ws.waitSubResultMu.Lock()
-
 	subscribeReq := WsSubscribeReq{
 		Op:   op,
 		Args: args,
@@ -268,12 +289,6 @@ func subscribe[T any](ws *WsStreamClient, op string, args []WsSubscribeArg) (*Su
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("send msg: %s", string(data))
-	err = ws.conn.WriteMessage(websocket.TextMessage, data)
-	if err != nil {
-		return nil, err
-	}
-
 	node, err := snowflake.NewNode(2)
 	if err != nil {
 		return nil, err
@@ -284,10 +299,24 @@ func subscribe[T any](ws *WsStreamClient, op string, args []WsSubscribeArg) (*Su
 		Op:           op,
 		Args:         args,
 		resultChan:   make(chan T, 50),
-		errChan:      make(chan error),
+		errChan:      make(chan error, 1),
 		closeChan:    make(chan struct{}),
 		Ws:           ws,
 		subResultMap: map[string]bool{},
+	}
+
+	// The lock must be released on every failure after this point, or the
+	// connection stays "busy" forever.
+	ws.waitSubResultMu.Lock()
+	// Register the waiter before the write so a fast ack is not dropped.
+	if waiter, ok := any(result).(*Subscription[WsActionResult]); ok {
+		ws.waitSubResult = waiter
+	}
+	log.Debugf("send msg: %s", string(data))
+	if err := ws.writeText(data); err != nil {
+		ws.waitSubResult = nil
+		ws.waitSubResultMu.Unlock()
+		return nil, err
 	}
 	return result, nil
 }
@@ -322,21 +351,55 @@ func (ws *WsStreamClient) Close() error {
 	ws.ordersSubMap = NewMySyncMap[string, *Subscription[WsOrders]]()
 	ws.ordersAlgoSubMap = NewMySyncMap[string, *Subscription[WsOrdersAlgo]]()
 
-	if ws.waitSubResult != nil {
-		//给当前等待订阅结果的请求返回错误
-		ws.waitSubResultMu.Lock()
-		ws.waitSubResult.errChan <- fmt.Errorf("websocket is closed")
-		ws.waitSubResult = nil
-		ws.waitSubResultMu.Unlock()
+	// The waiter owns the action lock and releases it in its deferred cleanup, so
+	// closing must only wake it. Taking the lock here would deadlock.
+	if w := ws.waitSubResult; w != nil {
+		select {
+		case w.errChan <- fmt.Errorf("websocket is closed"):
+		default:
+		}
 	}
-
-	if ws.waitOrderResult != nil {
-		ws.waitOrderResultMu.Lock()
-		ws.waitOrderResult.errChan <- fmt.Errorf("websocket is closed")
-		ws.waitOrderResult = nil
-		ws.waitOrderResultMu.Unlock()
+	if w := ws.waitOrderResult; w != nil {
+		select {
+		case w.errChan <- fmt.Errorf("websocket is closed"):
+		default:
+		}
 	}
 	return nil
+}
+
+// writeText is the only way to write a text frame. It serializes writers and
+// bounds the time a dead socket can hold the write lock.
+func (ws *WsStreamClient) writeText(data []byte) error {
+	conn := ws.conn
+	if conn == nil {
+		return fmt.Errorf("websocket is close")
+	}
+	return ws.writeTextTo(conn, data)
+}
+
+func (ws *WsStreamClient) writeTextTo(conn *websocket.Conn, data []byte) error {
+	ws.writeMu.Lock()
+	defer ws.writeMu.Unlock()
+	_ = conn.SetWriteDeadline(time.Now().Add(wsWriteTimeout))
+	return conn.WriteMessage(websocket.TextMessage, data)
+}
+
+// LastMessageTime is the arrival time of the last text frame on the current
+// connection. Pong replies count, so it advances on an idle but healthy link.
+func (ws *WsStreamClient) LastMessageTime() time.Time {
+	return time.Unix(0, ws.lastMsgNano.Load())
+}
+
+// ForceReconnect drops the current connection. The read loop then fails and the
+// normal reconnect path logs in again and resubscribes every channel.
+func (ws *WsStreamClient) ForceReconnect(reason string) error {
+	conn := ws.conn
+	if conn == nil || ws.isClose {
+		return fmt.Errorf("websocket is close")
+	}
+	log.Warnf("force reconnect okx ws: %s", reason)
+	return conn.Close()
 }
 
 func (ws *WsStreamClient) OpenConn() error {
@@ -348,21 +411,27 @@ func (ws *WsStreamClient) OpenConn() error {
 	}
 	apiUrl := handlerWsStreamRequestApi(ws.apiType)
 	if ws.conn == nil {
-		conn, err := wsStreamServe(apiUrl, ws.resultChan, ws.errChan)
+		conn, err := wsStreamServe(ws, apiUrl, ws.resultChan, ws.errChan)
+		if err != nil {
+			return err
+		}
 		ws.conn = conn
 		ws.isClose = false
 		ws.connId = ""
 		log.Info("OpenConn success to ", apiUrl)
 		ws.handleResult(ws.resultChan, ws.errChan)
-		return err
-	} else {
-		conn, err := wsStreamServe(apiUrl, ws.resultChan, ws.errChan)
-		ws.conn = conn
-		ws.connId = ""
-		log.Info("Auto ReOpenConn success to ", apiUrl)
+		return nil
+	}
+	// A failed redial must keep the old conn. Clearing it would make the next
+	// attempt look like a first open and start a second handleResult loop.
+	conn, err := wsStreamServe(ws, apiUrl, ws.resultChan, ws.errChan)
+	if err != nil {
 		return err
 	}
-
+	ws.conn = conn
+	ws.connId = ""
+	log.Info("Auto ReOpenConn success to ", apiUrl)
+	return nil
 }
 
 type PublicWsStreamClient struct {
@@ -447,22 +516,76 @@ func (ws *WsStreamClient) sendSubscribeResultToChan(result WsActionResult) {
 	if ws.connId == "" && result.ConnId != "" {
 		ws.connId = result.ConnId
 	}
-	if ws.waitSubResult != nil {
-		if result.Code != "" && result.Code != "0" {
-			ws.waitSubResult.errChan <- fmt.Errorf("errHandler: %+v", result)
-		} else {
-			ws.waitSubResult.resultChan <- result
+	// Connection-level events carry no arg. Routing them to a waiter would be
+	// counted as a subscribe ack, so they are handled here.
+	switch result.Event {
+	case "notice":
+		log.Warnf("okx ws notice: code=%s msg=%s connId=%s", result.Code, result.Msg, result.ConnId)
+		go func() { _ = ws.ForceReconnect("server notice " + result.Code) }()
+		return
+	case "channel-conn-count":
+		log.Debugf("okx ws channel-conn-count: connId=%s", result.ConnId)
+		return
+	case "channel-conn-count-error":
+		log.Errorf("okx ws channel-conn-count-error: code=%s msg=%s connId=%s", result.Code, result.Msg, result.ConnId)
+		return
+	}
+
+	w := ws.waitSubResult
+	if w == nil {
+		if result.Event == "error" || (result.Code != "" && result.Code != "0") {
+			log.Warnf("okx ws event without waiter: %+v", result)
 		}
+		return
+	}
+	// Non-blocking: a waiter that already timed out must not stall the read path.
+	if result.Code != "" && result.Code != "0" {
+		select {
+		case w.errChan <- fmt.Errorf("errHandler: %+v", result):
+		default:
+			log.Warnf("okx ws drop error event, waiter busy: %+v", result)
+		}
+		return
+	}
+	select {
+	case w.resultChan <- result:
+	default:
+		log.Warnf("okx ws drop event, waiter full: %+v", result)
 	}
 }
 
 func (ws *WsStreamClient) sendOrderResultToChan(result WsOrderResult) {
-	if result.Code != "" && result.Code != "0" {
-		ws.waitOrderResult.errChan <- fmt.Errorf("errHandler: %+v", result)
-		ws.waitOrderResult.resultChan <- result
-	} else {
-		ws.waitOrderResult.resultChan <- result
+	w := ws.waitOrderResult
+	if w == nil {
+		return
 	}
+	if result.Code != "" && result.Code != "0" {
+		select {
+		case w.errChan <- fmt.Errorf("errHandler: %+v", result):
+		default:
+		}
+	}
+	select {
+	case w.resultChan <- result:
+	default:
+	}
+}
+
+// signalClose delivers a close signal without blocking the caller. The channels
+// are unbuffered, so a blocking send made Close() hang forever whenever the
+// consumer had stopped reading.
+func signalClose(ch chan struct{}) {
+	if ch == nil {
+		return
+	}
+	go func() {
+		timer := time.NewTimer(5 * time.Second)
+		defer timer.Stop()
+		select {
+		case ch <- struct{}{}:
+		case <-timer.C:
+		}
+	}()
 }
 
 func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeArg) {
@@ -472,70 +595,70 @@ func (ws *WsStreamClient) sendUnSubscribeSuccessToCloseChan(args []WsSubscribeAr
 		if sub, ok := ws.candleSubMap.Load(key); ok {
 			ws.candleSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.booksSubMap.Load(key); ok {
 			ws.booksSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.tradesSubMap.Load(key); ok {
 			ws.tradesSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.allTradesSubMap.Load(key); ok {
 			ws.allTradesSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.ordersSubMap.Load(key); ok {
 			ws.ordersSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.ordersAlgoSubMap.Load(key); ok {
 			ws.ordersAlgoSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.optSummarySubMap.Load(key); ok {
 			ws.optSummarySubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.markPriceSubMap.Load(key); ok {
 			ws.markPriceSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.indexTickersSubMap.Load(key); ok {
 			ws.indexTickersSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
 		if sub, ok := ws.tickersSubMap.Load(key); ok {
 			ws.tickersSubMap.Delete(key)
 			if sub.closeChan != nil {
-				sub.closeChan <- struct{}{}
+				signalClose(sub.closeChan)
 				sub.closeChan = nil
 			}
 		}
@@ -556,13 +679,16 @@ func (ws *WsStreamClient) sendWsCloseToAllSub() {
 	ws.sendUnSubscribeSuccessToCloseChan(args)
 }
 
-func (ws *WsStreamClient) reSubscribeForReconnect() error {
+// reSubscribeForReconnect resubscribes every recorded channel. done carries the
+// channels already restored, so a retry after a partial failure skips them.
+// A successful subscribe replaces the commonSubMap entry with the new
+// subscription, so both pointers are recorded.
+func (ws *WsStreamClient) reSubscribeForReconnect(done map[*Subscription[WsActionResult]]struct{}) error {
 	ws.reSubscribeMu.Lock()
 	defer ws.reSubscribeMu.Unlock()
-	isDoReSubscribe := map[int64]bool{}
 	var wErr error
 	ws.commonSubMap.Range(func(_ string, sub *Subscription[WsActionResult]) bool {
-		if _, ok := isDoReSubscribe[sub.SubId]; ok {
+		if _, ok := done[sub]; ok {
 			return true
 		}
 
@@ -581,11 +707,87 @@ func (ws *WsStreamClient) reSubscribeForReconnect() error {
 		log.Infof("reSubscribe Success: args:%v", reSub.Args)
 
 		sub.SubId = reSub.SubId
-		isDoReSubscribe[sub.SubId] = true
+		done[sub] = struct{}{}
+		done[reSub] = struct{}{}
 		time.Sleep(500 * time.Millisecond)
 		return true
 	})
 	return wErr
+}
+
+// restoreAfterReconnect logs in again and resubscribes. A newer reconnect
+// (gen moved on) or a manual Close cancels it. A resubscribe that keeps failing
+// would leave a silently dead subscription, so it drops the connection and
+// lets the reconnect cycle start over.
+func (ws *WsStreamClient) restoreAfterReconnect(gen int64) {
+	superseded := func() bool {
+		return ws.isClose || ws.reconnectGen.Load() != gen
+	}
+	if ws.lastLogin != nil && ws.client != nil {
+		err := ws.Login(ws.client)
+		for err != nil {
+			log.Error(err)
+			time.Sleep(1500 * time.Millisecond)
+			if superseded() {
+				return
+			}
+			err = ws.Login(ws.client)
+		}
+	}
+
+	done := map[*Subscription[WsActionResult]]struct{}{}
+	for attempt := 1; ; attempt++ {
+		if superseded() {
+			return
+		}
+		err := ws.reSubscribeForReconnect(done)
+		if err == nil {
+			return
+		}
+		log.Errorf("reSubscribe failed, attempt %d/%d: %v", attempt, wsResubscribeMaxAttempts, err)
+		if attempt >= wsResubscribeMaxAttempts {
+			_ = ws.ForceReconnect("resubscribe exhausted")
+			return
+		}
+		time.Sleep(time.Duration(attempt) * 1500 * time.Millisecond)
+	}
+}
+
+// loadOrdersSub finds the subscription for an orders push. The exact arg is tried
+// first. The push may carry instId/instFamily that the subscribe request did not
+// have (it is subscribed per instType), so coarser keys are tried next instead
+// of dropping the message.
+func (ws *WsStreamClient) loadOrdersSub(arg WsSubscribeArg) (*Subscription[WsOrders], bool) {
+	candidates := []WsSubscribeArg{
+		arg,
+		{Channel: arg.Channel, InstType: arg.InstType, InstFamily: arg.InstFamily},
+		{Channel: arg.Channel, InstType: arg.InstType},
+	}
+	for _, c := range candidates {
+		keyData, _ := json.Marshal(c)
+		if sub, ok := ws.ordersSubMap.Load(string(keyData)); ok {
+			return sub, true
+		}
+	}
+	return nil, false
+}
+
+// deliverOrders hands a push to the consumer. A consumer that stops reading
+// would otherwise block the read loop for every channel on this connection.
+func deliverOrders(sub *Subscription[WsOrders], order WsOrders) {
+	select {
+	case sub.resultChan <- order:
+		return
+	default:
+	}
+	timer := time.NewTimer(wsPushSendTimeout)
+	defer timer.Stop()
+	select {
+	case sub.resultChan <- order:
+	case <-timer.C:
+		log.Errorf("orders consumer stalled, push dropped: clOrdId=%s ordId=%s state=%s",
+			order.ClOrdId, order.OrdId, order.State)
+	}
 }
 
 func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan error) {
@@ -598,37 +800,24 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 					return
 				}
 				log.Error(err)
-				//错误处理 重连等
-				//ws标记为非关闭 且返回错误包含EOF、close、reset时自动重连
-				if !ws.isClose && (strings.Contains(err.Error(), "EOF") ||
-					strings.Contains(err.Error(), "close") ||
-					strings.Contains(err.Error(), "reset")) {
-					//重连
-					err := ws.OpenConn()
-					for err != nil {
-						time.Sleep(1500 * time.Millisecond)
-						err = ws.OpenConn()
-					}
-					ws.AutoReConnectTimes += 1
-					go func() {
-						//重新登陆
-						if ws.lastLogin != nil && ws.client != nil {
-							err = ws.Login(ws.client)
-							for err != nil {
-								time.Sleep(1500 * time.Millisecond)
-								err = ws.Login(ws.client)
-							}
-						}
-
-						//重新订阅
-						err = ws.reSubscribeForReconnect()
-						if err != nil {
-							log.Error(err)
-						}
-					}()
-				} else {
+				// The read loop exits on any read error, so the connection is dead
+				// whatever the message says. Matching on EOF/close/reset missed
+				// others (broken pipe, i/o timeout) and left it dead for good.
+				if ws.isClose {
 					continue
 				}
+				gen := ws.reconnectGen.Add(1)
+				err = ws.OpenConn()
+				for err != nil {
+					log.Error(err)
+					time.Sleep(1500 * time.Millisecond)
+					if ws.isClose {
+						return
+					}
+					err = ws.OpenConn()
+				}
+				ws.AutoReConnectTimes += 1
+				go ws.restoreAfterReconnect(gen)
 			case data, ok := <-resultChan:
 				if !ok {
 					log.Error("resultChan is closed")
@@ -719,19 +908,22 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 				}
 				if strings.Contains(string(data), "channel\":\"orders\"") {
 					ordersList, err := handleWsOrders(data)
+					if err != nil {
+						// ordersList is nil here, so it must not be dereferenced.
+						log.Errorf("parse orders push failed: %v", err)
+						continue
+					}
 					if len(*ordersList) == 0 {
 						continue
 					}
 					arg := (*ordersList)[0].WsSubscribeArg
-					keyData, _ := json.Marshal(arg)
-					if sub, ok := ws.ordersSubMap.Load(string(keyData)); ok {
-						if err != nil {
-							sub.errChan <- err
-							continue
-						}
-						for _, order := range *ordersList {
-							sub.resultChan <- order
-						}
+					sub, ok := ws.loadOrdersSub(arg)
+					if !ok {
+						log.Warnf("orders push has no matching subscription, dropped: arg=%+v", arg)
+						continue
+					}
+					for _, order := range *ordersList {
+						deliverOrders(sub, order)
 					}
 					continue
 				}
@@ -841,15 +1033,18 @@ func (ws *WsStreamClient) handleResult(resultChan chan []byte, errChan chan erro
 	}()
 }
 
+// DeferSub records a fully acknowledged subscription and always releases the
+// action lock. Releasing only on success left the connection "busy" after the
+// first failed or timed-out subscribe.
 func (ws *WsStreamClient) DeferSub() {
-	if len(ws.waitSubResult.subResultMap) == len(ws.waitSubResult.Args) {
-		for _, arg := range ws.waitSubResult.Args {
+	if w := ws.waitSubResult; w != nil && len(w.subResultMap) == len(w.Args) {
+		for _, arg := range w.Args {
 			keyData, _ := json.Marshal(&arg)
-			ws.commonSubMap.Store(string(keyData), ws.waitSubResult)
+			ws.commonSubMap.Store(string(keyData), w)
 		}
-		ws.waitSubResult = nil
-		ws.waitSubResultMu.Unlock()
 	}
+	ws.waitSubResult = nil
+	ws.waitSubResultMu.Unlock()
 }
 
 func (ws *WsStreamClient) DeferOrder() {
@@ -886,6 +1081,8 @@ func (ws *WsStreamClient) CatchLoginReuslt(sub *Subscription[WsActionResult]) er
 	ws.waitSubResult = sub
 	defer sub.Ws.DeferSub()
 
+	timer := time.NewTimer(WsActionTimeout)
+	defer timer.Stop()
 	select {
 	case err := <-sub.ErrChan():
 		// log.Error(err)
@@ -893,10 +1090,12 @@ func (ws *WsStreamClient) CatchLoginReuslt(sub *Subscription[WsActionResult]) er
 	case loginResult := <-sub.ResultChan():
 		if loginResult.Code != "" && loginResult.Code != "0" {
 			log.Error(loginResult.Code, ":", loginResult.Msg)
-			return fmt.Errorf(loginResult.Code, ":", loginResult.Msg)
+			return fmt.Errorf("%s:%s", loginResult.Code, loginResult.Msg)
 		}
 		log.Debug("catchLoginResults: ", loginResult)
 		return nil
+	case <-timer.C:
+		return fmt.Errorf("Login Error: wait result timeout")
 	}
 }
 
@@ -904,7 +1103,8 @@ func (ws *WsStreamClient) CatchLoginReuslt(sub *Subscription[WsActionResult]) er
 func (ws *WsStreamClient) catchSubscribeResult(sub *Subscription[WsActionResult]) error {
 	ws.waitSubResult = sub
 	defer sub.Ws.DeferSub()
-	isBreak := false
+	timer := time.NewTimer(WsActionTimeout)
+	defer timer.Stop()
 	for {
 		select {
 		case err := <-sub.ErrChan():
@@ -913,32 +1113,38 @@ func (ws *WsStreamClient) catchSubscribeResult(sub *Subscription[WsActionResult]
 		case subResult := <-sub.ResultChan():
 			if subResult.Code != "" && subResult.Code != "0" {
 				log.Error(subResult.Code, ":", subResult.Msg)
-				return fmt.Errorf(subResult.Code, ":", subResult.Msg)
+				return fmt.Errorf("%s:%s", subResult.Code, subResult.Msg)
 			}
 			keyData, _ := json.Marshal(subResult.Arg)
 			sub.subResultMap[string(keyData)] = true
 			if len(sub.subResultMap) == len(sub.Args) {
-				isBreak = true
+				log.Debug("catchResults: ", sub.subResultMap)
+				return nil
 			}
-		}
-		if isBreak {
-			break
+		case <-timer.C:
+			return fmt.Errorf("SubAction Error: wait subscribe result timeout, op:%s args:%v", sub.Op, sub.Args)
 		}
 	}
-	log.Debug("catchResults: ", sub.subResultMap)
-	return nil
 }
 
 // 捕获订单操作结果
 func (ws *PrivateWsStreamClient) CatchOrderReuslt(sub *Subscription[WsOrderResult]) (*WsOrderResult, error) {
 	ws.waitOrderResult = sub
 	defer sub.Ws.DeferOrder()
+	timer := time.NewTimer(WsActionTimeout)
+	defer timer.Stop()
 	select {
 	case err := <-sub.ErrChan():
-		orderResult := <-sub.ResultChan()
-		return &orderResult, fmt.Errorf("[op:%s] Action Error: %v", sub.Op, err)
+		select {
+		case orderResult := <-sub.ResultChan():
+			return &orderResult, fmt.Errorf("[op:%s] Action Error: %v", sub.Op, err)
+		case <-timer.C:
+			return nil, fmt.Errorf("[op:%s] Action Error: %v", sub.Op, err)
+		}
 	case orderResult := <-sub.ResultChan():
 		return &orderResult, nil
+	case <-timer.C:
+		return nil, fmt.Errorf("[op:%s] Action Error: wait order result timeout", sub.Op)
 	}
 }
 
@@ -970,7 +1176,7 @@ func (ws *WsStreamClient) Login(client *RestClient) error {
 }
 
 // 标准订阅方法
-func wsStreamServe(api string, resultChan chan []byte, errChan chan error) (*websocket.Conn, error) {
+func wsStreamServe(ws *WsStreamClient, api string, resultChan chan []byte, errChan chan error) (*websocket.Conn, error) {
 	dialer := websocket.DefaultDialer
 	if WsUseProxy {
 		proxy, _ := getBestProxyAndWeight()
@@ -990,15 +1196,21 @@ func wsStreamServe(api string, resultChan chan []byte, errChan chan error) (*web
 		return nil, err
 	}
 	c.SetReadLimit(655350)
+	ws.lastMsgNano.Store(time.Now().UnixNano())
+	if WebsocketKeepalive {
+		keepAlive(ws, c, WebsocketTimeout)
+	}
 	go func() {
-		if WebsocketKeepalive {
-			keepAlive(c, WebsocketTimeout)
-		}
 		for {
 			_, message, err := c.ReadMessage()
 			if err != nil {
 				errChan <- err
 				return
+			}
+			ws.lastMsgNano.Store(time.Now().UnixNano())
+			// The reply to the text "ping" only proves liveness.
+			if string(message) == "pong" {
+				continue
 			}
 			resultChan <- message
 		}
@@ -1053,33 +1265,35 @@ func getWsApi(apiType APIType) string {
 	}
 }
 
-// 发送ping/pong消息以检查连接稳定性
-func keepAlive(c *websocket.Conn, timeout time.Duration) {
+// keepAlive sends OKX's text "ping" when the link has been quiet and closes the
+// connection when no text frame (data or "pong") arrived for 3*timeout. The
+// protocol-level pong is not trusted: it can be answered by an intermediate hop
+// while the upstream is gone. Closing makes the read loop fail, which triggers
+// the reconnect path.
+func keepAlive(ws *WsStreamClient, c *websocket.Conn, timeout time.Duration) {
 	ticker := time.NewTicker(timeout)
-
-	lastResponse := time.Now()
-	c.SetPongHandler(func(msg string) error {
-		lastResponse = time.Now()
-		return nil
-	})
 
 	go func() {
 		defer ticker.Stop()
 		for {
-			deadline := time.Now().Add(10 * time.Second)
-			err := c.WriteControl(websocket.PingMessage, []byte{}, deadline)
-			if err != nil {
-				return
-			}
-			<-ticker.C
-			if time.Since(lastResponse) > 3*timeout {
-				err := c.Close()
-				if err != nil {
+			idle := time.Since(time.Unix(0, ws.lastMsgNano.Load()))
+			if idle > 3*timeout {
+				log.Warnf("okx ws silent for %s, closing to reconnect", idle.Round(time.Second))
+				if err := c.Close(); err != nil {
 					log.Error(err)
-					return
 				}
 				return
 			}
+			if idle >= timeout/2 {
+				if err := ws.writeTextTo(c, []byte("ping")); err != nil {
+					log.Warnf("okx ws ping failed, closing to reconnect: %v", err)
+					_ = c.Close()
+					return
+				}
+			}
+			// Keep the protocol-level ping as well for intermediaries that expect it.
+			_ = c.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(10*time.Second))
+			<-ticker.C
 		}
 	}()
 }
