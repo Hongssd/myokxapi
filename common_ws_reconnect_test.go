@@ -72,7 +72,7 @@ func newFakeOkxServer(t *testing.T) *fakeOkxServer {
 	}))
 	t.Cleanup(f.srv.Close)
 
-	// The client always dials wss://ws.okx.com:8443, so redirect the dial.
+	// The client always dials wss://ws.okx.com, so redirect the dial.
 	d := websocket.DefaultDialer
 	oldDial, oldTLS, oldProxy := d.NetDialContext, d.TLSClientConfig, d.Proxy
 	addr := f.srv.Listener.Addr().String()

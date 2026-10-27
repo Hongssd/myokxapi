@@ -64,11 +64,11 @@ type MyOkx struct {
 
 const (
 	OKX_API_HTTP      = "www.okx.com"
-	OKX_API_WEBSOCKET = "ws.okx.com:8443"
+	OKX_API_WEBSOCKET = "ws.okx.com"
 	OKX_API_HTTP_AWS  = "aws.okx.com"
 
-	OKX_API_WEBSOCKET_AWS     = "wsaws.okx.com:8443"
-	OKX_API_WEBSOCKET_TESTNET = "wspap.okx.com:8443"
+	OKX_API_WEBSOCKET_AWS     = "wsaws.okx.com"
+	OKX_API_WEBSOCKET_TESTNET = "wspap.okx.com"
 
 	OKX_API_HTTP_COLO                         = "coloapi3.okx.com"
 	OKX_API_WEBSOCKET_COLO_PUBLIC_AND_PRIVATE = "colows-d.okx.com"
